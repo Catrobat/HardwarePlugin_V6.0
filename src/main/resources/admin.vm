@@ -1,0 +1,212 @@
+<!--
+  ~ Copyright 2014 Stephan Fellhofer
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<html>
+<head>
+    <title>$i18n.getText("admin_helper.admin.label")</title>
+    <meta name="decorator" content="atl.admin" />
+    <meta name="application-base-url" content="$applicationProperties.getBaseUrl()">
+    $webResourceManager.requireResource("at.fellhofer.jira.AdminHelper:admin-resources")
+</head>
+<body>
+<a name="top"></a>
+<div id="aui-message-bar"></div>
+<div class="aui-tabs horizontal-tabs">
+    <ul class="tabs-menu">
+        <li class="menu-item active-tab">
+            <a href="#tabs-general"><strong>General Configuration</strong></a>
+        </li>
+        <li class="menu-item">
+            <a href="#tabs-teams"><strong>Add/Remove Teams</strong></a>
+        </li>
+    </ul>
+    <div class="tabs-pane active-pane" id="tabs-general">
+        <form id="general" class="aui">
+            <h3>GitHub</h3>
+            <fieldset>
+                <div class="field-group">
+                    <label for="github_id">Client ID<span class="aui-icon icon-required"> required</span></label>
+                    <input class="text" type="text" id="github_id" name="github_id" title="github_id">
+                </div>
+                <div class="field-group">
+                    <label for="github_secret">Client Secret<span class="aui-icon icon-required"> required</span></label>
+                    <input class="text" type="text" id="github_secret" name="github_secret" title="github_secret">
+                </div>
+            </fieldset>
+            <div id="teams"></div>
+            #*
+            <h3>Catroid</h3>
+            <fieldset>
+                <div class="field-group">
+                    <label for="github-teams">GitHub Teams</label>
+                    <input class="text" type="text" id="teams-catroid" name="github-teams">
+                    <div class="description">User gets added to those comma separated teams.</div>
+                </div>
+                <div class="field-group">
+                    <label for="membership-catroid-developer">Developer<span class="aui-icon icon-required"> required</span></label>
+                    <input class="text" type="text" id="membership-catroid-developer" name="membership-catroid" title="membership-catroid">
+                    <div class="description">User gets added to those comma separated groups.</div>
+                </div>
+                <div class="field-group">
+                    <label for="membership-catroid-senior">Senior<span class="aui-icon icon-required"> required</span></label>
+                    <input class="text" type="text" id="membership-catroid-senior" name="membership-catroid" title="membership-catroid">
+                    <div class="description">User gets added to those comma separated groups.</div>
+                </div>
+                <div class="field-group">
+                    <label for="membership-catroid-coordinator">Coordinator<span class="aui-icon icon-required"> required</span></label>
+                    <input class="text" type="text" id="membership-catroid-coordinator" name="membership-catroid" title="membership-catroid">
+                    <div class="description">User gets added to those comma separated groups.</div>
+                </div>
+            </fieldset>
+
+            <h4>Coordinator</h4>
+            <fieldset>
+                <legend><span>Dropdowns and multi select</span></legend>
+                <div class="field-group">
+                    <label for="multiselect">Modify group membership</label>
+                    <select class="multi-select" size="4" multiple="multiple" id="multiselect" name="multiselect">
+                        <option>Catroid</option>
+                        <option>Catroid-Coordinators</option>
+                        <option>Catroid-Seniors</option>
+                        <option>Catroweb</option>
+                        <option>Catroweb-Coordinators</option>
+                        <option>Catroweb-Seniors</option>
+                        <option>Paintroid</option>
+                        <option>Paintroid-Coordinators</option>
+                        <option>Paintroid-Seniors</option>
+                    </select>
+                </div>
+            </fieldset>
+            <h4>Senior</h4>
+            <fieldset>
+                <legend><span>Dropdowns and multi select</span></legend>
+                <div class="field-group">
+                    <label for="multiselect">Modify group membership</label>
+                    <select class="multi-select" size="4" multiple="multiple" id="multiselect" name="multiselect">
+                        <option>Catroid</option>
+                        <option>Catroid-Coordinators</option>
+                        <option>Catroid-Seniors</option>
+                        <option>Catroweb</option>
+                        <option>Catroweb-Coordinators</option>
+                        <option>Catroweb-Seniors</option>
+                        <option>Paintroid</option>
+                        <option>Paintroid-Coordinators</option>
+                        <option>Paintroid-Seniors</option>
+                    </select>
+                </div>
+            </fieldset>
+            <h4>Developer</h4>
+            <fieldset>
+                <legend><span>Dropdowns and multi select</span></legend>
+                <div class="field-group">
+                    <label for="multiselect">Modify group membership</label>
+                    <select class="multi-select" size="4" multiple="multiple" id="multiselect" name="multiselect">
+                        <option>Catroid</option>
+                        <option>Catroid-Coordinators</option>
+                        <option>Catroid-Seniors</option>
+                        <option>Catroweb</option>
+                        <option>Catroweb-Coordinators</option>
+                        <option>Catroweb-Seniors</option>
+                        <option>Paintroid</option>
+                        <option>Paintroid-Coordinators</option>
+                        <option>Paintroid-Seniors</option>
+                    </select>
+                </div>
+            </fieldset>
+
+            <h3>Paintroid</h3>
+            <h4>Coordinator</h4>
+            <fieldset>
+                <div class="field-group">
+                    <label for="github-teams">GitHub Teams</label>
+                    <input class="text" type="text" id="github-teams" name="github-teams">
+                    <div class="description">User gets added to those comma separated teams.</div>
+                </div>
+                <legend><span>Dropdowns and multi select</span></legend>
+                <div class="field-group">
+                    <label for="multiselect">Modify group membership</label>
+                    <select class="multi-select" size="4" multiple="multiple" id="multiselect" name="multiselect">
+                        <option>Catroid</option>
+                        <option>Catroid-Coordinators</option>
+                        <option>Catroid-Seniors</option>
+                        <option>Catroweb</option>
+                        <option>Catroweb-Coordinators</option>
+                        <option>Catroweb-Seniors</option>
+                        <option>Paintroid</option>
+                        <option>Paintroid-Coordinators</option>
+                        <option>Paintroid-Seniors</option>
+                    </select>
+                </div>
+            </fieldset>
+            <h4>Senior</h4>
+            <fieldset>
+                <legend><span>Dropdowns and multi select</span></legend>
+                <div class="field-group">
+                    <label for="multiselect">Modify group membership</label>
+                    <select class="multi-select" size="4" multiple="multiple" id="multiselect" name="multiselect">
+                        <option>Catroid</option>
+                        <option>Catroid-Coordinators</option>
+                        <option>Catroid-Seniors</option>
+                        <option>Catroweb</option>
+                        <option>Catroweb-Coordinators</option>
+                        <option>Catroweb-Seniors</option>
+                        <option>Paintroid</option>
+                        <option>Paintroid-Coordinators</option>
+                        <option>Paintroid-Seniors</option>
+                    </select>
+                </div>
+            </fieldset>
+            <h4>Developer</h4>
+            <fieldset>
+                <legend><span>Dropdowns and multi select</span></legend>
+                <div class="field-group">
+                    <label for="multiselect">Modify group membership</label>
+                    <select class="multi-select" size="4" multiple="multiple" id="multiselect" name="multiselect">
+                        <option>Catroid</option>
+                        <option>Catroid-Coordinators</option>
+                        <option>Catroid-Seniors</option>
+                        <option>Catroweb</option>
+                        <option>Catroweb-Coordinators</option>
+                        <option>Catroweb-Seniors</option>
+                        <option>Paintroid</option>
+                        <option>Paintroid-Coordinators</option>
+                        <option>Paintroid-Seniors</option>
+                    </select>
+                </div>
+            </fieldset>
+            *#
+            <div class="field-group">
+                <input type="submit" value="Save" class="aui-button aui-button-primary">
+            </div>
+        </form>
+    </div>
+    <div class="tabs-pane" id="tabs-teams">
+        <form id="modify-teams" class="aui">
+            <fieldset>
+                <div class="field-group">
+                    <label for="team">Team name<span class="aui-icon icon-required"> required</span></label>
+                    <input class="text" type="text" id="team" name="team" title="team">
+                </div>
+                <div class="field-group">
+                    <input type="submit" value="Create" class="aui-button aui-button-primary">
+                    <input type="submit" value="Remove" id="remove" class="aui-button">
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>
+</body>
+</html>
