@@ -27,7 +27,9 @@ import com.atlassian.sal.api.user.UserManager;
 
 import javax.json.stream.JsonParser;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -47,7 +49,7 @@ public class GithubHelperRest {
     private final TransactionTemplate transactionTemplate;
 
     public GithubHelperRest(UserManager userManager, PluginSettingsFactory pluginSettingsFactory,
-                              TransactionTemplate transactionTemplate) {
+                            TransactionTemplate transactionTemplate) {
         this.userManager = userManager;
         this.pluginSettingsFactory = pluginSettingsFactory;
         this.transactionTemplate = transactionTemplate;
@@ -62,7 +64,13 @@ public class GithubHelperRest {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
-        return Response.ok(transactionTemplate.execute(new TransactionCallback() {
+        String returnValue = doesUserExist(searchString) ? "success" : "failure";
+
+        return Response.ok(returnValue).build();
+    }
+
+    public boolean doesUserExist(final String searchString) {
+        return (Boolean) transactionTemplate.execute(new TransactionCallback() {
             public Object doInTransaction() {
                 PluginSettings settings = pluginSettingsFactory.createGlobalSettings();
 
@@ -76,20 +84,19 @@ public class GithubHelperRest {
                     JSONObject jsonObject = new JSONObject(jsonUsers);
                     JSONArray jsonArray = jsonObject.getJSONArray("items");
                     int length = jsonObject.getInt("total_count");
-                    for(int i = 0; i < length; i++) {
-                        if(jsonArray.getJSONObject(i).getString("login").equals(searchString)) {
-                            return "success";
+                    for (int i = 0; i < length; i++) {
+                        if (jsonArray.getJSONObject(i).getString("login").equals(searchString)) {
+                            return Boolean.TRUE;
                         }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
-                return "error";
+                return Boolean.FALSE;
             }
-        })).build();
+        });
     }
-
 
 
     public String connect(String clientId, String clientSecret, String urlAppendix, String... params) {

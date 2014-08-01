@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+"use strict";
 AJS.toInit(function() {
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
     var teams = [];
 
-    AJS.$('#firstname').keyup(function() {
+    AJS.$('#firstname').change(function() {
       updateUsername();
     });
-    AJS.$('#lastname').keyup(function() {
+    AJS.$('#lastname').change(function() {
       updateUsername();
     });
 
@@ -123,20 +123,20 @@ AJS.toInit(function() {
 
     populateTable();
 
-    AJS.$('#github').keyup(function(){
-      var user_input = AJS.$(this).val();
-      jQuery.ajax({
-        url: baseUrl + "/rest/admin-helper/1.0/github/searchUser",
-        type: "PUT",
-        contentType: "application/json",
-        data: user_input
-      }).
-        done(function(html){
-          if(html == "success") {
-            AJS.$('#github-error').hide();
-          } else {
-            AJS.$('#github-error').show();
-          }
+    AJS.$('#github').change(function(){
+        var user_input = AJS.$(this).val();
+        jQuery.ajax({
+            url: baseUrl + "/rest/admin-helper/1.0/github/searchUser",
+            type: "PUT",
+            contentType: "application/json",
+            data: user_input,
+            success: function(response) {
+                if(response == "success") {
+                    AJS.$('#github-error').hide();
+                } else {
+                    error: AJS.$('#github-error').show();
+                }
+            }
         });
     });
 

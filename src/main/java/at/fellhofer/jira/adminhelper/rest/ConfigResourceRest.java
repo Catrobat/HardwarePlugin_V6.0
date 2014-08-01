@@ -67,7 +67,11 @@ public class ConfigResourceRest {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
-        return Response.ok(transactionTemplate.execute(new TransactionCallback() {
+        return Response.ok(getConfigFromSettings()).build();
+    }
+
+    public Config getConfigFromSettings() {
+        return (Config) transactionTemplate.execute(new TransactionCallback() {
             public Object doInTransaction() {
                 PluginSettings settings = pluginSettingsFactory.createGlobalSettings();
 
@@ -92,7 +96,7 @@ public class ConfigResourceRest {
 
                 return config;
             }
-        })).build();
+        });
     }
 
     @GET

@@ -16,10 +16,20 @@
 
 package at.fellhofer.jira.adminhelper.rest;
 
+import com.atlassian.crowd.embedded.api.Group;
+import com.atlassian.crowd.embedded.api.User;
+import com.atlassian.crowd.exception.GroupNotFoundException;
+import com.atlassian.crowd.exception.OperationFailedException;
+import com.atlassian.crowd.exception.OperationNotPermittedException;
+import com.atlassian.crowd.exception.UserNotFoundException;
+import com.atlassian.crowd.exception.embedded.InvalidGroupException;
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.exception.CreateException;
 import com.atlassian.jira.exception.PermissionException;
+import com.atlassian.jira.security.groups.GroupManager;
 import com.atlassian.jira.user.util.UserUtil;
+import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
+import com.atlassian.sal.api.transaction.TransactionTemplate;
 import com.atlassian.sal.api.user.UserManager;
 import org.apache.commons.validator.routines.EmailValidator;
 
@@ -27,7 +37,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -35,45 +44,66 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Path("/user")
 public class UserRest {
 
     private final UserManager userManager;
+    private final PluginSettingsFactory pluginSettingsFactory;
+    private final TransactionTemplate transactionTemplate;
 
-    public UserRest(final UserManager userManager) {
+    public UserRest(final UserManager userManager, final PluginSettingsFactory pluginSettingsFactory,
+                    final TransactionTemplate transactionTemplate) {
         this.userManager = userManager;
+        this.pluginSettingsFactory = pluginSettingsFactory;
+        this.transactionTemplate = transactionTemplate;
     }
 
     @PUT
     @Path("/createUser")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createUser(final User userToCreate, @Context HttpServletRequest request) {
+    public Response createUser(final JsonUser jsonUser, @Context HttpServletRequest request) {
         String username = userManager.getRemoteUsername(request);
         if (username == null || !userManager.isSystemAdmin(username)) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
-        if(userToCreate.getFirstName() == null || userToCreate.getLastName() == null ||
-                userToCreate.getUserName() == null || !EmailValidator.getInstance().isValid(userToCreate.getEmail())) {
+        if (jsonUser.getFirstName() == null || jsonUser.getLastName() == null ||
+                jsonUser.getUserName() == null || !EmailValidator.getInstance().isValid(jsonUser.getEmail())) {
             return Response.serverError().entity("Please check all input fields.").build();
         }
 
         try {
             UserUtil userUtil = ComponentAccessor.getUserUtil();
-            userUtil.createUserNoNotification(userToCreate.getUserName(), "catroid", userToCreate.getEmail(),
-                    userToCreate.getFirstName() + " " + userToCreate.getLastName());
 
-            for(String teams : userToCreate.getCoordinatorList()) {
-                System.out.println("Coordinator of: " + teams);
+            User jiraUser = userUtil.createUserNoNotification(jsonUser.getUserName(), "catroid", jsonUser.getEmail(),
+                    jsonUser.getFirstName() + " " + jsonUser.getLastName());
+
+            ConfigResourceRest configResourceRest = new ConfigResourceRest(userManager, pluginSettingsFactory, transactionTemplate);
+            ConfigResourceRest.Config config = configResourceRest.getConfigFromSettings();
+
+            for (String coordinatorOf : jsonUser.getCoordinatorList()) {
+                for (ConfigResourceRest.Config.Team team : config.getTeams()) {
+                    if (team.getName().equals(coordinatorOf)) {
+                        addToGroups(jiraUser, team.getCoordinatorGroups());
+                    }
+                }
             }
-            for(String teams : userToCreate.getSeniorList()) {
-                System.out.println("Senior of: " + teams);
+            for (String seniorOf : jsonUser.getSeniorList()) {
+                for (ConfigResourceRest.Config.Team team : config.getTeams()) {
+                    if (team.getName().equals(seniorOf)) {
+                        addToGroups(jiraUser, team.getSeniorGroups());
+                    }
+                }
             }
-            for(String teams : userToCreate.getDeveloperList()) {
-                System.out.println("Developer of: " + teams);
+            for (String developerOf : jsonUser.getDeveloperList()) {
+                for (ConfigResourceRest.Config.Team team : config.getTeams()) {
+                    if (team.getName().equals(developerOf)) {
+                        addToGroups(jiraUser, team.getDeveloperGroups());
+                    }
+                }
             }
         } catch (PermissionException e) {
             e.printStackTrace();
@@ -81,16 +111,44 @@ public class UserRest {
         } catch (CreateException e) {
             e.printStackTrace();
             return Response.serverError().entity("User already exists").build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().build();
         }
 
-        System.out.println(userToCreate.getGithubName());
+        System.out.println(jsonUser.getGithubName());
 
         return Response.ok().build();
     }
 
+    private void addToGroups(User user, List<String> groupList) throws UserNotFoundException, OperationFailedException,
+            GroupNotFoundException, OperationNotPermittedException, InvalidGroupException {
+        if(user == null || groupList == null)
+            return;
+
+        GroupManager groupManager = ComponentAccessor.getGroupManager();
+        Collection<Group> groupCollection;
+
+        for (String groupString : groupList) {
+            boolean groupExists = false;
+            groupCollection = groupManager.getAllGroups();
+            for (Group group : groupCollection) {
+                if (groupString.toLowerCase().equals(group.getName().toLowerCase())) {
+                    groupManager.addUserToGroup(user, group);
+                    groupExists = true;
+                    break;
+                }
+            }
+            if (!groupExists) {
+                Group newGroup = groupManager.createGroup(groupString);
+                groupManager.addUserToGroup(user, newGroup);
+            }
+        }
+    }
+
     @XmlRootElement
     @XmlAccessorType(XmlAccessType.FIELD)
-    public static final class User {
+    public static final class JsonUser {
         @XmlElement
         private String userName;
         @XmlElement
