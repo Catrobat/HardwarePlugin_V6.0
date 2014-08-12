@@ -28,8 +28,8 @@ AJS.toInit(function() {
       url: baseUrl + "/rest/admin-helper/1.0/config/getConfig",
       dataType: "json",
       success: function(config) {
-        AJS.$("#github_id").attr("value", config.githubId);
-        AJS.$("#github_secret").attr("value", config.githubSecret);
+        AJS.$("#github_token").attr("value", config.githubToken);
+        AJS.$("#github_organization").attr("value", config.githubOrganization);
         teams = [];
         for (var key in config.teams) {
            var obj = config.teams[key];
@@ -53,8 +53,8 @@ AJS.toInit(function() {
 
   function updateConfig() {
     var config = new Object();
-    config.githubId = AJS.$("#github_id").attr("value");
-    config.githubSecret = AJS.$("#github_secret").attr("value");
+    config.githubToken = AJS.$("#github_token").attr("value");
+    config.githubOrganization = AJS.$("#github_organization").attr("value");
     config.teams = [];
     for(var key in teams) {
       var tempTeam = new Object();

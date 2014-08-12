@@ -16,6 +16,7 @@
 
 package at.fellhofer.jira.adminhelper.rest;
 
+import com.atlassian.core.AtlassianCoreException;
 import com.atlassian.crowd.embedded.api.Group;
 import com.atlassian.crowd.embedded.api.User;
 import com.atlassian.crowd.exception.GroupNotFoundException;
@@ -27,10 +28,17 @@ import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.exception.CreateException;
 import com.atlassian.jira.exception.PermissionException;
 import com.atlassian.jira.security.groups.GroupManager;
+import com.atlassian.jira.user.ApplicationUser;
+import com.atlassian.jira.user.ApplicationUsers;
+import com.atlassian.jira.user.UserPropertyManager;
+import com.atlassian.jira.user.preferences.ExtendedPreferences;
+import com.atlassian.jira.user.preferences.UserPreferencesManager;
 import com.atlassian.jira.user.util.UserUtil;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
+import com.atlassian.sal.api.transaction.TransactionCallback;
 import com.atlassian.sal.api.transaction.TransactionTemplate;
 import com.atlassian.sal.api.user.UserManager;
+import com.opensymphony.module.propertyset.PropertySet;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,20 +53,25 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Path("/user")
 public class UserRest {
+    public static final String GITHUB_PROPERTY = "github";
 
     private final UserManager userManager;
     private final PluginSettingsFactory pluginSettingsFactory;
     private final TransactionTemplate transactionTemplate;
+    private final UserPreferencesManager userPreferencesManager;
 
     public UserRest(final UserManager userManager, final PluginSettingsFactory pluginSettingsFactory,
-                    final TransactionTemplate transactionTemplate) {
+                    final TransactionTemplate transactionTemplate, final UserPreferencesManager userPreferencesManager) {
         this.userManager = userManager;
         this.pluginSettingsFactory = pluginSettingsFactory;
         this.transactionTemplate = transactionTemplate;
+        this.userPreferencesManager = userPreferencesManager;
     }
 
     @PUT
@@ -75,19 +88,23 @@ public class UserRest {
             return Response.serverError().entity("Please check all input fields.").build();
         }
 
+        GithubHelperRest githubHelper = new GithubHelperRest(userManager, pluginSettingsFactory, transactionTemplate);
+        ConfigResourceRest configResourceRest = new ConfigResourceRest(userManager, pluginSettingsFactory, transactionTemplate);
+        ConfigResourceRest.Config config = configResourceRest.getConfigFromSettings();
+
+        User jiraUser = null;
+        Set<String> githubTeamSet = new HashSet<String>();
         try {
             UserUtil userUtil = ComponentAccessor.getUserUtil();
 
-            User jiraUser = userUtil.createUserNoNotification(jsonUser.getUserName(), "catroid", jsonUser.getEmail(),
+            jiraUser = userUtil.createUserNoNotification(jsonUser.getUserName(), "catroid", jsonUser.getEmail(),
                     jsonUser.getFirstName() + " " + jsonUser.getLastName());
-
-            ConfigResourceRest configResourceRest = new ConfigResourceRest(userManager, pluginSettingsFactory, transactionTemplate);
-            ConfigResourceRest.Config config = configResourceRest.getConfigFromSettings();
 
             for (String coordinatorOf : jsonUser.getCoordinatorList()) {
                 for (ConfigResourceRest.Config.Team team : config.getTeams()) {
                     if (team.getName().equals(coordinatorOf)) {
                         addToGroups(jiraUser, team.getCoordinatorGroups());
+                        githubTeamSet.addAll(team.getGithubTeams());
                     }
                 }
             }
@@ -95,6 +112,7 @@ public class UserRest {
                 for (ConfigResourceRest.Config.Team team : config.getTeams()) {
                     if (team.getName().equals(seniorOf)) {
                         addToGroups(jiraUser, team.getSeniorGroups());
+                        githubTeamSet.addAll(team.getGithubTeams());
                     }
                 }
             }
@@ -102,6 +120,7 @@ public class UserRest {
                 for (ConfigResourceRest.Config.Team team : config.getTeams()) {
                     if (team.getName().equals(developerOf)) {
                         addToGroups(jiraUser, team.getDeveloperGroups());
+                        githubTeamSet.addAll(team.getGithubTeams());
                     }
                 }
             }
@@ -115,15 +134,37 @@ public class UserRest {
             e.printStackTrace();
             return Response.serverError().build();
         }
+        if (jiraUser == null) {
+            return Response.serverError().build();
+        }
 
-        System.out.println(jsonUser.getGithubName());
+        if (githubHelper.doesUserExist(jsonUser.getUserName())) {
+            ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(ApplicationUsers.from(jiraUser));
+            try {
+                extendedPreferences.setText(GITHUB_PROPERTY, jsonUser.getGithubName());
+            } catch (AtlassianCoreException e) {
+                e.printStackTrace();
+            }
+        }
+
+        StringBuilder errors = new StringBuilder();
+        for (String team : githubTeamSet) {
+            String returnValue = githubHelper.addUserToTeam(jsonUser.getGithubName(), team);
+            if (returnValue != null) {
+                errors.append(returnValue);
+            }
+        }
+
+        if (errors.length() != 0) {
+            return Response.serverError().entity(errors.toString()).build();
+        }
 
         return Response.ok().build();
     }
 
     private void addToGroups(User user, List<String> groupList) throws UserNotFoundException, OperationFailedException,
             GroupNotFoundException, OperationNotPermittedException, InvalidGroupException {
-        if(user == null || groupList == null)
+        if (user == null || groupList == null)
             return;
 
         GroupManager groupManager = ComponentAccessor.getGroupManager();

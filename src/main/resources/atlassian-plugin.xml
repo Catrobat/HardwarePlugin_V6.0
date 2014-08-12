@@ -95,12 +95,6 @@
         <link linkId="admin_helper-admin-link">/plugins/servlet/admin_helper/admin</link>
     </web-item>
 
-    <web-item key="jira-menu-item" name="XProduct Admin" section="system.admin/globalsettings" weight="10" application="jira">
-        <description>Link to xproduct-admin page.</description>
-        <label>Blub</label>
-        <link linkId="xproduct-admin-link">/plugins/servlet/xproduct/admin</link>
-    </web-item>
-
     <web-section key="admin_helper_links_section" name="My Links Main Section" location="admin_helper_links"
                  weight="10"/>
 

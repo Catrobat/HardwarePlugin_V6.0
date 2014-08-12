@@ -38,8 +38,8 @@ import java.util.List;
 @Path("/config")
 public class ConfigResourceRest {
     public static final String KEY_BASE = Config.class.getName() + ".";
-    public static final String KEY_ID = KEY_BASE + "githubId";
-    public static final String KEY_SECRET = KEY_BASE + "githubSecret";
+    public static final String KEY_TOKEN = KEY_BASE + "githubToken";
+    public static final String KEY_ORGANIZATION = KEY_BASE + "githubOrganization";
     public static final String KEY_TEAMS = KEY_BASE + "teams";
 
     public static final String SUBKEY_COORDINATORS = ".coordinators";
@@ -76,8 +76,8 @@ public class ConfigResourceRest {
                 PluginSettings settings = pluginSettingsFactory.createGlobalSettings();
 
                 Config config = new Config();
-                config.setGithubId((String) settings.get(KEY_ID));
-                config.setGithubSecret((String) settings.get(KEY_SECRET));
+                config.setGithubToken((String) settings.get(KEY_TOKEN));
+                config.setGithubOrganization((String) settings.get(KEY_ORGANIZATION));
 
                 if((List<String>)settings.get(KEY_TEAMS) == null)
                     settings.put(KEY_TEAMS, new ArrayList<String>());
@@ -130,8 +130,8 @@ public class ConfigResourceRest {
         transactionTemplate.execute(new TransactionCallback() {
             public Object doInTransaction() {
                 PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
-                pluginSettings.put(KEY_ID, config.getGithubId());
-                pluginSettings.put(KEY_SECRET, config.getGithubSecret());
+                pluginSettings.put(KEY_TOKEN, config.getGithubToken());
+                pluginSettings.put(KEY_ORGANIZATION, config.getGithubOrganization());
 
                 if (config.getTeams() == null)
                     config.setTeams(new ArrayList<Config.Team>());
@@ -233,26 +233,26 @@ public class ConfigResourceRest {
     @XmlAccessorType(XmlAccessType.FIELD)
     public static final class Config {
         @XmlElement
-        private String githubId;
+        private String githubToken;
         @XmlElement
-        private String githubSecret;
+        private String githubOrganization;
         @XmlElement
         private List<Team> teams;
 
-        public String getGithubId() {
-            return githubId;
+        public String getGithubToken() {
+            return githubToken;
         }
 
-        public void setGithubId(String githubId) {
-            this.githubId = githubId;
+        public void setGithubToken(String githubToken) {
+            this.githubToken = githubToken;
         }
 
-        public String getGithubSecret() {
-            return githubSecret;
+        public String getGithubOrganization() {
+            return githubOrganization;
         }
 
-        public void setGithubSecret(String githubSecret) {
-            this.githubSecret = githubSecret;
+        public void setGithubOrganization(String githubOrganization) {
+            this.githubOrganization = githubOrganization;
         }
 
         public List<Team> getTeams() {
