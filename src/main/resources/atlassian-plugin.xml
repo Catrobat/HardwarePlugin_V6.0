@@ -50,6 +50,13 @@
     <web-resource name="Create User Resources" key="create-resources">
         <dependency>com.atlassian.auiplugin:ajs</dependency>
         <resource type="download" name="create_user.js" location="create_user.js"/>
+        <resource type="download" name="user_helper.js" location="user_helper.js"/>
+    </web-resource>
+
+    <web-resource name="Create User Resources" key="modify-resources">
+        <dependency>com.atlassian.auiplugin:ajs</dependency>
+        <resource type="download" name="modify_user.js" location="modify_user.js"/>
+        <resource type="download" name="user_helper.js" location="user_helper.js"/>
     </web-resource>
 
     <!-- publish our component -->
@@ -61,6 +68,10 @@
 
     <servlet key="create-user-servlet" class="at.fellhofer.jira.adminhelper.CreateUserServlet" >
         <url-pattern>/admin_helper/create_user</url-pattern>
+    </servlet>
+
+    <servlet key="modify-user-servlet" class="at.fellhofer.jira.adminhelper.ModifyUserServlet" >
+        <url-pattern>/admin_helper/modify_user</url-pattern>
     </servlet>
 
     <servlet key="admin-servlet" class="at.fellhofer.jira.adminhelper.AdminServlet">
@@ -115,7 +126,7 @@
     <web-item key="modify_user_link" name="Modify User" section="admin_helper_links/admin_helper_links_section"
               weight="10">
         <label>Modify User</label>
-        <link linkId="modify_user_link"/>
+        <link linkId="modify_user_link">/plugins/servlet/admin_helper/modify_user</link>
     </web-item>
 
 </atlassian-plugin>

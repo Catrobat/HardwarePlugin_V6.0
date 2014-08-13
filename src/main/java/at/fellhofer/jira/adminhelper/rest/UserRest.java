@@ -16,6 +16,9 @@
 
 package at.fellhofer.jira.adminhelper.rest;
 
+import at.fellhofer.jira.adminhelper.rest.json.JsonConfig;
+import at.fellhofer.jira.adminhelper.rest.json.JsonTeam;
+import at.fellhofer.jira.adminhelper.rest.json.JsonUser;
 import com.atlassian.core.AtlassianCoreException;
 import com.atlassian.crowd.embedded.api.Group;
 import com.atlassian.crowd.embedded.api.User;
@@ -27,35 +30,24 @@ import com.atlassian.crowd.exception.embedded.InvalidGroupException;
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.exception.CreateException;
 import com.atlassian.jira.exception.PermissionException;
+import com.atlassian.jira.exception.RemoveException;
 import com.atlassian.jira.security.groups.GroupManager;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.user.ApplicationUsers;
-import com.atlassian.jira.user.UserPropertyManager;
 import com.atlassian.jira.user.preferences.ExtendedPreferences;
 import com.atlassian.jira.user.preferences.UserPreferencesManager;
 import com.atlassian.jira.user.util.UserUtil;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
-import com.atlassian.sal.api.transaction.TransactionCallback;
 import com.atlassian.sal.api.transaction.TransactionTemplate;
 import com.atlassian.sal.api.user.UserManager;
-import com.opensymphony.module.propertyset.PropertySet;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Path("/user")
 public class UserRest {
@@ -88,75 +80,156 @@ public class UserRest {
             return Response.serverError().entity("Please check all input fields.").build();
         }
 
-        GithubHelperRest githubHelper = new GithubHelperRest(userManager, pluginSettingsFactory, transactionTemplate);
         ConfigResourceRest configResourceRest = new ConfigResourceRest(userManager, pluginSettingsFactory, transactionTemplate);
-        ConfigResourceRest.Config config = configResourceRest.getConfigFromSettings();
+        JsonConfig config = configResourceRest.getConfigFromSettings();
 
         User jiraUser = null;
-        Set<String> githubTeamSet = new HashSet<String>();
+        UserUtil userUtil = ComponentAccessor.getUserUtil();
         try {
-            UserUtil userUtil = ComponentAccessor.getUserUtil();
-
             jiraUser = userUtil.createUserNoNotification(jsonUser.getUserName(), "catroid", jsonUser.getEmail(),
                     jsonUser.getFirstName() + " " + jsonUser.getLastName());
-
-            for (String coordinatorOf : jsonUser.getCoordinatorList()) {
-                for (ConfigResourceRest.Config.Team team : config.getTeams()) {
-                    if (team.getName().equals(coordinatorOf)) {
-                        addToGroups(jiraUser, team.getCoordinatorGroups());
-                        githubTeamSet.addAll(team.getGithubTeams());
-                    }
-                }
-            }
-            for (String seniorOf : jsonUser.getSeniorList()) {
-                for (ConfigResourceRest.Config.Team team : config.getTeams()) {
-                    if (team.getName().equals(seniorOf)) {
-                        addToGroups(jiraUser, team.getSeniorGroups());
-                        githubTeamSet.addAll(team.getGithubTeams());
-                    }
-                }
-            }
-            for (String developerOf : jsonUser.getDeveloperList()) {
-                for (ConfigResourceRest.Config.Team team : config.getTeams()) {
-                    if (team.getName().equals(developerOf)) {
-                        addToGroups(jiraUser, team.getDeveloperGroups());
-                        githubTeamSet.addAll(team.getGithubTeams());
-                    }
-                }
-            }
         } catch (PermissionException e) {
             e.printStackTrace();
-            return Response.serverError().build();
         } catch (CreateException e) {
             e.printStackTrace();
-            return Response.serverError().entity("User already exists").build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Response.serverError().build();
         }
+
         if (jiraUser == null) {
             return Response.serverError().build();
         }
 
-        if (githubHelper.doesUserExist(jsonUser.getUserName())) {
-            ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(ApplicationUsers.from(jiraUser));
-            try {
-                extendedPreferences.setText(GITHUB_PROPERTY, jsonUser.getGithubName());
-            } catch (AtlassianCoreException e) {
-                e.printStackTrace();
+        Response errorResponse = addUserToGithubAndJiraGroups(jsonUser, jiraUser, config);
+        if (errorResponse != null) {
+            return errorResponse;
+        }
+
+        ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(ApplicationUsers.from(jiraUser));
+        try {
+            extendedPreferences.setText(GITHUB_PROPERTY, jsonUser.getGithubName());
+        } catch (AtlassianCoreException e) {
+            e.printStackTrace();
+        }
+
+
+        return Response.ok().build();
+    }
+
+    @GET
+    @Path("/getUsers")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUsers(@Context HttpServletRequest request) {
+        String username = userManager.getRemoteUsername(request);
+        if (username == null || !userManager.isSystemAdmin(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        UserUtil userUtil = ComponentAccessor.getUserUtil();
+        List<JsonUser> jsonUserList = new ArrayList<JsonUser>();
+        Collection<User> allUsers = ComponentAccessor.getUserManager().getAllUsers();
+        Collection<User> systemAdmins = userUtil.getJiraSystemAdministrators();
+        for (User user : allUsers) {
+            if (systemAdmins.contains(user)) {
+                continue;
+            }
+
+            JsonUser jsonUser = new JsonUser();
+            jsonUser.setEmail(user.getEmailAddress());
+            jsonUser.setUserName(user.getName());
+
+            String displayName = user.getDisplayName();
+            int lastSpaceIndex = displayName.lastIndexOf(' ');
+            if (lastSpaceIndex >= 0) {
+                jsonUser.setFirstName(displayName.substring(0, lastSpaceIndex));
+                jsonUser.setLastName(displayName.substring(lastSpaceIndex + 1));
+            } else {
+                jsonUser.setFirstName(displayName);
+            }
+
+            if (userUtil.getGroupsForUser(user.getName()).size() == 0) {
+                jsonUser.setActive(false);
+            } else {
+                jsonUser.setActive(true);
+            }
+
+            ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(ApplicationUsers.from(user));
+            jsonUser.setGithubName(extendedPreferences.getText(GITHUB_PROPERTY));
+
+            jsonUserList.add(jsonUser);
+        }
+
+        return Response.ok(jsonUserList).build();
+    }
+
+    @PUT
+    @Path("/activateUser")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response activateUser(final JsonUser jsonUser, @Context HttpServletRequest request) {
+        String username = userManager.getRemoteUsername(request);
+        if (username == null || !userManager.isSystemAdmin(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        if (jsonUser == null) {
+            return Response.serverError().entity("User not given").build();
+        }
+
+        ApplicationUser applicationUser = ComponentAccessor.getUserManager().getUserByName(jsonUser.getUserName());
+        if (applicationUser == null) {
+            return Response.serverError().entity("User not found").build();
+        }
+
+        if (jsonUser.getCoordinatorList().size() == 0 && jsonUser.getSeniorList().size() == 0 && jsonUser.getDeveloperList().size() == 0) {
+            return Response.serverError().entity("No Team selected").build();
+        }
+
+        ConfigResourceRest configResourceRest = new ConfigResourceRest(userManager, pluginSettingsFactory, transactionTemplate);
+        JsonConfig config = configResourceRest.getConfigFromSettings();
+
+        // add user to all desired GitHub teams and groups
+        addUserToGithubAndJiraGroups(jsonUser, applicationUser.getDirectoryUser(), config);
+
+
+        return Response.ok().build();
+    }
+
+    @PUT
+    @Path("/inactivateUser")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response inactivateUser(final String inactivateUser, @Context HttpServletRequest request) {
+        String username = userManager.getRemoteUsername(request);
+        if (username == null || !userManager.isSystemAdmin(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        if (inactivateUser == null) {
+            return Response.serverError().entity("User not given").build();
+        }
+
+        ApplicationUser applicationUser = ComponentAccessor.getUserManager().getUserByName(inactivateUser);
+        if (applicationUser == null) {
+            return Response.serverError().entity("User not found").build();
+        }
+
+        // remove user from all GitHub teams
+        ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(applicationUser);
+        String githubName = extendedPreferences.getText(GITHUB_PROPERTY);
+        if (githubName != null) {
+            GithubHelperRest githubHelper = new GithubHelperRest(userManager, pluginSettingsFactory, transactionTemplate);
+            String error = githubHelper.removeUserFromAllTeams(githubName);
+            if (error != null) {
+                return Response.serverError().entity(error).build();
             }
         }
 
-        StringBuilder errors = new StringBuilder();
-        for (String team : githubTeamSet) {
-            String returnValue = githubHelper.addUserToTeam(jsonUser.getGithubName(), team);
-            if (returnValue != null) {
-                errors.append(returnValue);
-            }
-        }
-
-        if (errors.length() != 0) {
-            return Response.serverError().entity(errors.toString()).build();
+        // remove user from all groups
+        try {
+            removeFromAllGroups(ApplicationUsers.toDirectoryUser(applicationUser));
+        } catch (RemoveException e) {
+            e.printStackTrace();
+            return Response.serverError().entity(e.getMessage()).build();
+        } catch (PermissionException e) {
+            e.printStackTrace();
+            return Response.serverError().entity(e.getMessage()).build();
         }
 
         return Response.ok().build();
@@ -187,88 +260,77 @@ public class UserRest {
         }
     }
 
-    @XmlRootElement
-    @XmlAccessorType(XmlAccessType.FIELD)
-    public static final class JsonUser {
-        @XmlElement
-        private String userName;
-        @XmlElement
-        private String firstName;
-        @XmlElement
-        private String lastName;
-        @XmlElement
-        private String email;
-        @XmlElement
-        private String githubName;
-        @XmlElement
-        private List<String> coordinatorList;
-        @XmlElement
-        private List<String> seniorList;
-        @XmlElement
-        private List<String> developerList;
-
-        public String getUserName() {
-            return userName;
+    private Response addUserToGithubAndJiraGroups(JsonUser jsonUser, User jiraUser, JsonConfig config) {
+        Set<String> githubTeamSet = new HashSet<String>();
+        GithubHelperRest githubHelper = new GithubHelperRest(userManager, pluginSettingsFactory, transactionTemplate);
+        try {
+            for (String coordinatorOf : jsonUser.getCoordinatorList()) {
+                for (JsonTeam team : config.getTeams()) {
+                    if (team.getName().equals(coordinatorOf)) {
+                        addToGroups(jiraUser, team.getCoordinatorGroups());
+                        githubTeamSet.addAll(team.getGithubTeams());
+                    }
+                }
+            }
+            for (String seniorOf : jsonUser.getSeniorList()) {
+                for (JsonTeam team : config.getTeams()) {
+                    if (team.getName().equals(seniorOf)) {
+                        addToGroups(jiraUser, team.getSeniorGroups());
+                        githubTeamSet.addAll(team.getGithubTeams());
+                    }
+                }
+            }
+            for (String developerOf : jsonUser.getDeveloperList()) {
+                for (JsonTeam team : config.getTeams()) {
+                    if (team.getName().equals(developerOf)) {
+                        addToGroups(jiraUser, team.getDeveloperGroups());
+                        githubTeamSet.addAll(team.getGithubTeams());
+                    }
+                }
+            }
+        } catch (UserNotFoundException e) {
+            e.printStackTrace();
+            return Response.serverError().entity(e.getMessage()).build();
+        } catch (OperationFailedException e) {
+            e.printStackTrace();
+            return Response.serverError().entity(e.getMessage()).build();
+        } catch (GroupNotFoundException e) {
+            e.printStackTrace();
+            return Response.serverError().entity(e.getMessage()).build();
+        } catch (OperationNotPermittedException e) {
+            e.printStackTrace();
+            return Response.serverError().entity(e.getMessage()).build();
+        } catch (InvalidGroupException e) {
+            e.printStackTrace();
+            return Response.serverError().entity(e.getMessage()).build();
         }
 
-        public void setUserName(String userName) {
-            this.userName = userName;
+        ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(ApplicationUsers.from(jiraUser));
+        jsonUser.setGithubName(extendedPreferences.getText(GITHUB_PROPERTY));
+
+        StringBuilder errors = new StringBuilder();
+        for (String team : githubTeamSet) {
+            String returnValue = githubHelper.addUserToTeam(jsonUser.getGithubName(), team);
+            if (returnValue != null) {
+                errors.append(returnValue);
+            }
         }
 
-        public String getFirstName() {
-            return firstName;
+        if (errors.length() != 0) {
+            return Response.serverError().entity(errors.toString()).build();
         }
 
-        public void setFirstName(String firstName) {
-            this.firstName = firstName;
-        }
+        return Response.ok().build();
+    }
 
-        public String getLastName() {
-            return lastName;
-        }
+    private void removeFromAllGroups(User user) throws RemoveException, PermissionException {
+        if (user == null)
+            return;
 
-        public void setLastName(String lastName) {
-            this.lastName = lastName;
-        }
+        GroupManager groupManager = ComponentAccessor.getGroupManager();
+        Collection<Group> groupCollection = groupManager.getGroupsForUser(user);
 
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getGithubName() {
-            return githubName;
-        }
-
-        public void setGithubName(String githubName) {
-            this.githubName = githubName;
-        }
-
-        public List<String> getCoordinatorList() {
-            return coordinatorList;
-        }
-
-        public void setCoordinatorList(List<String> coordinatorList) {
-            this.coordinatorList = coordinatorList;
-        }
-
-        public List<String> getSeniorList() {
-            return seniorList;
-        }
-
-        public void setSeniorList(List<String> seniorList) {
-            this.seniorList = seniorList;
-        }
-
-        public List<String> getDeveloperList() {
-            return developerList;
-        }
-
-        public void setDeveloperList(List<String> developerList) {
-            this.developerList = developerList;
-        }
+        UserUtil userUtil = ComponentAccessor.getUserUtil();
+        userUtil.removeUserFromGroups(groupCollection, user);
     }
 }

@@ -43,42 +43,6 @@ AJS.toInit(function() {
       return str;
     }
 
-    function populateTable() {
-        AJS.$.ajax({
-            url: baseUrl + "/rest/admin-helper/1.0/config/getConfig",
-            dataType: "json",
-            success: function(config) {
-                for (var key in config.teams) {
-                    var obj = config.teams[key];
-                    AJS.$("#team-body").append("<tr><td headers=\"basic-team\">" + obj['name'] +
-                        "</td><td headers=\"basic-coordinator\"><input class=\"radio\" type=\"radio\" name=\"" + obj['name'] +
-                        "\" id=\"" + obj['name'] + "-coordinator\" value=\"coordinator\"></td><td headers=\"basic-senior\"><input class=\"radio\" type=\"radio\" name=\"" +
-                        obj['name'] + "\" id=\"" + obj['name'] + "-senior\" value=\"senior\"></td><td headers=\"basic-developer\"><input class=\"radio\" type=\"radio\" name=\"" +
-                        obj['name'] + "\" id=\"" + obj['name'] + "-developer\" value=\"developer\"></td><td headers=\"basic-none\"><input class=\"radio\" type=\"radio\" checked=\"checked\" name=\"" +
-                        obj['name'] + "\" id=\"" + obj['name'] + "-none\" value=\"none\"></td></tr>");
-               }
-            },
-            error: function() {
-                AJS.messages.error({
-                    title: "Error!",
-                    body: "Something went wrong!"
-                });
-            }
-        });
-    }
-
-    function getTeamList(callme){
-        var teamList;
-        AJS.$.ajax({
-            url: baseUrl + "/rest/admin-helper/1.0/config/getTeamList",
-            type: "GET",
-            contentType: "application/json",
-            success: function(result) {
-                callme(result);
-            }
-        });
-    }
-
     function createUser(teamList) {
         var userToCreate = new Object();
         userToCreate.userName = AJS.$("#username").attr("value");
@@ -121,7 +85,7 @@ AJS.toInit(function() {
         });
     }
 
-    populateTable();
+    populateTeamTable(baseUrl, "#team-body");
 
     AJS.$('#github').change(function(){
         var user_input = AJS.$(this).val();

@@ -64,6 +64,10 @@ public class GithubHelperRest {
     }
 
     public boolean doesUserExist(final String userName) {
+        if(userName == null) {
+            return Boolean.FALSE;
+        }
+
         return (Boolean) transactionTemplate.execute(new TransactionCallback() {
             public Object doInTransaction() {
                 PluginSettings settings = pluginSettingsFactory.createGlobalSettings();
@@ -88,7 +92,7 @@ public class GithubHelperRest {
     }
 
     public String addUserToTeam(final String user, final String team) {
-        if (!doesUserExist(user)) {
+        if (user == null || !doesUserExist(user)) {
             return "User does not exist on GitHub";
         }
 
@@ -115,6 +119,44 @@ public class GithubHelperRest {
                         return "Team not found";
 
                     teamService.addMember(id, user);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return e.getCause();
+                }
+
+                return null; // everything went fine
+            }
+        });
+    }
+
+    public String removeUserFromAllTeams(final String user) {
+        if (!doesUserExist(user)) {
+            return "User does not exist on GitHub";
+        }
+
+        return (String) transactionTemplate.execute(new TransactionCallback() {
+            public Object doInTransaction() {
+                PluginSettings settings = pluginSettingsFactory.createGlobalSettings();
+
+                String token = (String) settings.get(ConfigResourceRest.KEY_TOKEN);
+                String organization = (String) settings.get(ConfigResourceRest.KEY_ORGANIZATION);
+
+                try {
+                    TeamService teamService = new TeamService();
+                    teamService.getClient().setOAuth2Token(token);
+
+                    List<Team> teamList = teamService.getTeams(organization);
+                    for(Team githubTeam : teamList) {
+                        // Owner group must not me empty
+                        // getMembersCount() just filled when getting single team
+                        if(githubTeam.getName().equals("Owners") && teamService.getTeam(githubTeam.getId()).getMembersCount() <= 1) {
+                            continue;
+                        }
+
+                        if(teamService.isMember(githubTeam.getId(), user)) {
+                            teamService.removeMember(githubTeam.getId(), user);
+                        }
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                     return e.getCause();

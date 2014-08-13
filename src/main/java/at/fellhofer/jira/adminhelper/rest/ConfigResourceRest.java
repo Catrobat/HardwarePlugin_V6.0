@@ -17,6 +17,8 @@
 package at.fellhofer.jira.adminhelper.rest;
 
 
+import at.fellhofer.jira.adminhelper.rest.json.JsonConfig;
+import at.fellhofer.jira.adminhelper.rest.json.JsonTeam;
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 import com.atlassian.sal.api.transaction.TransactionCallback;
@@ -28,16 +30,12 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 
 @Path("/config")
 public class ConfigResourceRest {
-    public static final String KEY_BASE = Config.class.getName() + ".";
+    public static final String KEY_BASE = "at.fellhofer.jira.adminhelper.";
     public static final String KEY_TOKEN = KEY_BASE + "githubToken";
     public static final String KEY_ORGANIZATION = KEY_BASE + "githubOrganization";
     public static final String KEY_TEAMS = KEY_BASE + "teams";
@@ -70,25 +68,37 @@ public class ConfigResourceRest {
         return Response.ok(getConfigFromSettings()).build();
     }
 
-    public Config getConfigFromSettings() {
-        return (Config) transactionTemplate.execute(new TransactionCallback() {
+    public JsonConfig getConfigFromSettings() {
+        return (JsonConfig) transactionTemplate.execute(new TransactionCallback() {
             public Object doInTransaction() {
                 PluginSettings settings = pluginSettingsFactory.createGlobalSettings();
 
-                Config config = new Config();
+                JsonConfig config = new JsonConfig();
                 config.setGithubToken((String) settings.get(KEY_TOKEN));
                 config.setGithubOrganization((String) settings.get(KEY_ORGANIZATION));
 
-                if((List<String>)settings.get(KEY_TEAMS) == null)
+
+                if (settings.get(KEY_TEAMS) == null)
                     settings.put(KEY_TEAMS, new ArrayList<String>());
 
-                List<Config.Team> teamList = new ArrayList<Config.Team>();
-                for (String teamName : (List<String>)settings.get(KEY_TEAMS) ) {
-                    Config.Team tempTeam = new Config.Team(teamName);
-                    tempTeam.setGithubTeams((List<String>) settings.get(KEY_BASE + teamName + SUBKEY_GITHUB));
-                    tempTeam.setDeveloperGroups((List<String>) settings.get(KEY_BASE + teamName + SUBKEY_DEVELOPERS));
-                    tempTeam.setSeniorGroups((List<String>) settings.get(KEY_BASE + teamName + SUBKEY_SENIORS));
-                    tempTeam.setCoordinatorGroups((List<String>) settings.get(KEY_BASE + teamName + SUBKEY_COORDINATORS));
+                List<JsonTeam> teamList = new ArrayList<JsonTeam>();
+                @SuppressWarnings("unchecked")
+                List<String> settingsTeamList = (List<String>) settings.get(KEY_TEAMS);
+                for (String teamName : settingsTeamList) {
+                    JsonTeam tempTeam = new JsonTeam(teamName);
+
+                    @SuppressWarnings("unchecked")
+                    List<String> githubTeams = (List<String>) settings.get(KEY_BASE + teamName + SUBKEY_GITHUB);
+                    tempTeam.setGithubTeams(githubTeams);
+                    @SuppressWarnings("unchecked")
+                    List<String> developerGroups = (List<String>) settings.get(KEY_BASE + teamName + SUBKEY_DEVELOPERS);
+                    tempTeam.setDeveloperGroups(developerGroups);
+                    @SuppressWarnings("unchecked")
+                    List<String> seniorGroups = (List<String>) settings.get(KEY_BASE + teamName + SUBKEY_SENIORS);
+                    tempTeam.setSeniorGroups(seniorGroups);
+                    @SuppressWarnings("unchecked")
+                    List<String> coordinatorGroups = (List<String>) settings.get(KEY_BASE + teamName + SUBKEY_COORDINATORS);
+                    tempTeam.setCoordinatorGroups(coordinatorGroups);
                     teamList.add(tempTeam);
                 }
 
@@ -111,9 +121,10 @@ public class ConfigResourceRest {
         return Response.ok(transactionTemplate.execute(new TransactionCallback() {
             public Object doInTransaction() {
                 PluginSettings settings = pluginSettingsFactory.createGlobalSettings();
-                List<String> teamNames = (ArrayList<String>) settings.get(KEY_TEAMS);
+                @SuppressWarnings("unchecked")
+                List<String> teamList = (List<String>) settings.get(KEY_TEAMS);
 
-                return teamNames;
+                return teamList;
             }
         })).build();
     }
@@ -121,7 +132,7 @@ public class ConfigResourceRest {
     @PUT
     @Path("/saveConfig")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response setConfig(final Config config, @Context HttpServletRequest request) {
+    public Response setConfig(final JsonConfig config, @Context HttpServletRequest request) {
         String username = userManager.getRemoteUsername(request);
         if (username == null || !userManager.isSystemAdmin(username)) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
@@ -134,11 +145,11 @@ public class ConfigResourceRest {
                 pluginSettings.put(KEY_ORGANIZATION, config.getGithubOrganization());
 
                 if (config.getTeams() == null)
-                    config.setTeams(new ArrayList<Config.Team>());
+                    config.setTeams(new ArrayList<JsonTeam>());
 
                 List<String> teamNames = new ArrayList<String>();
-                for (Config.Team team : config.getTeams()) {
-                    if(teamNames.contains(team.getName())) {
+                for (JsonTeam team : config.getTeams()) {
+                    if (teamNames.contains(team.getName())) {
                         continue;
                     }
 
@@ -169,6 +180,7 @@ public class ConfigResourceRest {
         boolean successful = (Boolean) transactionTemplate.execute(new TransactionCallback() {
             public Object doInTransaction() {
                 PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
+                @SuppressWarnings("unchecked")
                 List<String> teamList = (List<String>) pluginSettings.get(ConfigResourceRest.KEY_TEAMS);
 
                 for (String teamName : teamList) {
@@ -203,6 +215,7 @@ public class ConfigResourceRest {
         boolean successful = (Boolean) transactionTemplate.execute(new TransactionCallback() {
             public Object doInTransaction() {
                 PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
+                @SuppressWarnings("unchecked")
                 List<String> teamList = (List<String>) pluginSettings.get(ConfigResourceRest.KEY_TEAMS);
 
                 for (String teamName : teamList) {
@@ -226,108 +239,5 @@ public class ConfigResourceRest {
             return Response.noContent().build();
 
         return Response.serverError().build();
-    }
-
-
-    @XmlRootElement
-    @XmlAccessorType(XmlAccessType.FIELD)
-    public static final class Config {
-        @XmlElement
-        private String githubToken;
-        @XmlElement
-        private String githubOrganization;
-        @XmlElement
-        private List<Team> teams;
-
-        public String getGithubToken() {
-            return githubToken;
-        }
-
-        public void setGithubToken(String githubToken) {
-            this.githubToken = githubToken;
-        }
-
-        public String getGithubOrganization() {
-            return githubOrganization;
-        }
-
-        public void setGithubOrganization(String githubOrganization) {
-            this.githubOrganization = githubOrganization;
-        }
-
-        public List<Team> getTeams() {
-            return teams;
-        }
-
-        public void setTeams(List<Team> teams) {
-            this.teams = teams;
-        }
-
-        @XmlRootElement
-        @XmlAccessorType(XmlAccessType.FIELD)
-        public static final class Team {
-            @XmlElement
-            private String name;
-            @XmlElement
-            private List<String> githubTeams;
-            @XmlElement
-            private List<String> coordinatorGroups;
-            @XmlElement
-            private List<String> seniorGroups;
-            @XmlElement
-            private List<String> developerGroups;
-
-            public Team() {
-
-            }
-
-            public Team(String name) {
-                this.name = name;
-                githubTeams = new ArrayList<String>();
-                coordinatorGroups = new ArrayList<String>();
-                seniorGroups = new ArrayList<String>();
-                developerGroups = new ArrayList<String>();
-            }
-
-            public String getName() {
-                return name;
-            }
-
-            public void setName(String name) {
-                this.name = name;
-            }
-
-            public List<String> getGithubTeams() {
-                return githubTeams;
-            }
-
-            public void setGithubTeams(List<String> githubTeams) {
-                this.githubTeams = githubTeams;
-            }
-
-            public List<String> getCoordinatorGroups() {
-                return coordinatorGroups;
-            }
-
-            public void setCoordinatorGroups(List<String> coordinatorGroups) {
-                this.coordinatorGroups = coordinatorGroups;
-            }
-
-            public List<String> getSeniorGroups() {
-                return seniorGroups;
-            }
-
-            public void setSeniorGroups(List<String> seniorGroups) {
-                this.seniorGroups = seniorGroups;
-            }
-
-            public List<String> getDeveloperGroups() {
-                return developerGroups;
-            }
-
-            public void setDeveloperGroups(List<String> developerGroups) {
-                this.developerGroups = developerGroups;
-            }
-        }
     }
 }

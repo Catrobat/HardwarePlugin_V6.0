@@ -62,7 +62,6 @@
                 </fieldset>
 
                 <h3>Teams</h3>
-
                 <table class="aui">
                     <thead>
                     <tr>
@@ -77,50 +76,6 @@
 
                     </tbody>
                 </table>
-
-                #*
-                <h3>Resources</h3>
-                <fieldset class="group">
-                    <legend><span>Allow access to</span></legend>
-                    <div class="checkbox">
-                        <input class="checkbox" type="checkbox" name="cbOne" id="cbOne">
-                        <label for="cbOne">Jira</label>
-                    </div>
-                    <div class="checkbox">
-                        <input class="checkbox" type="checkbox" name="cbTwo" id="cbTwo">
-                        <label for="cbTwo">Confluence</label>
-                    </div>
-                    <div class="checkbox">
-                        <input class="checkbox" type="checkbox" name="cbThree" id="cbThree">
-                        <label for="cbThree">Jenkins</label>
-                    </div>
-                    <div class="checkbox">
-                        <input class="checkbox" type="checkbox" name="cbThree" id="cbFour">
-                        <label for="cbThree">IRC Bouncer</label>
-                    </div>
-                </fieldset>
-
-                <h3>All Groups</h3>
-                <fieldset>
-                    <legend><span>Dropdowns and multi select</span></legend>
-                    <div class="field-group">
-                        <label for="multiselect">Modify group membership</label>
-                        <select class="multi-select" size="4" multiple="multiple" id="multiselect" name="multiselect">
-                            <option>Catroid</option>
-                            <option>Catroid-Coordinators</option>
-                            <option>Catroid-Seniors</option>
-                            <option>Catroweb</option>
-                            <option>Catroweb-Coordinators</option>
-                            <option>Catroweb-Seniors</option>
-                            <option>Paintroid</option>
-                            <option>Paintroid-Coordinators</option>
-                            <option>Paintroid-Seniors</option>
-                        </select>
-
-                        <div class="description">Use only if you know what you're doing.</div>
-                    </div>
-                </fieldset>
-                *#
 
                 <div class="buttons-container">
                     <div class="buttons">
