@@ -14,33 +14,49 @@
  * limitations under the License.
  */
 "use strict";
-AJS.toInit(function() {
+AJS.toInit(function () {
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
     var teams = [];
 
-    AJS.$('#firstname').change(function() {
-      updateUsername();
+    AJS.$('#firstname').change(function () {
+        updateUsername();
     });
-    AJS.$('#lastname').change(function() {
-      updateUsername();
+    AJS.$('#lastname').change(function () {
+        updateUsername();
     });
 
     function updateUsername() {
-      var first = AJS.$('#firstname').val();
-      first = replaceUmlauts(first);
+        var first = AJS.$('#firstname').val();
+        first = replaceUmlauts(first);
 
-      var last = AJS.$('#lastname').val();
-      last = replaceUmlauts(last);
+        var last = AJS.$('#lastname').val();
+        last = replaceUmlauts(last);
 
-      AJS.$('#username').val(first + last);
+        AJS.$('#username').val(first + last);
     }
 
     function replaceUmlauts(str) {
-      str = str.replace(/\u00e4/g,"ae").replace(/\u00f6/g,"oe")
-        .replace(/\u00fc/g,"ue").replace(/\u00c4/g,"Ae").replace(/\u00d6/g,"Oe")
-        .replace(/\u00dc/g,"Ue").replace(/\u00df/g,"ss");
+        str = str.replace(/\u00e4/g, "ae").replace(/\u00f6/g, "oe")
+            .replace(/\u00fc/g, "ue").replace(/\u00c4/g, "Ae").replace(/\u00d6/g, "Oe")
+            .replace(/\u00dc/g, "Ue").replace(/\u00df/g, "ss");
 
-      return str;
+        return str;
+    }
+
+    function resetForm() {
+        getTeamList(baseUrl, resetFormAjax);
+    }
+
+    function resetFormAjax(teamList) {
+        AJS.$("#username").attr("value", "");
+        AJS.$("#firstname").attr("value", "");
+        AJS.$("#lastname").attr("value", "");
+        AJS.$("#email").attr("value", "");
+        AJS.$("#github").attr("value", "");
+
+        for (var i in teamList) {
+            AJS.$("#" + teamList[i] + "-none").prop("checked", true);
+        }
     }
 
     function createUser(teamList) {
@@ -54,13 +70,13 @@ AJS.toInit(function() {
         userToCreate.seniorList = [];
         userToCreate.developerList = [];
 
-        for(var i in teamList) {
+        for (var i in teamList) {
             var value = AJS.$("input[name='" + teamList[i] + "']:checked").val();
-            if(value == "coordinator") {
+            if (value == "coordinator") {
                 userToCreate.coordinatorList.push(teamList[i]);
-            } else if(value == "senior") {
+            } else if (value == "senior") {
                 userToCreate.seniorList.push(teamList[i]);
-            } else if(value == "developer") {
+            } else if (value == "developer") {
                 userToCreate.developerList.push(teamList[i]);
             }
         }
@@ -70,13 +86,14 @@ AJS.toInit(function() {
             type: "PUT",
             contentType: "application/json",
             data: JSON.stringify(userToCreate),
-            success: function() {
+            success: function () {
                 AJS.messages.success({
                     title: "Success!",
                     body: "User created!"
                 });
+                resetForm();
             },
-            error: function(e) {
+            error: function (e) {
                 AJS.messages.error({
                     title: "Error!",
                     body: "Something went wrong!<br />" + e.responseText
@@ -87,15 +104,15 @@ AJS.toInit(function() {
 
     populateTeamTable(baseUrl, "#team-body");
 
-    AJS.$('#github').change(function(){
+    AJS.$('#github').change(function () {
         var user_input = AJS.$(this).val();
         jQuery.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/github/searchUser",
             type: "PUT",
             contentType: "application/json",
             data: user_input,
-            success: function(response) {
-                if(response == "success") {
+            success: function (response) {
+                if (response == "success") {
                     AJS.$('#github-error').hide();
                 } else {
                     error: AJS.$('#github-error').show();
@@ -104,8 +121,12 @@ AJS.toInit(function() {
         });
     });
 
-    AJS.$("#create").submit(function(e) {
+    AJS.$("#create").submit(function (e) {
         e.preventDefault();
-        getTeamList(createUser);
+        getTeamList(baseUrl, createUser);
+    });
+    AJS.$(".cancel").click(function (e) {
+        e.preventDefault();
+        resetForm();
     });
 });

@@ -98,11 +98,6 @@ public class UserRest {
             return Response.serverError().build();
         }
 
-        Response errorResponse = addUserToGithubAndJiraGroups(jsonUser, jiraUser, config);
-        if (errorResponse != null) {
-            return errorResponse;
-        }
-
         ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(ApplicationUsers.from(jiraUser));
         try {
             extendedPreferences.setText(GITHUB_PROPERTY, jsonUser.getGithubName());
@@ -110,6 +105,10 @@ public class UserRest {
             e.printStackTrace();
         }
 
+        Response errorResponse = addUserToGithubAndJiraGroups(jsonUser, jiraUser, config);
+        if (errorResponse != null) {
+            return errorResponse;
+        }
 
         return Response.ok().build();
     }
@@ -305,8 +304,10 @@ public class UserRest {
             return Response.serverError().entity(e.getMessage()).build();
         }
 
-        ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(ApplicationUsers.from(jiraUser));
-        jsonUser.setGithubName(extendedPreferences.getText(GITHUB_PROPERTY));
+        if(jsonUser.getGithubName() == null) {
+            ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(ApplicationUsers.from(jiraUser));
+            jsonUser.setGithubName(extendedPreferences.getText(GITHUB_PROPERTY));
+        }
 
         StringBuilder errors = new StringBuilder();
         for (String team : githubTeamSet) {

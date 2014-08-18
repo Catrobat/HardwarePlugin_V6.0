@@ -66,11 +66,11 @@
     </component>
     -->
 
-    <servlet key="create-user-servlet" class="at.fellhofer.jira.adminhelper.CreateUserServlet" >
+    <servlet key="create-user-servlet" class="at.fellhofer.jira.adminhelper.CreateUserServlet">
         <url-pattern>/admin_helper/create_user</url-pattern>
     </servlet>
 
-    <servlet key="modify-user-servlet" class="at.fellhofer.jira.adminhelper.ModifyUserServlet" >
+    <servlet key="modify-user-servlet" class="at.fellhofer.jira.adminhelper.ModifyUserServlet">
         <url-pattern>/admin_helper/modify_user</url-pattern>
     </servlet>
 
@@ -85,7 +85,7 @@
     <component-import key="loginUriProvider" interface="com.atlassian.sal.api.auth.LoginUriProvider"/>
     <component-import key="pluginSettingsFactory"
                       interface="com.atlassian.sal.api.pluginsettings.PluginSettingsFactory"/>
-    <component-import key="transactionTemplate" interface="com.atlassian.sal.api.transaction.TransactionTemplate" />
+    <component-import key="transactionTemplate" interface="com.atlassian.sal.api.transaction.TransactionTemplate"/>
     <component-import key="webSudoManager" interface="com.atlassian.sal.api.websudo.WebSudoManager"/>
 
     <template-context-item key="applicationPropertiesContextItem" component-ref="applicationProperties"
@@ -97,36 +97,26 @@
 
 
     <web-section key="admin-helper-config-section" location="admin_plugins_menu">
-        <label key="admin_helper.admin.section" />
+        <label key="admin_helper.admin.section"/>
     </web-section>
 
-    <web-item key="admin-helper-config-item" section="admin_plugins_menu/admin-helper-config-section" name="Admin Helper">
-        <description>Link to AdminHelper-admin page.</description>
-        <label key="admin_helper.admin.label" />
-        <link linkId="admin_helper-admin-link">/plugins/servlet/admin_helper/admin</link>
-    </web-item>
-
-    <web-section key="admin_helper_links_section" name="My Links Main Section" location="admin_helper_links"
-                 weight="10"/>
-
-    <web-item key="admin_helper_links" name="Admin-Helper" section="system.top.navigation.bar" weight="47">
-        <label>Admin-Helper</label>
-        <link linkId="admin_helper_links"/>
-        <condition class="com.atlassian.jira.plugin.webfragment.conditions.JiraGlobalPermissionCondition">
-            <param name="permission">admin</param>
-        </condition>
-    </web-item>
-
-    <web-item key="create_user_link" name="Create User" section="admin_helper_links/admin_helper_links_section"
+    <web-item key="create_user_link" section="admin_plugins_menu/admin-helper-config-section" name="Create User"
               weight="10">
         <label>Create User</label>
         <link linkId="create_user_link">/plugins/servlet/admin_helper/create_user</link>
     </web-item>
 
-    <web-item key="modify_user_link" name="Modify User" section="admin_helper_links/admin_helper_links_section"
-              weight="10">
+    <web-item key="modify_user_link" section="admin_plugins_menu/admin-helper-config-section" name="Modify User"
+              weight="20">
         <label>Modify User</label>
         <link linkId="modify_user_link">/plugins/servlet/admin_helper/modify_user</link>
+    </web-item>
+
+    <web-item key="admin-helper-config-item" section="admin_plugins_menu/admin-helper-config-section"
+              name="Helper Configuration" weight="30">
+        <description>Link to AdminHelper-admin page.</description>
+        <label key="admin_helper.admin.label"/>
+        <link linkId="admin_helper-admin-link">/plugins/servlet/admin_helper/admin</link>
     </web-item>
 
 </atlassian-plugin>

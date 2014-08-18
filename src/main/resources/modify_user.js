@@ -156,24 +156,6 @@ AJS.toInit(function() {
     }
 
     function activateUser(userName) {
-        /*AJS.$.ajax({
-            url: baseUrl + "/rest/admin-helper/1.0/user/activateUser",
-            type: "PUT",
-            contentType: "application/json",
-            data: userName,
-            success: function() {
-                AJS.messages.success({
-                    title: "Success!",
-                    body: "User activated!"
-                });
-            },
-            error: function(e) {
-                AJS.messages.error({
-                    title: "Error!",
-                    body: "Something went wrong!<br />" + e.responseText
-                });
-            }
-        });*/
         dialog.gotoPage(0);
         dialog.gotoPanel(0);
         dialog.userName = userName;

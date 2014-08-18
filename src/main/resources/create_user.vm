@@ -18,7 +18,7 @@
 <html>
 <head>
     <title>Create New User</title>
-    <meta name="decorator" content="atl.general">
+    <meta name="decorator" content="atl.admin" />
     <meta name="application-base-url" content="$applicationProperties.getBaseUrl()">
     $webResourceManager.requireResource("at.fellhofer.jira.AdminHelper:create-resources")
 </head>
