@@ -59,6 +59,12 @@
         <resource type="download" name="user_helper.js" location="user_helper.js"/>
     </web-resource>
 
+    <web-resource name="Hardware Overview" key="hardware-resources">
+        <dependency>com.atlassian.auiplugin:ajs</dependency>
+        <dependency>com.atlassian.auiplugin:aui-experimental-table-sortable</dependency>
+        <resource type="download" name="hardware_overview.js" location="hardware_overview.js"/>
+    </web-resource>
+
     <!-- publish our component -->
     <!--
     <component key="myPluginComponent" class="at.fellhofer.jira.adminhelper.jira.MyPluginComponentImpl" public="true">
@@ -76,6 +82,10 @@
 
     <servlet key="admin-servlet" class="at.fellhofer.jira.adminhelper.AdminServlet">
         <url-pattern>/admin_helper/admin</url-pattern>
+    </servlet>
+
+    <servlet key="hardware-servlet" class="at.fellhofer.jira.adminhelper.HardwareServlet">
+        <url-pattern>/admin_helper/hardware</url-pattern>
     </servlet>
 
     <!-- import from the product container -->

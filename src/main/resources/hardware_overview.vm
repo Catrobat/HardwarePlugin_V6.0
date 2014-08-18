@@ -1,0 +1,142 @@
+<!--
+  ~ Copyright 2014 Stephan Fellhofer
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<html>
+<head>
+    <title>$i18n.getText("admin_helper.admin.label")</title>
+    <meta name="decorator" content="atl.general"/>
+    <meta name="application-base-url" content="$applicationProperties.getBaseUrl()">
+    $webResourceManager.requireResource("at.fellhofer.jira.AdminHelper:hardware-resources")
+</head>
+<body>
+<div class="aui-tabs horizontal-tabs" id="tabs-example1">
+    <ul class="tabs-menu">
+        <li class="menu-item active-tab">
+            <a href="#tabs-example-first"><strong>Overview</strong></a>
+        </li>
+        <li class="menu-item">
+            <a href="#tabs-example-second"><strong>Lended Out</strong></a>
+        </li>
+        <li class="menu-item">
+            <a href="#tabs-example-third"><strong>Sorted Out</strong></a>
+        </li>
+    </ul>
+    <div class="tabs-pane active-pane" id="tabs-example-first">
+        <h3>Overview</h3>
+        <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
+            <thead>
+            <tr>
+                <th class="aui-table-column-issue-key">Name</th>
+                <th>Type of Device</th>
+                <th>OS</th>
+                <th>Available</th>
+                <th class="aui-table-column-unsortable">Lend Device Out</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><a href="#z">Nexus 7</a></td>
+                <td>Tablet</td>
+                <td>Android</td>
+                <td>7/15</td>
+                <td><a class="lending_out" href="#">Lending out</a></td>
+            </tr>
+            <tr>
+                <td><a href="#y">Nexus 4</a></td>
+                <td>Smartphone</td>
+                <td>Android</td>
+                <td>1/16</td>
+                <td><a class="lending_out" href="#">Lending out</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="tabs-pane" id="tabs-example-second">
+        <h3>Lended Out</h3>
+        <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
+            <thead>
+            <tr>
+                <th class="aui-table-column-issue-key">Name</th>
+                <th>Serialnumber</th>
+                <th>IMEI</th>
+                <th>Inventorynumber</th>
+                <th>Lended out from</th>
+                <th>Lended out since</th>
+                <th class="aui-table-column-unsortable">Details</th>
+                <th class="aui-table-column-unsortable">Return Device</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><a href="#z">Nexus 7</a></td>
+                <td>302KPRW062238</td>
+                <td>358240051927168</td>
+                <td>113676</td>
+                <td>Felly</td>
+                <td>2013-08-12</td>
+                <td><a class="device_details" href="#">Details</a></td>
+                <td><a class="device_return" href="#">Return</a></td>
+            </tr>
+            <tr>
+                <td><a href="#y">Nexus 4</a></td>
+                <td>302KPRW062238</td>
+                <td>358240051937910</td>
+                <td>113676</td>
+                <td>Felly</td>
+                <td>2014-08-12</td>
+                <td><a class="device_details" href="#">Details</a></td>
+                <td><a class="device_return" href="#">Return</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="tabs-pane" id="tabs-example-third">
+        <h3>Sorted Out</h3>
+        <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
+            <thead>
+            <tr>
+                <th class="aui-table-column-issue-key">Name</th>
+                <th>Serialnumber</th>
+                <th>IMEI</th>
+                <th>Inventorynumber</th>
+                <th>Sorted out since</th>
+                <th class="aui-table-column-unsortable">Details</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><a href="#z">Nexus 7</a></td>
+                <td>302KPRW062238</td>
+                <td>358240051927168</td>
+                <td>113676</td>
+                <td>2014-08-12</td>
+                <td><a class="device_details" href="#z">Details</a></td>
+            </tr>
+            <tr>
+                <td><a href="#y">Nexus 4</a></td>
+                <td>302KPRW062238</td>
+                <td>358240051937910</td>
+                <td>113676</td>
+                <td>2014-08-12</td>
+                <td><a class="device_details" href="#z">Details</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- .aui-tabs -->
+</body>
+</html>
