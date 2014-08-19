@@ -34,8 +34,6 @@ AJS.toInit(function() {
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
     var teams = [];
 
-    // Note this is a small dialog, so it fits in the Sandbox panel
-    // Standard sizes are 400, 600 and 840 pixels wide
     var dialog = new AJS.Dialog({
         width: 840,
         height: 400,
@@ -43,14 +41,8 @@ AJS.toInit(function() {
         closeOnOutsideClick: true
     });
 
-    // PAGE 0 (first page)
-    // adds header for first page
     dialog.addHeader("Activate User");
-
-    // add panel 1
     dialog.addPanel("Panel 1", tableSkeleton, "panel-body");
-    // You can remove padding with:
-    dialog.get("panel:0").setPadding(0);
 
     dialog.addButton("OK", function (dialog) {
         getTeamList(baseUrl, modifyUser);

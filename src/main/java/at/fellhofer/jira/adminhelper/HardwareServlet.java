@@ -28,30 +28,24 @@ import java.io.IOException;
 public class HardwareServlet extends HelperServlet {
 
     private final TemplateRenderer renderer;
-    private final String dialogContent = "<form action=\"#\" method=\"post\" id=\"d\" class=\"aui\">\n" +
-            "    <fieldset>\n" +
-            "        <div class=\"field-group\">\n" +
-            "            <label for=\"comment\">Device Comment</label>\n" +
-            "            <textarea class=\"textarea\" name=\"comment\" id=\"comment\" placeholder=\"Your comment here...\"></textarea>\n" +
-            "        </div>\n" +
-            "        <div class=\"field-group\">\n" +
-            "            <label for=\"d-fname\">Begin Date</label>\n" +
-            "            <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\" placeholder=\"2014-08-18\">\n" +
-            "        </div>\n" +
-            "        <div class=\"field-group\">\n" +
-            "            <label for=\"d-fname\">End Date</label>\n" +
-            "            <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\" placeholder=\"2014-08-18\">\n" +
-            "        </div>\n" +
-            "        <div class=\"field-group\">\n" +
-            "            <label for=\"d-lname\">Lending Purpose</label>\n" +
-            "            <input class=\"text long-field\" type=\"text\" id=\"d-lname\" name=\"d-lname\" title=\"last name\">\n" +
-            "        </div>\n" +
-            "        <div class=\"field-group\">\n" +
-            "            <label for=\"comment\">Lending Comment</label>\n" +
-            "            <textarea class=\"textarea\" name=\"comment\" id=\"comment\" placeholder=\"Your comment here...\"></textarea>\n" +
-            "        </div>\n" +
-            "    </fieldset>\n" +
-            " </form> ";
+    private final String dialogContent = "<form class=\"aui\">\n" +
+            "        <p>Are you sure to delete this Hardware Model?</p>\n" +
+            "\n" +
+            "        <p>All allocated devices need to be moved to another Hardware Model.</p>\n" +
+            "        <fieldset>\n" +
+            "            <div class=\"field-group\">\n" +
+            "                <label for=\"dBase\">Move to</label>\n" +
+            "                <select class=\"select\" id=\"dBase\" name=\"dBase\" title=\"database select\">\n" +
+            "                    <option>Select</option>\n" +
+            "                    <optgroup label=\"Nexus 4\">\n" +
+            "                        <option>8 GB</option>\n" +
+            "                        <option>16 GB</option>\n" +
+            "                    </optgroup>\n" +
+            "                    <option>Nexus 7</option>\n" +
+            "                </select>\n" +
+            "            </div>\n" +
+            "        </fieldset>\n" +
+            "    </form>";
 
     public HardwareServlet(UserManager userManager, LoginUriProvider loginUriProvider, TemplateRenderer renderer){
         super(userManager, loginUriProvider);

@@ -62,6 +62,7 @@
     <web-resource name="Hardware Overview" key="hardware-resources">
         <dependency>com.atlassian.auiplugin:ajs</dependency>
         <dependency>com.atlassian.auiplugin:aui-experimental-table-sortable</dependency>
+        <dependency>com.atlassian.auiplugin:aui-date-picker</dependency>
         <resource type="download" name="hardware_overview.js" location="hardware_overview.js"/>
     </web-resource>
 

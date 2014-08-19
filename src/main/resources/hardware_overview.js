@@ -17,11 +17,9 @@
 "use strict";
 
 function createLendoutDialog() {
-    // Note this is a small dialog, so it fits in the Sandbox panel
-// Standard sizes are 400, 600 and 840 pixels wide
     var dialog = new AJS.Dialog({
         width: 600,
-        height: 400,
+        height: 450,
         id: "example-dialog",
         closeOnOutsideClick: true
     });
@@ -64,7 +62,6 @@ function createLendoutDialog() {
 
     dialog.addHeader("Lending Out");
     dialog.addPanel("Panel 1", content, "panel-body");
-    dialog.get("panel:0").setPadding(0);
 
     dialog.addButton("Save", function (dialog) {
         dialog.hide();
@@ -77,11 +74,9 @@ function createLendoutDialog() {
 }
 
 function createReturnDialog() {
-    // Note this is a small dialog, so it fits in the Sandbox panel
-// Standard sizes are 400, 600 and 840 pixels wide
     var dialog = new AJS.Dialog({
         width: 600,
-        height: 350,
+        height: 400,
         id: "example-dialog",
         closeOnOutsideClick: true
     });
@@ -109,7 +104,6 @@ function createReturnDialog() {
 
     dialog.addHeader("Returning Device");
     dialog.addPanel("Panel 1", content, "panel-body");
-    dialog.get("panel:0").setPadding(0);
 
     dialog.addButton("Save", function (dialog) {
         dialog.hide();
@@ -121,12 +115,196 @@ function createReturnDialog() {
     return dialog;
 }
 
-function createDeviceDetailDialog() {
-    // Note this is a small dialog, so it fits in the Sandbox panel
-// Standard sizes are 400, 600 and 840 pixels wide
+function createNewHardwareDialog() {
     var dialog = new AJS.Dialog({
         width: 600,
-        height: 400,
+        height: 600,
+        id: "example-dialog",
+        closeOnOutsideClick: true
+    });
+
+    var content = "<form action=\"#\" method=\"post\" id=\"d\" class=\"aui\">\n" +
+        "        <fieldset>\n" +
+        "            <div class=\"field-group\">\n" +
+        "                <label for=\"d-fname\">Name<span class=\"aui-icon icon-required\"> required</span></label>\n" +
+        "                <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
+        "\n" +
+        "                <div class=\"description\">Name or short term for describing the hardware type</div>\n" +
+        "            </div>\n" +
+        "\n" +
+        "            <div class=\"field-group\">\n" +
+        "                <label for=\"d-fname\">Type of device</label>\n" +
+        "                <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
+        "\n" +
+        "                <div class=\"description\">Type of device class for better grouping</div>\n" +
+        "            </div>\n" +
+        "\n" +
+        "            <div class=\"field-group\">\n" +
+        "                <label for=\"d-fname\">Version</label>\n" +
+        "                <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
+        "\n" +
+        "                <div class=\"description\">e.g. 8 GB/16 GB Version</div>\n" +
+        "            </div>\n" +
+        "\n" +
+        "            <div class=\"field-group\">\n" +
+        "                <label for=\"d-fname\">Price</label>\n" +
+        "                <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
+        "            </div>\n" +
+        "\n" +
+        "            <div class=\"field-group\">\n" +
+        "                <label for=\"d-fname\">Producer</label>\n" +
+        "                <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
+        "\n" +
+        "                <div class=\"description\">Main Producer or brand</div>\n" +
+        "            </div>\n" +
+        "\n" +
+        "            <div class=\"field-group\">\n" +
+        "                <label for=\"d-fname\">Operating System</label>\n" +
+        "                <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
+        "\n" +
+        "                <div class=\"description\">Android/iOS/Windows Phone</div>\n" +
+        "            </div>\n" +
+        "\n" +
+        "            <div class=\"field-group\">\n" +
+        "                <label for=\"d-fname\">Item number</label>\n" +
+        "                <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
+        "\n" +
+        "                <div class=\"description\">Unique item number for product (e.g. GTIN)</div>\n" +
+        "            </div>\n" +
+        "        </fieldset>\n" +
+        "    </form>";
+
+    dialog.addHeader("Create/Edit Hardware Model");
+    dialog.addPanel("Panel 1", content, "panel-body");
+
+    dialog.addButton("Save", function (dialog) {
+        dialog.hide();
+    });
+    dialog.addLink("Cancel", function (dialog) {
+        dialog.hide();
+    }, "#");
+
+    return dialog;
+}
+
+function createNewDeviceDialog() {
+    var dialog = new AJS.Dialog({
+        width: 600,
+        height: 500,
+        id: "example-dialog",
+        closeOnOutsideClick: true
+    });
+
+    var content = "<form action=\"#\" method=\"post\" id=\"d\" class=\"aui\">\n" +
+        "    <fieldset>\n" +
+        "        <div class=\"field-group\">\n" +
+        "            <label for=\"dBase\">Hardware Model<span class=\"aui-icon icon-required\"> required</span></label>\n" +
+        "            <select class=\"select\" id=\"dBase\" name=\"dBase\" title=\"database select\">\n" +
+        "                <option>Select</option>\n" +
+        "                <optgroup label=\"Nexus 4\">\n" +
+        "                    <option>8 GB</option>\n" +
+        "                    <option>16 GB</option>\n" +
+        "                </optgroup>\n" +
+        "                <option>Nexus 7</option>\n" +
+        "            </select>\n" +
+        "        </div>\n" +
+        "\n" +
+        "        <div class=\"field-group\">\n" +
+        "            <label for=\"d-fname\">Serial number<span class=\"aui-icon icon-required\"> required</span></label>\n" +
+        "            <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
+        "\n" +
+        "            <div class=\"description\">Device unique number to identify the single device</div>\n" +
+        "        </div>\n" +
+        "\n" +
+        "        <div class=\"field-group\">\n" +
+        "            <label for=\"d-fname\">IMEI</label>\n" +
+        "            <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
+        "        </div>\n" +
+        "\n" +
+        "        <div class=\"field-group\">\n" +
+        "            <label for=\"d-fname\">Inventory number</label>\n" +
+        "            <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
+        "        </div>\n" +
+        "\n" +
+        "        <div class=\"field-group\">\n" +
+        "            <label for=\"d-fname\">Received date</label>\n" +
+        "            <input class=\"text\" type=\"date\" id=\"date-picker\" name=\"d-fname\"/>\n" +
+        "        </div>\n" +
+        "\n" +
+        "        <div class=\"field-group\">\n" +
+        "            <label for=\"d-fname\">Received by</label>\n" +
+        "            <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
+        "\n" +
+        "            <div class=\"description\">Main Producer or brand</div>\n" +
+        "        </div>\n" +
+        "\n" +
+        "        <div class=\"field-group\">\n" +
+        "            <label for=\"d-fname\">Useful life of asset</label>\n" +
+        "            <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
+        "\n" +
+        "            <div class=\"description\">Amount of time when this device is obsolete</div>\n" +
+        "        </div>\n" +
+        "    </fieldset>\n" +
+        "</form>";
+
+    dialog.addHeader("Create New Device");
+    dialog.addPanel("Panel 1", content, "panel-body");
+
+    dialog.addButton("Save", function (dialog) {
+        dialog.hide();
+    });
+    dialog.addLink("Cancel", function (dialog) {
+        dialog.hide();
+    }, "#");
+
+    return dialog;
+}
+
+function createRemoveModelDialog() {
+    var dialog = new AJS.Dialog({
+        width: 600,
+        height: 250,
+        id: "example-dialog",
+        closeOnOutsideClick: true
+    });
+
+    var content = "<form class=\"aui\">\n" +
+        "        <p>Are you sure to delete this Hardware Model?</p>\n" +
+        "\n" +
+        "        <p>All allocated devices need to be moved to another Hardware Model.\n" +
+        "        <fieldset>\n" +
+        "            <div class=\"field-group\">\n" +
+        "                <label for=\"dBase\">Move to</label>\n" +
+        "                <select class=\"select\" id=\"dBase\" name=\"dBase\" title=\"database select\">\n" +
+        "                    <option>Select</option>\n" +
+        "                    <optgroup label=\"Nexus 4\">\n" +
+        "                        <option>8 GB</option>\n" +
+        "                        <option>16 GB</option>\n" +
+        "                    </optgroup>\n" +
+        "                    <option>Nexus 7</option>\n" +
+        "                </select>\n" +
+        "            </div>\n" +
+        "        </fieldset></p>\n" +
+        "    </form>";
+
+    dialog.addHeader("Remove Hardware Model");
+    dialog.addPanel("Panel 1", content, "panel-body");
+
+    dialog.addButton("Remove", function (dialog) {
+        dialog.hide();
+    });
+    dialog.addLink("Cancel", function (dialog) {
+        dialog.hide();
+    }, "#");
+
+    return dialog;
+}
+
+
+function createDeviceDetailDialog() {
+    var dialog = new AJS.Dialog({
+        width: 600,
+        height: 450,
         id: "example-dialog",
         closeOnOutsideClick: true
     });
@@ -288,9 +466,45 @@ AJS.toInit(function () {
     AJS.$(".device_details").click(function (e) {
         e.preventDefault();
 
-        var dialog = createDeviceDetailDialog() ;
+        var dialog = createDeviceDetailDialog();
         dialog.gotoPage(0);
         dialog.gotoPanel(0);
         dialog.show();
+    });
+
+    AJS.$("#create").submit(function (e) {
+        e.preventDefault();
+        alert(e.attr('name'));
+    });
+
+    AJS.$("#new_device").click(function(e) {
+        e.preventDefault();
+
+        var dialog = createNewDeviceDialog();
+        dialog.gotoPage(0);
+        dialog.gotoPanel(0);
+        dialog.show();
+    });
+
+    AJS.$("#new_model,.edit_model").click(function(e) {
+        e.preventDefault();
+
+        var dialog = createNewHardwareDialog();
+        dialog.gotoPage(0);
+        dialog.gotoPanel(0);
+        dialog.show();
+    });
+
+    AJS.$(".remove_model").click(function(e) {
+        e.preventDefault();
+
+        var dialog = createRemoveModelDialog();
+        dialog.gotoPage(0);
+        dialog.gotoPanel(0);
+        dialog.show();
+    });
+
+    AJS.$("#date-picker").datePicker({
+        overrideBrowserDefault: true
     });
 });
