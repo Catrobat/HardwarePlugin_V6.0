@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 "use strict";
 
 var tableSkeleton = "<table class=\"aui\">\n" +
@@ -31,7 +32,6 @@ var tableSkeleton = "<table class=\"aui\">\n" +
 
 AJS.toInit(function() {
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
-    var teams = [];
 
     // Note this is a small dialog, so it fits in the Sandbox panel
     // Standard sizes are 400, 600 and 840 pixels wide
@@ -65,8 +65,8 @@ AJS.toInit(function() {
             dataType: "json",
             success: function(users) {
                 AJS.$("#user-body").empty();
-                for (var key in users) {
-                    var obj = users[key];
+                for (var i = 0; i < users.length; i++) {
+                    var obj = users[i];
                     var username = obj['active'] ? obj['userName'] : "<del>" + obj['userName'] + "</del>";
                     var actionClass = obj['active'] ? "inactivate" : "activate";
                     AJS.$("#user-body").append("<tr><td headers=\"basic-username\">" + username + "</td>" +
@@ -96,12 +96,12 @@ AJS.toInit(function() {
     }
 
     function modifyUser(teamList) {
-        var userToModify = new Object();
+        var userToModify = {};
         userToModify.userName = dialog.userName;
         userToModify.coordinatorList = [];
         userToModify.seniorList = [];
         userToModify.developerList = [];
-        for(var i in teamList) {
+        for (var i = 0; i < teamList.length; i++) {
             var value = AJS.$("input[name='" + teamList[i] + "']:checked").val();
             if(value == "coordinator") {
                 userToModify.coordinatorList.push(teamList[i]);

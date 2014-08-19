@@ -18,7 +18,7 @@ package at.fellhofer.jira.adminhelper;
 
 import com.atlassian.sal.api.auth.LoginUriProvider;
 import com.atlassian.sal.api.user.UserManager;
-import com.atlassian.templaterenderer.TemplateRenderer;
+import com.atlassian.sal.api.websudo.WebSudoManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -27,20 +27,32 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public abstract class HelperServlet extends HttpServlet{
     private final UserManager userManager;
     private final LoginUriProvider loginUriProvider;
+    private final WebSudoManager webSudoManager;
 
-    public HelperServlet(UserManager userManager, LoginUriProvider loginUriProvider) {
-        this.userManager = userManager;
-        this.loginUriProvider = loginUriProvider;
+    public HelperServlet(final UserManager userManager, final LoginUriProvider loginUriProvider, final WebSudoManager webSudoManager) {
+        this.userManager = checkNotNull(userManager, "userManager");
+        this.loginUriProvider = checkNotNull(loginUriProvider, "loginProvider");
+        this.webSudoManager = checkNotNull(webSudoManager, "webSudoManager");
     }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
+        if (username == null) {
             redirectToLogin(request, response);
+            return;
+        } else if (!userManager.isSystemAdmin(username)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        if (!webSudoManager.canExecuteRequest(request)) {
+            webSudoManager.enforceWebSudoProtection(request, response);
             return;
         }
 

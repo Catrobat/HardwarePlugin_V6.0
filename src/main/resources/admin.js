@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 "use strict";
 AJS.toInit(function () {
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
@@ -31,8 +32,8 @@ AJS.toInit(function () {
                 AJS.$("#github_token").attr("value", config.githubToken);
                 AJS.$("#github_organization").attr("value", config.githubOrganization);
                 teams = [];
-                for (var key in config.teams) {
-                    var obj = config.teams[key];
+                for (var i = 0; i < config.teams.length; i++) {
+                    var obj = config.teams[i];
                     teams.push(obj['name']);
                     AJS.$("#teams").append("<h3>" + obj['name'] + "</h3><fieldset>");
                     AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + obj['name'] + "-github-teams\">GitHub Teams</label><input class=\"text\" type=\"text\" id=\"" + obj['name'] + "-github-teams\" name=\"github-teams\" value=\"" + obj['githubTeams'] + "\"><div class=\"description\">User gets added to those comma separated teams.</div></div>");
@@ -56,9 +57,9 @@ AJS.toInit(function () {
         config.githubToken = AJS.$("#github_token").attr("value");
         config.githubOrganization = AJS.$("#github_organization").attr("value");
         config.teams = [];
-        for (var key in teams) {
+        for (var i = 0; i < teams.length; i++) {
             var tempTeam = {};
-            tempTeam.name = teams[key];
+            tempTeam.name = teams[i];
             tempTeam.githubTeams = AJS.$("#" + tempTeam.name + "-github-teams").attr("value").split(",");
             tempTeam.coordinatorGroups = AJS.$("#" + tempTeam.name + "-coordinator").attr("value").split(",");
             tempTeam.seniorGroups = AJS.$("#" + tempTeam.name + "-senior").attr("value").split(",");
