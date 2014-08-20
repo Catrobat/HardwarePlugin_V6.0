@@ -89,6 +89,13 @@
         <url-pattern>/admin_helper/hardware</url-pattern>
     </servlet>
 
+    <!-- TODO delete me -->
+    <servlet key="todo-list" class="at.fellhofer.jira.adminhelper.BlubTodoServlet">
+        <url-pattern>/todo/list</url-pattern>
+    </servlet>
+
+    <component key="hardwareModel" class="at.fellhofer.jira.adminhelper.activeobject.service.HardwareModelServiceImpl"/>
+
     <!-- import from the product container -->
     <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties"/>
     <component-import key="templateRenderer" interface="com.atlassian.templaterenderer.TemplateRenderer"/>
@@ -98,6 +105,14 @@
                       interface="com.atlassian.sal.api.pluginsettings.PluginSettingsFactory"/>
     <component-import key="transactionTemplate" interface="com.atlassian.sal.api.transaction.TransactionTemplate"/>
     <component-import key="webSudoManager" interface="com.atlassian.sal.api.websudo.WebSudoManager"/>
+    <component-import key="ao" name="Active Objects service"
+                      interface="com.atlassian.activeobjects.external.ActiveObjects">
+        <description>Component to access Active Objects functionality from the plugin</description>
+    </component-import>
+    <component key="tx-processor" name="Transactional Annotation Processor"
+               class="com.atlassian.activeobjects.external.TransactionalAnnotationProcessor">
+        <decription>Processes @Transactional annotations.</decription>
+    </component>
 
     <template-context-item key="applicationPropertiesContextItem" component-ref="applicationProperties"
                            context-key="applicationProperties" name="Application Properties Context Item"/>
@@ -106,6 +121,10 @@
         <description>Provides REST resources for the admin UI.</description>
     </rest>
 
+    <ao key="ao-module">
+        <description>The module configuring the Active Objects service used by this plugin</description>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.entity.HardwareModel</entity>
+    </ao>
 
     <web-section key="admin-helper-config-section" location="admin_plugins_menu">
         <label key="admin_helper.admin.section"/>

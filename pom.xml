@@ -19,7 +19,7 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>at.fellhofer.jira.adminhelper</groupId>
+    <groupId>at.fellhofer.jira</groupId>
     <artifactId>AdminHelper</artifactId>
     <version>0.1-SNAPSHOT</version>
     <organization>
@@ -58,6 +58,12 @@
             <groupId>com.atlassian.crowd</groupId>
             <artifactId>embedded-crowd-core</artifactId>
             <version>2.7.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.atlassian.activeobjects</groupId>
+            <artifactId>activeobjects-plugin</artifactId>
+            <version>${ao.version}</version>
             <scope>provided</scope>
         </dependency>
         <!-- Add dependency on jira-core if you want access to JIRA implementation classes as well as the sanctioned API. -->
@@ -135,6 +141,7 @@
     </dependencies>
     <build>
         <plugins>
+
             <plugin>
                 <groupId>com.atlassian.maven.plugins</groupId>
                 <artifactId>maven-jira-plugin</artifactId>
@@ -153,6 +160,18 @@
                         </pluginArtifact>
                     </pluginArtifacts>
                     -->
+                    <pluginArtifacts>
+                        <pluginArtifact>
+                            <groupId>com.atlassian.activeobjects</groupId>
+                            <artifactId>activeobjects-plugin</artifactId>
+                            <version>${ao.version}</version>
+                        </pluginArtifact>
+                        <pluginArtifact>
+                            <groupId>com.atlassian.activeobjects</groupId>
+                            <artifactId>activeobjects-jira-spi</artifactId>
+                            <version>${ao.version}</version>
+                        </pluginArtifact>
+                    </pluginArtifacts>
                 </configuration>
             </plugin>
             <plugin>
@@ -179,6 +198,7 @@
     <properties>
         <jira.version>6.3.3</jira.version>
         <amps.version>5.0.3</amps.version>
+        <ao.version>0.23.2</ao.version>
         <plugin.testrunner.version>1.2.0</plugin.testrunner.version>
         <!-- TestKit version 5.x for JIRA 5.x, 6.x for JIRA 6.x -->
         <testkit.version>5.2.26</testkit.version>

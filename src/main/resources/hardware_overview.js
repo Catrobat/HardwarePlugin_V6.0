@@ -432,8 +432,8 @@ function createDeviceDetailDialog() {
     dialog.addHeader("Device Details");
     dialog.addPanel("Model", modelContent, "panel-body");
     dialog.addPanel("Device", deviceContent, "panel-body");
-    dialog.addPanel("Comments", commentContent, "panel-body");
-    dialog.addPanel("History", historyContent, "panel-body");
+    dialog.addPanel("Device Comments", commentContent, "panel-body");
+    dialog.addPanel("Lending History", historyContent, "panel-body");
 
     dialog.addButton("OK", function (dialog) {
         dialog.hide();
