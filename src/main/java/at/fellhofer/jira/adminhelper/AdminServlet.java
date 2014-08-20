@@ -18,6 +18,7 @@ package at.fellhofer.jira.adminhelper;
 
 import com.atlassian.sal.api.auth.LoginUriProvider;
 import com.atlassian.sal.api.user.UserManager;
+import com.atlassian.sal.api.websudo.WebSudoManager;
 import com.atlassian.templaterenderer.TemplateRenderer;
 
 import javax.servlet.ServletException;
@@ -28,8 +29,8 @@ import java.io.IOException;
 public class AdminServlet extends HelperServlet {
     private final TemplateRenderer renderer;
 
-    public AdminServlet(UserManager userManager, LoginUriProvider loginUriProvider, TemplateRenderer renderer) {
-        super(userManager, loginUriProvider);
+    public AdminServlet(UserManager userManager, LoginUriProvider loginUriProvider, TemplateRenderer renderer, WebSudoManager webSudoManager) {
+        super(userManager, loginUriProvider, webSudoManager);
         this.renderer = renderer;
     }
 

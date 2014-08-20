@@ -17,7 +17,6 @@
 "use strict";
 AJS.toInit(function () {
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
-    var teams = [];
 
     AJS.$('#firstname').change(function () {
         updateUsername();
@@ -55,13 +54,13 @@ AJS.toInit(function () {
         AJS.$("#email").attr("value", "");
         AJS.$("#github").attr("value", "");
 
-        for (var i in teamList) {
+        for (var i = 0; i < teamList.length; i++) {
             AJS.$("#" + teamList[i] + "-none").prop("checked", true);
         }
     }
 
     function createUser(teamList) {
-        var userToCreate = new Object();
+        var userToCreate = {};
         userToCreate.userName = AJS.$("#username").attr("value");
         userToCreate.firstName = AJS.$("#firstname").attr("value");
         userToCreate.lastName = AJS.$("#lastname").attr("value");
@@ -71,7 +70,7 @@ AJS.toInit(function () {
         userToCreate.seniorList = [];
         userToCreate.developerList = [];
 
-        for (var i in teamList) {
+        for (var i = 0; i < teamList.length; i++) {
             var value = AJS.$("input[name='" + teamList[i] + "']:checked").val();
             if (value == "coordinator") {
                 userToCreate.coordinatorList.push(teamList[i]);
@@ -116,8 +115,11 @@ AJS.toInit(function () {
                 if (response == "success") {
                     AJS.$('#github-error').hide();
                 } else {
-                    error: AJS.$('#github-error').show();
+                    AJS.$('#github-error').show();
                 }
+            },
+            error: function () {
+                AJS.$('#github-error').show();
             }
         });
     });

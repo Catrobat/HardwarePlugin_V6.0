@@ -22,8 +22,8 @@ function populateTeamTable(baseUrl, tableId) {
         dataType: "json",
         success: function (config) {
             AJS.$(tableId).empty();
-            for (var key in config.teams) {
-                var obj = config.teams[key];
+            for (var i = 0; i < config.teams.length; i++) {
+                var obj = config.teams[i];
                 AJS.$(tableId).append("<tr><td headers=\"basic-team\">" + obj['name'] +
                     "</td><td headers=\"basic-coordinator\"><input class=\"radio\" type=\"radio\" name=\"" + obj['name'] +
                     "\" id=\"" + obj['name'] + "-coordinator\" value=\"coordinator\"></td><td headers=\"basic-senior\"><input class=\"radio\" type=\"radio\" name=\"" +
@@ -31,6 +31,7 @@ function populateTeamTable(baseUrl, tableId) {
                     obj['name'] + "\" id=\"" + obj['name'] + "-developer\" value=\"developer\"></td><td headers=\"basic-none\"><input class=\"radio\" type=\"radio\" checked=\"checked\" name=\"" +
                     obj['name'] + "\" id=\"" + obj['name'] + "-none\" value=\"none\"></td></tr>");
             }
+
         },
         error: function () {
             AJS.messages.error({

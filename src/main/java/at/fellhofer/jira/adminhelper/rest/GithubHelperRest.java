@@ -16,6 +16,13 @@
 
 package at.fellhofer.jira.adminhelper.rest;
 
+import at.fellhofer.jira.adminhelper.rest.json.JsonUser;
+import com.atlassian.core.AtlassianCoreException;
+import com.atlassian.jira.component.ComponentAccessor;
+import com.atlassian.jira.user.ApplicationUser;
+import com.atlassian.jira.user.preferences.ExtendedPreferences;
+import com.atlassian.jira.user.preferences.UserPreferencesManager;
+import com.atlassian.jira.user.util.UserUtil;
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 import com.atlassian.sal.api.transaction.TransactionCallback;
@@ -63,9 +70,80 @@ public class GithubHelperRest {
         return Response.ok(returnValue).build();
     }
 
+    @PUT
+    @Path("/changeGithubname")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response changeGithubnameRest(final JsonUser jsonUser, @Context HttpServletRequest request) {
+        String username = userManager.getRemoteUsername(request);
+        if (username == null || !userManager.isSystemAdmin(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        if (jsonUser.getUserName() == null || jsonUser.getGithubName() == null || jsonUser.getDeveloperList() == null) {
+            return Response.serverError().entity("JSON User Object not complete").build();
+        }
+
+        if (jsonUser.getDeveloperList().size() == 0) {
+            return Response.serverError().entity("No team selected").build();
+        }
+
+        if (!doesUserExist(jsonUser.getGithubName())) {
+            return Response.serverError().entity("Github User does not exist").build();
+        }
+
+        UserUtil userUtil = ComponentAccessor.getUserUtil();
+        ApplicationUser applicationUser = userUtil.getUserByName(jsonUser.getUserName());
+
+        if (applicationUser == null) {
+            return Response.serverError().entity("Jira User does not exist").build();
+        }
+
+        UserPreferencesManager userPreferencesManager = ComponentAccessor.getUserPreferencesManager();
+        ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(applicationUser);
+        String oldGithubName = extendedPreferences.getText(UserRest.GITHUB_PROPERTY);
+
+        if (oldGithubName != null) {
+            if (oldGithubName.toLowerCase().equals(jsonUser.getGithubName().toLowerCase())) {
+                return Response.serverError().entity("Github Username not changed").build();
+            }
+
+            boolean stillExists = false;
+            for (ApplicationUser tempApplicationUser : userUtil.getAllApplicationUsers()) {
+                if (tempApplicationUser.getUsername().toLowerCase().equals(applicationUser.getUsername().toLowerCase())) {
+                    continue;
+                }
+
+                extendedPreferences = userPreferencesManager.getExtendedPreferences(tempApplicationUser);
+                String tempUserGithubname = extendedPreferences.getText(UserRest.GITHUB_PROPERTY);
+                if (tempUserGithubname != null && oldGithubName.toLowerCase().equals(tempUserGithubname.toLowerCase())) {
+                    stillExists = true;
+                    break;
+                }
+            }
+
+            if (!stillExists) {
+                removeUserFromAllTeams(oldGithubName);
+            }
+        }
+
+        extendedPreferences = userPreferencesManager.getExtendedPreferences(applicationUser);
+        try {
+            extendedPreferences.setText(UserRest.GITHUB_PROPERTY, jsonUser.getGithubName());
+        } catch (AtlassianCoreException e) {
+            e.printStackTrace();
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+
+        ConfigResourceRest configResourceRest = new ConfigResourceRest(userManager, pluginSettingsFactory, transactionTemplate);
+        UserRest userRest = new UserRest(userManager, pluginSettingsFactory, transactionTemplate, userPreferencesManager);
+        userRest.addUserToGithubAndJiraGroups(jsonUser, applicationUser.getDirectoryUser(), configResourceRest.getConfigFromSettings());
+
+        return Response.ok().build();
+    }
+
     public boolean doesUserExist(final String userName) {
-        if(userName == null) {
-            return Boolean.FALSE;
+        if (userName == null || userName.equals("")) {
+            return false;
         }
 
         return (Boolean) transactionTemplate.execute(new TransactionCallback() {
