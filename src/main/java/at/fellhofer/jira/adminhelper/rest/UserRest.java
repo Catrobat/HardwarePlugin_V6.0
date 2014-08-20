@@ -201,6 +201,8 @@ public class UserRest {
         }
 
         // add user to all desired GitHub teams and groups
+        ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(ApplicationUsers.from(applicationUser.getDirectoryUser()));
+        jsonUser.setGithubName(extendedPreferences.getText(GITHUB_PROPERTY));
         addUserToGithubAndJiraGroups(jsonUser, applicationUser.getDirectoryUser(), config);
 
 
@@ -291,31 +293,37 @@ public class UserRest {
         }
     }
 
-    private Response addUserToGithubAndJiraGroups(JsonUser jsonUser, User jiraUser, JsonConfig config) {
+    public Response addUserToGithubAndJiraGroups(JsonUser jsonUser, User jiraUser, JsonConfig config) {
         Set<String> githubTeamSet = new HashSet<String>();
         GithubHelperRest githubHelper = new GithubHelperRest(userManager, pluginSettingsFactory, transactionTemplate);
         try {
-            for (String coordinatorOf : jsonUser.getCoordinatorList()) {
-                for (JsonTeam team : config.getTeams()) {
-                    if (team.getName().equals(coordinatorOf)) {
-                        addToGroups(jiraUser, team.getCoordinatorGroups());
-                        githubTeamSet.addAll(team.getGithubTeams());
+            if (jsonUser.getCoordinatorList() != null) {
+                for (String coordinatorOf : jsonUser.getCoordinatorList()) {
+                    for (JsonTeam team : config.getTeams()) {
+                        if (team.getName().equals(coordinatorOf)) {
+                            addToGroups(jiraUser, team.getCoordinatorGroups());
+                            githubTeamSet.addAll(team.getGithubTeams());
+                        }
                     }
                 }
             }
-            for (String seniorOf : jsonUser.getSeniorList()) {
-                for (JsonTeam team : config.getTeams()) {
-                    if (team.getName().equals(seniorOf)) {
-                        addToGroups(jiraUser, team.getSeniorGroups());
-                        githubTeamSet.addAll(team.getGithubTeams());
+            if (jsonUser.getSeniorList() != null) {
+                for (String seniorOf : jsonUser.getSeniorList()) {
+                    for (JsonTeam team : config.getTeams()) {
+                        if (team.getName().equals(seniorOf)) {
+                            addToGroups(jiraUser, team.getSeniorGroups());
+                            githubTeamSet.addAll(team.getGithubTeams());
+                        }
                     }
                 }
             }
-            for (String developerOf : jsonUser.getDeveloperList()) {
-                for (JsonTeam team : config.getTeams()) {
-                    if (team.getName().equals(developerOf)) {
-                        addToGroups(jiraUser, team.getDeveloperGroups());
-                        githubTeamSet.addAll(team.getGithubTeams());
+            if (jsonUser.getDeveloperList() != null) {
+                for (String developerOf : jsonUser.getDeveloperList()) {
+                    for (JsonTeam team : config.getTeams()) {
+                        if (team.getName().equals(developerOf)) {
+                            addToGroups(jiraUser, team.getDeveloperGroups());
+                            githubTeamSet.addAll(team.getGithubTeams());
+                        }
                     }
                 }
             }
@@ -336,21 +344,18 @@ public class UserRest {
             return Response.serverError().entity(e.getMessage()).build();
         }
 
-        if (jsonUser.getGithubName() == null) {
-            ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(ApplicationUsers.from(jiraUser));
-            jsonUser.setGithubName(extendedPreferences.getText(GITHUB_PROPERTY));
-        }
-
-        StringBuilder errors = new StringBuilder();
-        for (String team : githubTeamSet) {
-            String returnValue = githubHelper.addUserToTeam(jsonUser.getGithubName(), team);
-            if (returnValue != null) {
-                errors.append(returnValue);
+        if (jsonUser.getGithubName() != null && !jsonUser.getGithubName().equals("")) {
+            StringBuilder errors = new StringBuilder();
+            for (String team : githubTeamSet) {
+                String returnValue = githubHelper.addUserToTeam(jsonUser.getGithubName(), team);
+                if (returnValue != null) {
+                    errors.append(returnValue);
+                }
             }
-        }
 
-        if (errors.length() != 0) {
-            return Response.serverError().entity(errors.toString()).build();
+            if (errors.length() != 0) {
+                return Response.serverError().entity(errors.toString()).build();
+            }
         }
 
         return Response.ok().build();
