@@ -16,10 +16,11 @@
 
 package at.fellhofer.jira.adminhelper;
 
-import at.fellhofer.jira.adminhelper.activeobject.entity.HardwareModel;
-import at.fellhofer.jira.adminhelper.activeobject.service.HardwareModelService;
-import com.atlassian.activeobjects.external.ActiveObjects;
-import com.atlassian.sal.api.transaction.TransactionCallback;
+import at.fellhofer.jira.adminhelper.activeobject.*;
+import at.fellhofer.jira.adminhelper.rest.json.JsonHardwareModel;
+import com.atlassian.jira.component.ComponentAccessor;
+import com.atlassian.jira.user.ApplicationUser;
+import com.atlassian.jira.user.util.UserManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -27,18 +28,54 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Calendar;
+import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.apache.commons.beanutils.BeanUtils.copyProperties;
 
 public class BlubTodoServlet extends HttpServlet {
     private final HardwareModelService hardwareModelService;
+    private final DeviceService deviceService;
+    private final LendingService lendingService;
 
-    public BlubTodoServlet(HardwareModelService hardwareModelService) {
+    public BlubTodoServlet(HardwareModelService hardwareModelService, DeviceService deviceService, LendingService lendingService) {
         this.hardwareModelService = checkNotNull(hardwareModelService);
+        this.deviceService = checkNotNull(deviceService);
+        this.lendingService = checkNotNull(lendingService);
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        if(hardwareModelService.all().size() == 0) {
+            hardwareModelService.add("Nexus 4", "Smartphone", "16 GB", "200€", "LG", "Android", "blub");
+            hardwareModelService.add("Nexus 7", "Tablet", "16 GB", "200€", "Asus", "Android", "blib");
+        }
+
+        if(lendingService.all().size() == 0) {
+            UserManager userManager = ComponentAccessor.getUserManager();
+            HardwareModel model = hardwareModelService.all().get(0);
+            Device device1 = deviceService.add(model, "imei 1", "serial 1", "inventory 1", "received 1", new Date());
+            Device device2 = deviceService.add(model, "imei 2", "serial 2", "inventory 2", "received 2", new Date());
+            Device device3 = deviceService.add(model, "imei 3", "serial 3", "inventory 3", "received 3", new Date());
+
+            String userKey = "user key";
+            for(ApplicationUser user : userManager.getAllApplicationUsers()) {
+                userKey = user.getKey();
+            }
+
+            Lending lending1 = lendingService.add(device1, userKey, "purpose 1", "comment 1", new Date());
+            lending1.setEnd(new Date());
+            Lending lending2 = lendingService.add(device2, userKey, "purpose 2", "comment 2", new Date());
+            Lending lending3 = lendingService.add(device3, userKey, "purpose 3", "comment 3", new Date());
+        }
+
+        if(lendingService.all().size() == 3) {
+            lendingService.bringBack(lendingService.all().get(0), "back purpose 1", "back comment 1", new Date());
+        }
+
+
         final PrintWriter w = res.getWriter();
         w.write("<h1>Todos</h1>");
 
@@ -54,7 +91,15 @@ public class BlubTodoServlet extends HttpServlet {
 
         for (HardwareModel hardwareModel : hardwareModelService.all()) // (2)
         {
-            w.printf("<li>%s, %s</li>", hardwareModel.getName(), hardwareModel.getTypeOfDevice());
+            JsonHardwareModel jsonHardwareModel = null;
+            try {
+                jsonHardwareModel = new JsonHardwareModel(hardwareModel, lendingService);
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            w.printf("<li>%s, %s</li>", jsonHardwareModel.getName(), jsonHardwareModel.getTypeOfDevice());
         }
 
         w.write("</ol>");
@@ -64,8 +109,7 @@ public class BlubTodoServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException
-    {
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         final String name = req.getParameter("task");
         final String producer = req.getParameter("producer");
         hardwareModelService.add(name, producer, null, null, null, null, null);

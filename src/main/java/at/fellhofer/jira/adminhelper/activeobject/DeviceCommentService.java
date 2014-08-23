@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package at.fellhofer.jira.adminhelper.activeobject.service;
+package at.fellhofer.jira.adminhelper.activeobject;
 
-import at.fellhofer.jira.adminhelper.activeobject.entity.HardwareModel;
 import com.atlassian.activeobjects.tx.Transactional;
 
 import java.util.List;
 
 @Transactional
-public interface HardwareModelService {
-    HardwareModel add(String name, String typeOfDevice, String version, String price, String producer, String operationSystem, String articleNumber);
-
-    List<HardwareModel> all();
+public interface DeviceCommentService {
+    List<DeviceComment> all();
 }

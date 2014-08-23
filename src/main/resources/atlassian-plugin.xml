@@ -94,7 +94,14 @@
         <url-pattern>/todo/list</url-pattern>
     </servlet>
 
-    <component key="hardwareModel" class="at.fellhofer.jira.adminhelper.activeobject.service.HardwareModelServiceImpl"/>
+    <component key="device" class="at.fellhofer.jira.adminhelper.activeobject.DeviceServiceImpl"/>
+    <component key="deviceComments" class="at.fellhofer.jira.adminhelper.activeobject.DeviceCommentServiceImpl"/>
+    <component key="hardwareModel" class="at.fellhofer.jira.adminhelper.activeobject.HardwareModelServiceImpl"/>
+    <component key="lending" class="at.fellhofer.jira.adminhelper.activeobject.LendingServiceImpl"/>
+    <component key="operatingSystem" class="at.fellhofer.jira.adminhelper.activeobject.OperatingSystemServiceImpl"/>
+    <component key="producer" class="at.fellhofer.jira.adminhelper.activeobject.ProducerServiceImpl"/>
+    <component key="typeOfDevice" class="at.fellhofer.jira.adminhelper.activeobject.TypeOfDeviceServiceImpl"/>
+
 
     <!-- import from the product container -->
     <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties"/>
@@ -123,7 +130,13 @@
 
     <ao key="ao-module">
         <description>The module configuring the Active Objects service used by this plugin</description>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.entity.HardwareModel</entity>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.Device</entity>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.DeviceComment</entity>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.HardwareModel</entity>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.Lending</entity>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.OperatingSystem</entity>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.Producer</entity>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.TypeOfDevice</entity>
     </ao>
 
     <web-section key="admin-helper-config-section" location="admin_plugins_menu">

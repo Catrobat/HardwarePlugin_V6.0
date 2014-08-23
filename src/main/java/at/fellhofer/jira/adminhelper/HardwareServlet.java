@@ -29,24 +29,6 @@ import java.io.IOException;
 public class HardwareServlet extends HelperServlet {
 
     private final TemplateRenderer renderer;
-    private final String dialogContent = "<form class=\"aui\">\n" +
-            "        <p>Are you sure to delete this Hardware Model?</p>\n" +
-            "\n" +
-            "        <p>All allocated devices need to be moved to another Hardware Model.</p>\n" +
-            "        <fieldset>\n" +
-            "            <div class=\"field-group\">\n" +
-            "                <label for=\"dBase\">Move to</label>\n" +
-            "                <select class=\"select\" id=\"dBase\" name=\"dBase\" title=\"database select\">\n" +
-            "                    <option>Select</option>\n" +
-            "                    <optgroup label=\"Nexus 4\">\n" +
-            "                        <option>8 GB</option>\n" +
-            "                        <option>16 GB</option>\n" +
-            "                    </optgroup>\n" +
-            "                    <option>Nexus 7</option>\n" +
-            "                </select>\n" +
-            "            </div>\n" +
-            "        </fieldset>\n" +
-            "    </form>";
 
     public HardwareServlet(UserManager userManager, LoginUriProvider loginUriProvider, TemplateRenderer renderer, WebSudoManager webSudoManager) {
         super(userManager, loginUriProvider, webSudoManager);

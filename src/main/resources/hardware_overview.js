@@ -16,6 +16,72 @@
 
 "use strict";
 
+function populateOverviewTable(hardwareList) {
+    var tableBody = "";
+
+    for (var i = 0; i < hardwareList.length; i++) {
+        tableBody += "<tr>\n" +
+            "<td>" + hardwareList[i].name + "</td>\n" +
+            "<td>" + hardwareList[i].typeOfDevice + "</td>\n" +
+            "<td>" + hardwareList[i].operatingSystem + "</td>\n" +
+            "<td>" + hardwareList[i].available + "/" + hardwareList[i].sumOfDevices + "</td>\n" +
+            "<td><a class=\"lending_out\" id=\"" + hardwareList[i].ID + "\" href=\"#\">Lending out</a></td>\n" +
+            "</tr>";
+    }
+
+    AJS.$("#table-overview").append(tableBody);
+    AJS.$("#table-overview").trigger("update");
+
+    AJS.$(".lending_out").click(function (e) {
+        e.preventDefault();
+
+        var dialog = createLendoutDialog(e.target.id);
+        dialog.gotoPage(0);
+        dialog.gotoPanel(0);
+        dialog.show();
+    });
+}
+
+function populateLentOutTable(hardwareList) {
+    var tableBody = "";
+
+    for (var i = 0; i < hardwareList.length; i++) {
+        var currentlyLentOutSince = new Date(hardwareList[i].currentlyLentOutSince);
+        tableBody += "<tr>\n"+
+            "<td>" + hardwareList[i].hardwareModelName + "</td>\n"+
+            "<td>" + hardwareList[i].serialNumber + "</td>\n"+
+            "<td>" + hardwareList[i].imei + "</td>\n"+
+            "<td>" + hardwareList[i].inventoryNumber + "</td>\n"+
+            "<td>" + hardwareList[i].currentlyLentOutFrom + "</td>\n"+
+            "<td>" + currentlyLentOutSince.toISOString().split("T")[0] + "</td>\n"+
+            "<td><a class=\"device_details\" id=\"" + hardwareList[i].ID + "\" href=\"#\">Details</a></td>\n"+
+            "<td><a class=\"device_return\" id=\"" + hardwareList[i].ID + "\" href=\"#\">Return</a></td>\n"+
+            "</tr>";
+    }
+
+    AJS.$("#table-lent-out").append(tableBody);
+    AJS.$("#table-lent-out").trigger("update");
+
+    AJS.$(".device_return").click(function (e) {
+        e.preventDefault();
+
+        var dialog = createReturnDialog();
+        dialog.gotoPage(0);
+        dialog.gotoPanel(0);
+        dialog.show();
+    });
+
+    AJS.$(".device_details").click(function (e) {
+        e.preventDefault();
+
+        var dialog = createDeviceDetailDialog();
+        dialog.gotoPage(0);
+        dialog.gotoPanel(0);
+        dialog.show();
+    });
+}
+
+//TODO pimp this dialog
 function createLendoutDialog() {
     var dialog = new AJS.Dialog({
         width: 600,
@@ -445,39 +511,12 @@ function createDeviceDetailDialog() {
 AJS.toInit(function () {
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
 
-    AJS.$(".lending_out").click(function (e) {
-        e.preventDefault();
-
-        var dialog = createLendoutDialog();
-        dialog.gotoPage(0);
-        dialog.gotoPanel(0);
-        dialog.show();
-    });
-
-    AJS.$(".device_return").click(function (e) {
-        e.preventDefault();
-
-        var dialog = createReturnDialog();
-        dialog.gotoPage(0);
-        dialog.gotoPanel(0);
-        dialog.show();
-    });
-
-    AJS.$(".device_details").click(function (e) {
-        e.preventDefault();
-
-        var dialog = createDeviceDetailDialog();
-        dialog.gotoPage(0);
-        dialog.gotoPanel(0);
-        dialog.show();
-    });
-
     AJS.$("#create").submit(function (e) {
         e.preventDefault();
         alert(e.attr('name'));
     });
 
-    AJS.$("#new_device").click(function(e) {
+    AJS.$("#new_device").click(function (e) {
         e.preventDefault();
 
         var dialog = createNewDeviceDialog();
@@ -486,7 +525,7 @@ AJS.toInit(function () {
         dialog.show();
     });
 
-    AJS.$("#new_model,.edit_model").click(function(e) {
+    AJS.$("#new_model,.edit_model").click(function (e) {
         e.preventDefault();
 
         var dialog = createNewHardwareDialog();
@@ -495,7 +534,7 @@ AJS.toInit(function () {
         dialog.show();
     });
 
-    AJS.$(".remove_model").click(function(e) {
+    AJS.$(".remove_model").click(function (e) {
         e.preventDefault();
 
         var dialog = createRemoveModelDialog();
@@ -504,7 +543,27 @@ AJS.toInit(function () {
         dialog.show();
     });
 
-    AJS.$("#date-picker").datePicker({
-        overrideBrowserDefault: true
+    AJS.$.ajax({
+        url: baseUrl + "/rest/admin-helper/1.0/hardware/getHardwareList",
+        type: "GET",
+        success: function (hardwareList) {
+            populateOverviewTable(hardwareList);
+        },
+        error: function(error) {
+            // TODO real error message
+            alert("Error: " + error.responseText);
+        }
+    });
+
+    AJS.$.ajax({
+        url: baseUrl + "/rest/admin-helper/1.0/hardware/getLentOutList",
+        type: "GET",
+        success: function (hardwareList) {
+            populateLentOutTable(hardwareList);
+        },
+        error: function(error) {
+            // TODO real error message
+            alert("Error: " + error.responseText);
+        }
     });
 });

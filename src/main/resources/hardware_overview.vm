@@ -25,7 +25,7 @@
 <div class="aui-tabs horizontal-tabs" id="tabs-example1">
 <ul class="tabs-menu">
     <li class="menu-item active-tab">
-        <a href="#tabs-example-first"><strong>Overview</strong></a>
+        <a href="#tabs-overview"><strong>Overview</strong></a>
     </li>
     <li class="menu-item">
         <a href="#tabs-example-second"><strong>Lended Out</strong></a>
@@ -37,9 +37,9 @@
         <a href="#tabs-example-forth"><strong>Hardware Management</strong></a>
     </li>
 </ul>
-<div class="tabs-pane active-pane" id="tabs-example-first">
+<div class="tabs-pane active-pane" id="tabs-overview">
     <h3>Overview</h3>
-    <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
+    <table id="table-overview" class="aui aui-table-interactive aui-table-sortable">
         <thead>
         <tr>
             <th class="aui-table-column-issue-key">Name</th>
@@ -49,7 +49,8 @@
             <th class="aui-table-column-unsortable">Lend Device Out</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody id="table-overview-body">
+        #*
         <tr>
             <td>Nexus 7</td>
             <td>Tablet</td>
@@ -64,11 +65,12 @@
             <td>1/16</td>
             <td><a class="lending_out" href="#">Lending out</a></td>
         </tr>
+        *#
         </tbody>
     </table>
 </div>
 <div class="tabs-pane" id="tabs-example-second">
-    <h3>Lended Out</h3>
+    <h3>Lent Out</h3>
     <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
         <thead>
         <tr>
@@ -76,13 +78,14 @@
             <th>Serialnumber</th>
             <th>IMEI</th>
             <th>Inventorynumber</th>
-            <th>Lended out from</th>
-            <th>Lended out since</th>
+            <th>Lent out from</th>
+            <th>Lent out since</th>
             <th class="aui-table-column-unsortable">Details</th>
             <th class="aui-table-column-unsortable">Return Device</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody id="table-lent-out">
+        #*
         <tr>
             <td>Nexus 7</td>
             <td>302KPRW062238</td>
@@ -103,6 +106,7 @@
             <td><a class="device_details" href="#">Details</a></td>
             <td><a class="device_return" href="#">Return</a></td>
         </tr>
+        *#
         </tbody>
     </table>
 </div>
