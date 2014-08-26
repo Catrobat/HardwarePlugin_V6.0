@@ -22,7 +22,7 @@
     $webResourceManager.requireResource("at.fellhofer.jira.AdminHelper:hardware-resources")
 </head>
 <body>
-<div class="aui-tabs horizontal-tabs" id="tabs-example1">
+<div ng-app="adminHelperApp" ng-controller="hardwareController" class="aui-tabs horizontal-tabs" id="tabs-example1">
 <ul class="tabs-menu">
     <li class="menu-item active-tab">
         <a href="#tabs-overview"><strong>Overview</strong></a>
@@ -300,5 +300,6 @@
 *#
 </div>
 <!-- .aui-tabs -->
+</div>
 </body>
 </html>
