@@ -22,6 +22,7 @@ function populateOverviewTable(hardwareList) {
     for (var i = 0; i < hardwareList.length; i++) {
         tableBody += "<tr>\n" +
             "<td>" + hardwareList[i].name + "</td>\n" +
+            "<td>" + hardwareList[i].version + "</td>\n" +
             "<td>" + hardwareList[i].typeOfDevice + "</td>\n" +
             "<td>" + hardwareList[i].operatingSystem + "</td>\n" +
             "<td>" + hardwareList[i].available + "/" + hardwareList[i].sumOfDevices + "</td>\n" +
@@ -29,17 +30,8 @@ function populateOverviewTable(hardwareList) {
             "</tr>";
     }
 
-    AJS.$("#table-overview").append(tableBody);
+    AJS.$("#table-overview").html(tableBody);
     AJS.$("#table-overview").trigger("update");
-
-    AJS.$(".lending_out").click(function (e) {
-        e.preventDefault();
-
-        var dialog = createLendoutDialog(e.target.id);
-        dialog.gotoPage(0);
-        dialog.gotoPanel(0);
-        dialog.show();
-    });
 }
 
 function populateLentOutTable(hardwareList) {
@@ -47,61 +39,121 @@ function populateLentOutTable(hardwareList) {
 
     for (var i = 0; i < hardwareList.length; i++) {
         var currentlyLentOutSince = new Date(hardwareList[i].currentlyLentOutSince);
-        tableBody += "<tr>\n"+
-            "<td>" + hardwareList[i].hardwareModelName + "</td>\n"+
-            "<td>" + hardwareList[i].serialNumber + "</td>\n"+
-            "<td>" + hardwareList[i].imei + "</td>\n"+
-            "<td>" + hardwareList[i].inventoryNumber + "</td>\n"+
-            "<td>" + hardwareList[i].currentlyLentOutFrom + "</td>\n"+
-            "<td>" + currentlyLentOutSince.toISOString().split("T")[0] + "</td>\n"+
-            "<td><a class=\"device_details\" id=\"" + hardwareList[i].ID + "\" href=\"#\">Details</a></td>\n"+
-            "<td><a class=\"device_return\" id=\"" + hardwareList[i].ID + "\" href=\"#\">Return</a></td>\n"+
+        tableBody += "<tr>\n" +
+            "<td>" + hardwareList[i].hardwareModelName + "</td>\n" +
+            "<td>" + hardwareList[i].serialNumber + "</td>\n" +
+            "<td>" + hardwareList[i].imei + "</td>\n" +
+            "<td>" + hardwareList[i].inventoryNumber + "</td>\n" +
+            "<td>" + hardwareList[i].currentlyLentOutFrom + "</td>\n" +
+            "<td>" + currentlyLentOutSince.toISOString().split("T")[0] + "</td>\n" +
+            "<td><a class=\"device_details\" id=\"" + hardwareList[i].ID + "\" href=\"#\">Details</a></td>\n" +
+            "<td><a class=\"device_return\" id=\"" + hardwareList[i].ID + "\" href=\"#\">Return</a></td>\n" +
             "</tr>";
     }
 
-    AJS.$("#table-lent-out").append(tableBody);
+    AJS.$("#table-lent-out").html(tableBody);
     AJS.$("#table-lent-out").trigger("update");
+}
 
-    AJS.$(".device_return").click(function (e) {
-        e.preventDefault();
+function populateSortedOutTable(deviceList) {
+    var tableBody = "";
 
-        var dialog = createReturnDialog();
-        dialog.gotoPage(0);
-        dialog.gotoPanel(0);
-        dialog.show();
-    });
+    for (var i = 0; i < deviceList.length; i++) {
+        var sortedOut = new Date(deviceList[i].sortedOutDate);
+        tableBody += "<tr>\n" +
+            "<td>" + deviceList[i].hardwareModelName + "</td>\n" +
+            "<td>" + deviceList[i].serialNumber + "</td>\n" +
+            "<td>" + deviceList[i].imei + "</td>\n" +
+            "<td>" + deviceList[i].inventoryNumber + "</td>\n" +
+            "<td>" + sortedOut.toISOString().split("T")[0] + "</td>\n" +
+            "<td><a class=\"device_details\" id=\"" + deviceList[i].ID + "\" href=\"#\">Details</a></td>\n" +
+            "</tr>";
+    }
 
-    AJS.$(".device_details").click(function (e) {
-        e.preventDefault();
+    AJS.$("#table-sorted-out").html(tableBody);
+    AJS.$("#table-sorted-out").trigger("update");
+}
 
-        var dialog = createDeviceDetailDialog();
-        dialog.gotoPage(0);
-        dialog.gotoPanel(0);
-        dialog.show();
+function populateHardwareManagementTable(hardwareList) {
+    var tableBody = "";
+
+    for (var i = 0; i < hardwareList.length; i++) {
+        tableBody += "<tr>\n" +
+            "<td>" + hardwareList[i].name + "</td>\n" +
+            "<td>" + hardwareList[i].typeOfDevice + "</td>\n" +
+            "<td>" + hardwareList[i].operatingSystem + "</td>\n" +
+            "<td>" + hardwareList[i].sumOfDevices + "</td>\n" +
+            "<td><a class=\"edit_model\" id=\"" + hardwareList[i].ID + "\" href=\"#\">Edit</a></td>\n" +
+            "<td><a class=\"remove_model\" id=\"" + hardwareList[i].ID + "\" href=\"#\">Remove</a></td>\n" +
+            "</tr>";
+    }
+
+    AJS.$("#table-management").html(tableBody);
+    AJS.$("#table-management").trigger("update");
+}
+
+function showLendoutDialog(baseUrl, hardwareId) {
+    alert("ID: " + hardwareId);
+    AJS.$.ajax({
+        url: baseUrl + "/rest/admin-helper/1.0/hardware/hardwares/" + hardwareId + "/devices/available",
+        type: "GET",
+        success: function (deviceList) {
+            showLendOutDialogAjax(hardwareId, deviceList)
+        },
+        error: function (error) {
+            // TODO real error message
+            alert("Error: " + error.responseText);
+        }
     });
 }
 
-//TODO pimp this dialog
-function createLendoutDialog() {
+function showLendOutDialogAjax(hardwareId, deviceList) {
     var dialog = new AJS.Dialog({
-        width: 600,
-        height: 450,
-        id: "example-dialog",
+        width: 840,
+        height: 600,
+        id: "lend-out-dialog",
         closeOnOutsideClick: true
     });
 
-    var content = "<form action=\"#\" method=\"post\" id=\"d\" class=\"aui\">\n" +
+    var selectedDeviceId = 0;
+
+    var contentDevices = "<table class=\"aui aui-table-interactive aui-table-sortable\">\n" +
+        "<thead>\n" +
+        "<tr>\n" +
+        "<th>Serialnumber</th>\n" +
+        "<th>IMEI</th>\n" +
+        "<th>Inventorynumber</th>\n" +
+        "<th class=\"aui-table-column-unsortable\">Choose</th>\n" +
+        "</tr>\n" +
+        "</thead>\n" +
+        "<tbody id=\"table-lent-out\">\n";
+    deviceList.map = [];
+    for (var i = 0; i < deviceList.length; i++) {
+        contentDevices += "<tr>\n" +
+            "<td class=\"serial\">" + deviceList[i].serialNumber + "</td>\n" +
+            "<td class=\"imei\">" + deviceList[i].imei + "</td>\n" +
+            "<td class=\"inventory\">" + deviceList[i].inventoryNumber + "</td>\n" +
+            "<td><a class=\"choose\" id=\"" + deviceList[i].ID + "\" href=\"#\">Choose...</a></td>\n" +
+            "</tr>\n";
+
+        deviceList.map[deviceList[i].ID] = i;
+    }
+    contentDevices += "</tbody>\n" +
+        "</table>";
+
+    var contentDetails = "<form action=\"#\" method=\"post\" id=\"d\" class=\"aui\">\n" +
         "    <fieldset>\n" +
-        "        <legend><span>Dropdowns and multi select</span></legend>\n" +
         "        <div class=\"field-group\">\n" +
-        "            <label for=\"dBase\">Device<span class=\"aui-icon icon-required\"> required</span></label>\n" +
-        "            <select class=\"select\" id=\"dBase\" name=\"dBase\" title=\"database select\">\n" +
-        "                <option>Select</option>\n" +
-        "                <option>SSN 1</option>\n" +
-        "                <option>SSN 2</option>\n" +
-        "                <option>SSN 3</option>\n" +
-        "                <option>SSN 4</option>\n" +
-        "            </select>\n" +
+        "            <label for=\"serial\">Serialnumber</label>\n" +
+        "            <input class=\"text\" type=\"text\" id=\"serial\" name=\"serial\" title=\"serial\" disabled>\n" +
+        "        </div>\n" +
+        "        <div class=\"field-group\">\n" +
+        "            <label for=\"imei\">IMEI</label>\n" +
+        "            <input class=\"text\" type=\"text\" id=\"imei\" name=\"imei\" title=\"imei\" disabled>\n" +
+        "        </div>\n" +
+        "        <div class=\"field-group\">\n" +
+        "            <label for=\"inventory\">Inventorynumber</label>\n" +
+        "            <input class=\"text\" type=\"text\" id=\"inventory\" name=\"inventory\" title=\"inventory\" disabled>\n" +
         "        </div>\n" +
         "        <div class=\"field-group\">\n" +
         "            <label for=\"d-fname\">User<span class=\"aui-icon icon-required\"> required</span></label>\n" +
@@ -127,16 +179,34 @@ function createLendoutDialog() {
         "</form>";
 
     dialog.addHeader("Lending Out");
-    dialog.addPanel("Panel 1", content, "panel-body");
+    dialog.addPanel("Choose device", contentDevices, "panel-body-device");
+
+    dialog.addPanel("Details", contentDetails, "panel-body-details");
 
     dialog.addButton("Save", function (dialog) {
-        dialog.hide();
+        dialog.remove();
     });
     dialog.addLink("Cancel", function (dialog) {
-        dialog.hide();
+        dialog.remove();
     }, "#");
 
-    return dialog;
+    AJS.$(document).on("click", ".choose", function (e) {
+        e.preventDefault();
+
+        dialog.gotoPanel(1);
+
+        AJS.$("#lend-out-dialog").find("a#" + selectedDeviceId).closest("tr").css("background-color", "");
+        selectedDeviceId = e.target.id;
+        AJS.$("#lend-out-dialog").find("a#" + selectedDeviceId).closest("tr").css("background-color", "#e0e0e0");
+
+        AJS.$("#serial").val(deviceList[deviceList.map[selectedDeviceId]].serialNumber);
+        AJS.$("#imei").val(deviceList[deviceList.map[selectedDeviceId]].imei);
+        AJS.$("#inventory").val(deviceList[deviceList.map[selectedDeviceId]].inventoryNumber);
+    });
+
+    dialog.gotoPage(0);
+    dialog.gotoPanel(0);
+    dialog.show();
 }
 
 function createReturnDialog() {
@@ -253,7 +323,23 @@ function createNewHardwareDialog() {
     return dialog;
 }
 
-function createNewDeviceDialog() {
+function showNewDeviceDialog(baseUrl) {
+    AJS.$.ajax({
+        url: baseUrl + "/rest/admin-helper/1.0/hardware/hardwares/",
+        type: "GET",
+        success: function (deviceList) {
+            showNewDeviceDialogAjax(baseUrl, deviceList)
+        },
+        error: function (error) {
+            AJS.messages.error({
+                title: "Error!",
+                body: error.responseText
+            });
+        }
+    });
+}
+
+function showNewDeviceDialogAjax(baseUrl, hardwareList) {
     var dialog = new AJS.Dialog({
         width: 600,
         height: 500,
@@ -261,69 +347,123 @@ function createNewDeviceDialog() {
         closeOnOutsideClick: true
     });
 
-    var content = "<form action=\"#\" method=\"post\" id=\"d\" class=\"aui\">\n" +
-        "    <fieldset>\n" +
-        "        <div class=\"field-group\">\n" +
-        "            <label for=\"dBase\">Hardware Model<span class=\"aui-icon icon-required\"> required</span></label>\n" +
-        "            <select class=\"select\" id=\"dBase\" name=\"dBase\" title=\"database select\">\n" +
-        "                <option>Select</option>\n" +
-        "                <optgroup label=\"Nexus 4\">\n" +
-        "                    <option>8 GB</option>\n" +
-        "                    <option>16 GB</option>\n" +
-        "                </optgroup>\n" +
-        "                <option>Nexus 7</option>\n" +
-        "            </select>\n" +
-        "        </div>\n" +
+    var content = "<div id=\"dialog_error\"></div><form action=\"#\" method=\"post\" id=\"d\" class=\"aui\">\n" +
+        "<fieldset>\n" +
+        "<div class=\"field-group\">\n" +
+        "<label for=\"hardware_selection\">Hardware Model<span class=\"aui-icon icon-required\"> required</span></label>\n" +
+        "<select class=\"select\" id=\"hardware_selection\" name=\"hardware\" title=\"hardware\">\n" +
+        "<option>Select</option>\n";
+    for (var i = 0; i < hardwareList.length; i++) {
+        content += "<option value=\"" + hardwareList[i].ID + "\">" + hardwareList[i].name;
+        if (hardwareList[i].version) {
+            content += " (" + hardwareList[i].version + ")";
+        }
+        content += "</option>\n";
+    }
+    content += "</select>\n" +
+        "<div class=\"error\" id=\"select_hardware_error\">Select a hardware model</div>\n" +
+        "</div>\n" +
         "\n" +
-        "        <div class=\"field-group\">\n" +
-        "            <label for=\"d-fname\">Serial number<span class=\"aui-icon icon-required\"> required</span></label>\n" +
-        "            <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
+        "<div class=\"field-group\">\n" +
+        "<label for=\"serial\">Serial number</label>\n" +
+        "<input class=\"text device_id\" type=\"text\" id=\"serial\" name=\"serial\" title=\"serial number\">\n" +
+        "</div>\n" +
         "\n" +
-        "            <div class=\"description\">Device unique number to identify the single device</div>\n" +
-        "        </div>\n" +
+        "<div class=\"field-group\">\n" +
+        "<label for=\"imei\">IMEI</label>\n" +
+        "<input class=\"text device_id\" type=\"text\" id=\"imei\" name=\"imei\" title=\"imei\">\n" +
+        "</div>\n" +
         "\n" +
-        "        <div class=\"field-group\">\n" +
-        "            <label for=\"d-fname\">IMEI</label>\n" +
-        "            <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
-        "        </div>\n" +
+        "<div class=\"field-group\">\n" +
+        "<label for=\"inventory\">Inventory number</label>\n" +
+        "<input class=\"text device_id\" type=\"text\" id=\"inventory\" name=\"inventory\" title=\"inventory number\">\n" +
+        "<div class=\"error\" id=\"unique_id\">At least one unique identifier must be filled out (Serial/IMEI/Inventory)</div>\n" +
+        "</div>\n" +
         "\n" +
-        "        <div class=\"field-group\">\n" +
-        "            <label for=\"d-fname\">Inventory number</label>\n" +
-        "            <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
-        "        </div>\n" +
+        "<div class=\"field-group\">\n" +
+        "<label for=\"received_date\">Received date</label>\n" +
+        "<input class=\"text\" type=\"date\" id=\"received_date\" name=\"received_date\"/>\n" +
+        "</div>\n" +
         "\n" +
-        "        <div class=\"field-group\">\n" +
-        "            <label for=\"d-fname\">Received date</label>\n" +
-        "            <input class=\"text\" type=\"date\" id=\"date-picker\" name=\"d-fname\"/>\n" +
-        "        </div>\n" +
+        "<div class=\"field-group\">\n" +
+        "<label for=\"received_from\">Received from</label>\n" +
+        "<input class=\"text\" type=\"text\" id=\"received_from\" name=\"received_from\" title=\"received from\">\n" +
+        "<div class=\"description\">Main Producer or brand</div>\n" +
+        "</div>\n" +
         "\n" +
-        "        <div class=\"field-group\">\n" +
-        "            <label for=\"d-fname\">Received by</label>\n" +
-        "            <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
-        "\n" +
-        "            <div class=\"description\">Main Producer or brand</div>\n" +
-        "        </div>\n" +
-        "\n" +
-        "        <div class=\"field-group\">\n" +
-        "            <label for=\"d-fname\">Useful life of asset</label>\n" +
-        "            <input class=\"text\" type=\"text\" id=\"d-fname\" name=\"d-fname\" title=\"first name\">\n" +
-        "\n" +
-        "            <div class=\"description\">Amount of time when this device is obsolete</div>\n" +
-        "        </div>\n" +
-        "    </fieldset>\n" +
+        "<div class=\"field-group\">\n" +
+        "<label for=\"life_of_asset\">Useful life of asset</label>\n" +
+        "<input class=\"text\" type=\"text\" id=\"life_of_asset\" name=\"life_of_asset\" title=\"life of asset\">\n" +
+        "<div class=\"description\">Amount of time when this device is obsolete</div>\n" +
+        "</div>\n" +
+        "</fieldset>\n" +
         "</form>";
 
     dialog.addHeader("Create New Device");
     dialog.addPanel("Panel 1", content, "panel-body");
 
     dialog.addButton("Save", function (dialog) {
-        dialog.hide();
-    });
+        if ((AJS.$("#serial").val() || AJS.$("#imei").val() || AJS.$("#inventory").val()) && AJS.$("#hardware_selection").val()) {
+            var device = {
+                serialNumber: AJS.$("#serial").val(),
+                imei: AJS.$("#imei").val(),
+                inventoryNumber: AJS.$("#inventory").val(),
+                receivedDate: new Date(AJS.$("#received_date").val()),
+                receivedFrom: AJS.$("#received_from").val(),
+                usefulLiveOfAsset: AJS.$("#life_of_asset").val()
+            }
+            alert("device: " + JSON.stringify(device));
+            AJS.$.ajax({
+                url: baseUrl + "/rest/admin-helper/1.0/hardware/hardwares/" + AJS.$("#hardware_selection").val() + "/devices",
+                type: "PUT",
+                contentType: "application/json",
+                data: JSON.stringify(device),
+                dateType: "json",
+                success: function () {
+                    AJS.messages.success({
+                        title: "Success!",
+                        body: "Device added successfully"
+                    });
+                    fillOutAllTables(baseUrl);
+                },
+                error: function (error) {
+                    AJS.messages.error({
+                        title: "Error!",
+                        body: error.responseText
+                    });
+                }
+            });
+            dialog.remove();
+        } else {
+            AJS.messages.error("#dialog_error", {
+                title: "Error!",
+                body: "Please fill out above fields"
+            });
+        }
+    }, "dialog_submit_button");
     dialog.addLink("Cancel", function (dialog) {
-        dialog.hide();
+        dialog.remove();
     }, "#");
 
-    return dialog;
+    dialog.gotoPage(0);
+    dialog.gotoPanel(0);
+    dialog.show();
+
+    AJS.$(".device_id").change(function () {
+        if (AJS.$("#serial").val() || AJS.$("#imei").val() || AJS.$("#inventory").val()) {
+            AJS.$("#unique_id").hide();
+        } else {
+            AJS.$("#unique_id").show();
+        }
+    });
+
+    AJS.$("#hardware_selection").change(function () {
+        if (AJS.$(this).val()) {
+            AJS.$("#select_hardware_error").hide();
+        } else {
+            AJS.$("#select_hardware_error").show();
+        }
+    });
 }
 
 function createRemoveModelDialog() {
@@ -510,22 +650,74 @@ function createDeviceDetailDialog() {
 
 AJS.toInit(function () {
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
+    fillOutAllTables(baseUrl);
+    handleEvents(baseUrl);
+});
 
-    AJS.$("#create").submit(function (e) {
-        e.preventDefault();
-        alert(e.attr('name'));
+function fillOutAllTables(baseUrl) {
+    AJS.$.ajax({
+        url: baseUrl + "/rest/admin-helper/1.0/hardware/hardwares",
+        type: "GET",
+        success: function (hardwareList) {
+            populateOverviewTable(hardwareList);
+            populateHardwareManagementTable(hardwareList);
+        },
+        error: function (error) {
+            // TODO real error message
+            alert("Error: " + error.responseText);
+        }
     });
 
-    AJS.$("#new_device").click(function (e) {
+    AJS.$.ajax({
+        url: baseUrl + "/rest/admin-helper/1.0/hardware/devices/ongoing-lendings",
+        type: "GET",
+        success: function (deviceList) {
+            populateLentOutTable(deviceList);
+        },
+        error: function (error) {
+            // TODO real error message
+            alert("Error: " + error.responseText);
+        }
+    });
+
+    AJS.$.ajax({
+        url: baseUrl + "/rest/admin-helper/1.0/hardware/devices/sorted-out",
+        type: "GET",
+        success: function (deviceList) {
+            populateSortedOutTable(deviceList);
+        },
+        error: function (error) {
+            // TODO real error message
+            alert("Error: " + error.responseText);
+        }
+    });
+}
+
+function handleEvents(baseUrl) {
+    AJS.$(document).on("click", ".lending_out", function (e) {
+        e.preventDefault();
+        showLendoutDialog(baseUrl, e.target.id);
+    });
+
+    AJS.$(document).on("click", ".device_return", function (e) {
         e.preventDefault();
 
-        var dialog = createNewDeviceDialog();
+        var dialog = createReturnDialog();
         dialog.gotoPage(0);
         dialog.gotoPanel(0);
         dialog.show();
     });
 
-    AJS.$("#new_model,.edit_model").click(function (e) {
+    AJS.$(document).on("click", ".device_details", function (e) {
+        e.preventDefault();
+
+        var dialog = createDeviceDetailDialog();
+        dialog.gotoPage(0);
+        dialog.gotoPanel(0);
+        dialog.show();
+    });
+
+    AJS.$(document).on("click", ".edit_model, #new_model", function (e) {
         e.preventDefault();
 
         var dialog = createNewHardwareDialog();
@@ -534,7 +726,7 @@ AJS.toInit(function () {
         dialog.show();
     });
 
-    AJS.$(".remove_model").click(function (e) {
+    AJS.$(document).on("click", ".remove_model", function (e) {
         e.preventDefault();
 
         var dialog = createRemoveModelDialog();
@@ -543,27 +735,8 @@ AJS.toInit(function () {
         dialog.show();
     });
 
-    AJS.$.ajax({
-        url: baseUrl + "/rest/admin-helper/1.0/hardware/getHardwareList",
-        type: "GET",
-        success: function (hardwareList) {
-            populateOverviewTable(hardwareList);
-        },
-        error: function(error) {
-            // TODO real error message
-            alert("Error: " + error.responseText);
-        }
+    AJS.$("#new_device").click(function (e) {
+        e.preventDefault();
+        showNewDeviceDialog(baseUrl);
     });
-
-    AJS.$.ajax({
-        url: baseUrl + "/rest/admin-helper/1.0/hardware/getLentOutList",
-        type: "GET",
-        success: function (hardwareList) {
-            populateLentOutTable(hardwareList);
-        },
-        error: function(error) {
-            // TODO real error message
-            alert("Error: " + error.responseText);
-        }
-    });
-});
+}

@@ -16,13 +16,12 @@
 
 package at.fellhofer.jira.adminhelper.rest.json;
 
+import at.fellhofer.jira.adminhelper.activeobject.DeviceService;
 import at.fellhofer.jira.adminhelper.activeobject.HardwareModel;
 import at.fellhofer.jira.adminhelper.activeobject.LendingService;
-import at.fellhofer.jira.adminhelper.activeobject.LendingServiceImpl;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
 import java.lang.reflect.InvocationTargetException;
 
 import static org.apache.commons.beanutils.BeanUtils.copyProperties;
@@ -53,14 +52,19 @@ public class JsonHardwareModel {
     public JsonHardwareModel() {
     }
 
-    public JsonHardwareModel(HardwareModel toCopy, LendingService lendingService) throws InvocationTargetException, IllegalAccessException {
-        copyProperties(this, toCopy);
-        setProducer(toCopy.getProducer().getProducerName());
-        setOperatingSystem(toCopy.getOperatingSystem().getOperatingSystemName());
-        setTypeOfDevice(toCopy.getTypeOfDevice().getTypeOfDeviceName());
+    public JsonHardwareModel(HardwareModel toCopy, LendingService lendingService, DeviceService deviceService) {
+        ID = toCopy.getID();
+        name = toCopy.getName();
+        typeOfDevice = toCopy.getTypeOfDevice().getTypeOfDeviceName();
+        version = toCopy.getVersion();
+        price = toCopy.getPrice();
+        producer = toCopy.getProducer().getProducerName();
+        operatingSystem = toCopy.getOperatingSystem().getOperatingSystemName();
+        articleNumber = toCopy.getArticleNumber();
 
-        available = toCopy.getDevices().length - lendingService.currentlyLentOutDevices(toCopy).size();
-        sumOfDevices = toCopy.getDevices().length;
+        sumOfDevices = toCopy.getDevices().length - deviceService.getSortedOutDevicesOfHardware(toCopy.getID()).size();
+        available = sumOfDevices - lendingService.currentlyLentOutDevices(toCopy).size();
+
     }
 
     public int getID() {

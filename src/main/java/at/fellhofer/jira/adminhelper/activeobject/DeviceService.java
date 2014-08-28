@@ -23,7 +23,15 @@ import java.util.List;
 
 @Transactional
 public interface DeviceService {
-    Device add(HardwareModel hardwareModel, String imei, String serialNumber, String inventoryNumber, String receivedBy, Date receivedDate);
+    Device add(HardwareModel hardwareModel, String imei, String serialNumber, String inventoryNumber, String receivedFrom, Date receivedDate, String usefulLifeOfAsset);
 
     List<Device> all();
+
+    Device sortOutDevice(int id, Date sortedOutDate, String sortedOutComment);
+
+    List<Device> getCurrentlyAvailableDevices(int hardwareId);
+
+    List<Device> getSortedOutDevices();
+
+    List<Device> getSortedOutDevicesOfHardware(int hardwareId);
 }

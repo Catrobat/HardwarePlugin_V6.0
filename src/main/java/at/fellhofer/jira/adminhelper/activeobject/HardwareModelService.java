@@ -27,5 +27,7 @@ public interface HardwareModelService {
 
     HardwareModel add(String name, TypeOfDevice typeOfDevice, String version, String price, Producer producer, OperatingSystem operationSystem, String articleNumber);
 
+    HardwareModel get(int id);
+
     List<HardwareModel> all();
 }

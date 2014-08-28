@@ -17,6 +17,7 @@
 package at.fellhofer.jira.adminhelper;
 
 import at.fellhofer.jira.adminhelper.activeobject.*;
+import at.fellhofer.jira.adminhelper.rest.json.JsonDevice;
 import at.fellhofer.jira.adminhelper.rest.json.JsonHardwareModel;
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.user.ApplicationUser;
@@ -28,12 +29,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Calendar;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.apache.commons.beanutils.BeanUtils.copyProperties;
 
 public class BlubTodoServlet extends HttpServlet {
     private final HardwareModelService hardwareModelService;
@@ -48,20 +46,20 @@ public class BlubTodoServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        if(hardwareModelService.all().size() == 0) {
+        if (hardwareModelService.all().size() == 0) {
             hardwareModelService.add("Nexus 4", "Smartphone", "16 GB", "200€", "LG", "Android", "blub");
             hardwareModelService.add("Nexus 7", "Tablet", "16 GB", "200€", "Asus", "Android", "blib");
         }
 
-        if(lendingService.all().size() == 0) {
+        if (lendingService.all().size() == 0) {
             UserManager userManager = ComponentAccessor.getUserManager();
             HardwareModel model = hardwareModelService.all().get(0);
-            Device device1 = deviceService.add(model, "imei 1", "serial 1", "inventory 1", "received 1", new Date());
-            Device device2 = deviceService.add(model, "imei 2", "serial 2", "inventory 2", "received 2", new Date());
-            Device device3 = deviceService.add(model, "imei 3", "serial 3", "inventory 3", "received 3", new Date());
+            Device device1 = deviceService.add(model, "imei 1", "serial 1", "inventory 1", "received 1", new Date(), "2");
+            Device device2 = deviceService.add(model, "imei 2", "serial 2", "inventory 2", "received 2", new Date(), "2");
+            Device device3 = deviceService.add(model, "imei 3", "serial 3", "inventory 3", "received 3", new Date(), "2");
 
             String userKey = "user key";
-            for(ApplicationUser user : userManager.getAllApplicationUsers()) {
+            for (ApplicationUser user : userManager.getAllApplicationUsers()) {
                 userKey = user.getKey();
             }
 
@@ -71,8 +69,11 @@ public class BlubTodoServlet extends HttpServlet {
             Lending lending3 = lendingService.add(device3, userKey, "purpose 3", "comment 3", new Date());
         }
 
-        if(lendingService.all().size() == 3) {
+        if (deviceService.getSortedOutDevices().size() == 0) {
             lendingService.bringBack(lendingService.all().get(0), "back purpose 1", "back comment 1", new Date());
+
+            int id = deviceService.all().get(0).getID();
+            deviceService.sortOutDevice(id, new Date(), "sortedOutComment 1");
         }
 
 
@@ -92,17 +93,21 @@ public class BlubTodoServlet extends HttpServlet {
         for (HardwareModel hardwareModel : hardwareModelService.all()) // (2)
         {
             JsonHardwareModel jsonHardwareModel = null;
-            try {
-                jsonHardwareModel = new JsonHardwareModel(hardwareModel, lendingService);
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-            w.printf("<li>%s, %s</li>", jsonHardwareModel.getName(), jsonHardwareModel.getTypeOfDevice());
+            jsonHardwareModel = new JsonHardwareModel(hardwareModel, lendingService, deviceService);
+            w.printf("<li>%s, %s, %s</li>", jsonHardwareModel.getID(), jsonHardwareModel.getName(), jsonHardwareModel.getTypeOfDevice());
         }
-
         w.write("</ol>");
+
+        w.write("<table><tr><td>hardware</td><td>id</td><td>serial</td><td>received</td><td>sortedout</td></tr>");
+        for (Device device : deviceService.all()) // (2)
+        {
+            JsonDevice jsonDevice = null;
+            jsonDevice = new JsonDevice(device);
+            w.printf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", jsonDevice.getHardwareModelName(), jsonDevice.getID(), jsonDevice.getSerialNumber(), jsonDevice.getReceivedDate(), jsonDevice.getSortedOutDate());
+        }
+        w.write("</table>");
+
+
         w.write("<script language='javascript'>document.forms[0].elements[0].focus();</script>");
 
         w.close();

@@ -44,9 +44,9 @@ public interface Device extends Entity {
 
     void setReceivedDate(Date receivedDate);
 
-    String getReceivedBy();
+    String getReceivedFrom();
 
-    void setReceivedBy(String receivedBy);
+    void setReceivedFrom(String receivedFrom);
 
     String getUsefulLifeOfAsset();
 
@@ -58,7 +58,7 @@ public interface Device extends Entity {
 
     String getSortedOutComment();
 
-    void setSortedOutComment();
+    void setSortedOutComment(String sortedOutComment);
 
     @OneToMany(reverse = "getDevice")
     DeviceComment[] getDeviceComments();

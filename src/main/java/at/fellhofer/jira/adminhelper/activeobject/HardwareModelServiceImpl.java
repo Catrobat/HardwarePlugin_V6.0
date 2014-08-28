@@ -17,6 +17,7 @@
 package at.fellhofer.jira.adminhelper.activeobject;
 
 import com.atlassian.activeobjects.external.ActiveObjects;
+import net.java.ao.Query;
 
 import java.util.Arrays;
 import java.util.List;
@@ -81,6 +82,15 @@ public class HardwareModelServiceImpl implements HardwareModelService {
         hardwareModel.setArticleNumber(articleNumber);
         hardwareModel.save();
         return hardwareModel;
+    }
+
+    @Override
+    public HardwareModel get(int id) {
+        HardwareModel[] hardwareModels = ao.find(HardwareModel.class, Query.select().where("ID = ?", id));
+        if (hardwareModels.length == 1)
+            return hardwareModels[0];
+        else
+            return null;
     }
 
     @Override

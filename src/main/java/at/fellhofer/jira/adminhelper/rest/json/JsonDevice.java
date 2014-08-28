@@ -17,55 +17,69 @@
 package at.fellhofer.jira.adminhelper.rest.json;
 
 import at.fellhofer.jira.adminhelper.activeobject.Device;
-import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.beanutils.converters.DateConverter;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
-
-import static org.apache.commons.beanutils.BeanUtils.copyProperties;
 
 @XmlRootElement
 public class JsonDevice {
+
     @XmlElement
-    int ID;
+    private int ID;
+
     @XmlElement
-    String hardwareModelName;
+    private String hardwareModelName;
+
     @XmlElement
-    String serialNumber;
+    private String serialNumber;
+
     @XmlElement
-    String imei;
+    private String imei;
+
     @XmlElement
-    String inventoryNumber;
-    @XmlElement
-    @XmlJavaTypeAdapter(DateAdapter.class)
-    Date receivedDate;
-    @XmlElement
-    String receivedBy;
-    @XmlElement
-    String usefulLiveOfAsset;
-    @XmlElement
-    @XmlJavaTypeAdapter(DateAdapter.class)
-    Date sortedOutDate;
-    @XmlElement
-    String sortedOutComment;
-    @XmlElement
-    String currentlyLentOutFrom;
+    private String inventoryNumber;
+
     @XmlElement
     @XmlJavaTypeAdapter(DateAdapter.class)
-    Date currentlyLentOutSince;
+    private Date receivedDate;
+
+    @XmlElement
+    private String receivedFrom;
+
+    @XmlElement
+    private String usefulLiveOfAsset;
+
+    @XmlElement
+    @XmlJavaTypeAdapter(DateAdapter.class)
+    private Date sortedOutDate;
+
+    @XmlElement
+    private String sortedOutComment;
+
+    @XmlElement
+    private String currentlyLentOutFrom;
+
+    @XmlElement
+    @XmlJavaTypeAdapter(DateAdapter.class)
+    private Date currentlyLentOutSince;
 
     public JsonDevice() {
 
     }
 
-    public JsonDevice(Device toCopy) throws InvocationTargetException, IllegalAccessException {
-        ConvertUtils.register(new DateConverter(null), Date.class);
-        copyProperties(this, toCopy);
+    public JsonDevice(Device toCopy) {
+        ID = toCopy.getID();
         hardwareModelName = toCopy.getHardwareModel().getName();
+        serialNumber = toCopy.getSerialNumber();
+        imei = toCopy.getImei();
+        inventoryNumber = toCopy.getInventoryNumber();
+        receivedDate = toCopy.getReceivedDate();
+        receivedFrom = toCopy.getReceivedFrom();
+        usefulLiveOfAsset = toCopy.getUsefulLifeOfAsset();
+        sortedOutDate = toCopy.getSortedOutDate();
+        sortedOutComment = toCopy.getSortedOutComment();
     }
 
     public int getID() {
@@ -116,12 +130,12 @@ public class JsonDevice {
         this.receivedDate = receivedDate;
     }
 
-    public String getReceivedBy() {
-        return receivedBy;
+    public String getReceivedFrom() {
+        return receivedFrom;
     }
 
-    public void setReceivedBy(String receivedBy) {
-        this.receivedBy = receivedBy;
+    public void setReceivedFrom(String receivedFrom) {
+        this.receivedFrom = receivedFrom;
     }
 
     public String getUsefulLiveOfAsset() {

@@ -34,7 +34,7 @@
         <dependency>com.atlassian.auiplugin:jquery-ui-other</dependency>
 
         <resource type="i18n" name="i18n" location="at.fellhofer.jira.adminhelper.i18n"/>
-        <resource type="download" name="AdminHelper.css" location="/css/AdminHelper.css"/>
+        <resource type="download" name="admin_helper.css" location="/css/admin_helper.css"/>
         <resource type="download" name="AdminHelper.js" location="/js/AdminHelper.js"/>
         <resource type="download" name="images/" location="/images"/>
 
@@ -64,6 +64,7 @@
         <dependency>com.atlassian.auiplugin:aui-experimental-table-sortable</dependency>
         <dependency>com.atlassian.auiplugin:aui-date-picker</dependency>
         <resource type="download" name="hardware_overview.js" location="js/hardware_overview.js"/>
+        <resource type="download" name="admin_helper.css" location="css/admin_helper.css"/>
     </web-resource>
 
     <!-- publish our component -->

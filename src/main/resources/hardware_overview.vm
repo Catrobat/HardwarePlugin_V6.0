@@ -22,13 +22,16 @@
     $webResourceManager.requireResource("at.fellhofer.jira.AdminHelper:hardware-resources")
 </head>
 <body>
-<div ng-app="adminHelperApp" ng-controller="hardwareController" class="aui-tabs horizontal-tabs" id="tabs-example1">
+<div id="aui-message-bar">
+#* will be filled out by JavaScript *#
+</div>
+<div class="aui-tabs horizontal-tabs" id="tabs-example1">
 <ul class="tabs-menu">
     <li class="menu-item active-tab">
         <a href="#tabs-overview"><strong>Overview</strong></a>
     </li>
     <li class="menu-item">
-        <a href="#tabs-example-second"><strong>Lended Out</strong></a>
+        <a href="#tabs-example-second"><strong>Lent Out</strong></a>
     </li>
     <li class="menu-item">
         <a href="#tabs-example-third"><strong>Sorted Out</strong></a>
@@ -43,6 +46,7 @@
         <thead>
         <tr>
             <th class="aui-table-column-issue-key">Name</th>
+            <th>Version</th>
             <th>Type of Device</th>
             <th>OS</th>
             <th>Available</th>
@@ -50,25 +54,11 @@
         </tr>
         </thead>
         <tbody id="table-overview-body">
-        #*
-        <tr>
-            <td>Nexus 7</td>
-            <td>Tablet</td>
-            <td>Android</td>
-            <td>7/15</td>
-            <td><a class="lending_out" href="#">Lending out</a></td>
-        </tr>
-        <tr>
-            <td>Nexus 4</td>
-            <td>Smartphone</td>
-            <td>Android</td>
-            <td>1/16</td>
-            <td><a class="lending_out" href="#">Lending out</a></td>
-        </tr>
-        *#
+        #* will be filled out by JavaScript *#
         </tbody>
     </table>
 </div>
+
 <div class="tabs-pane" id="tabs-example-second">
     <h3>Lent Out</h3>
     <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
@@ -85,28 +75,7 @@
         </tr>
         </thead>
         <tbody id="table-lent-out">
-        #*
-        <tr>
-            <td>Nexus 7</td>
-            <td>302KPRW062238</td>
-            <td>358240051927168</td>
-            <td>113676</td>
-            <td>Felly</td>
-            <td>2013-08-12</td>
-            <td><a class="device_details" href="#">Details</a></td>
-            <td><a class="device_return" href="#">Return</a></td>
-        </tr>
-        <tr>
-            <td>Nexus 4</td>
-            <td>302KPRW062238</td>
-            <td>358240051937910</td>
-            <td>113676</td>
-            <td>Felly</td>
-            <td>2014-08-12</td>
-            <td><a class="device_details" href="#">Details</a></td>
-            <td><a class="device_return" href="#">Return</a></td>
-        </tr>
-        *#
+        #* will be filled out by JavaScript *#
         </tbody>
     </table>
 </div>
@@ -123,23 +92,8 @@
             <th class="aui-table-column-unsortable">Details</th>
         </tr>
         </thead>
-        <tbody>
-        <tr>
-            <td>Nexus 7</td>
-            <td>302KPRW062238</td>
-            <td>358240051927168</td>
-            <td>113676</td>
-            <td>2014-08-12</td>
-            <td><a class="device_details" href="#z">Details</a></td>
-        </tr>
-        <tr>
-            <td>Nexus 4</td>
-            <td>302KPRW062238</td>
-            <td>358240051937910</td>
-            <td>113676</td>
-            <td>2014-08-12</td>
-            <td><a class="device_details" href="#z">Details</a></td>
-        </tr>
+        <tbody id="table-sorted-out">
+        #* will be filled out by JavaScript *#
         </tbody>
     </table>
 </div>
@@ -156,23 +110,8 @@
             <th class="aui-table-column-unsortable">Remove</th>
         </tr>
         </thead>
-        <tbody>
-        <tr>
-            <td><a href="#z">Nexus 7</a></td>
-            <td>Tablet</td>
-            <td>Android</td>
-            <td>15</td>
-            <td><a class="edit_model" href="#">Edit</a></td>
-            <td><a class="remove_model" href="#">Remove</a></td>
-        </tr>
-        <tr>
-            <td><a href="#y">Nexus 4</a></td>
-            <td>Smartphone</td>
-            <td>Android</td>
-            <td>16</td>
-            <td><a class="edit_model" href="#">Edit</a></td>
-            <td><a class="remove_model" href="#">Remove</a></td>
-        </tr>
+        <tbody id="table-management">
+        #* will be filled out by JavaScript *#
         </tbody>
     </table>
     <p>
