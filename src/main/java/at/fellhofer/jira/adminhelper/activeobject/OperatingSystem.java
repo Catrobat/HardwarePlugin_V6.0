@@ -19,7 +19,6 @@ package at.fellhofer.jira.adminhelper.activeobject;
 import net.java.ao.Entity;
 import net.java.ao.OneToMany;
 import net.java.ao.Preload;
-import net.java.ao.schema.Unique;
 
 @Preload
 public interface OperatingSystem extends Entity {
@@ -28,6 +27,6 @@ public interface OperatingSystem extends Entity {
 
     void setOperatingSystemName(String operatingSystemName);
 
-    @OneToMany(reverse = "getTypeOfDevice")
+    @OneToMany(reverse = "getOperatingSystem")
     HardwareModel[] getHardwareModels();
 }

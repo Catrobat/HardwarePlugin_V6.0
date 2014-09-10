@@ -18,9 +18,8 @@ package at.fellhofer.jira.adminhelper.activeobject;
 
 import net.java.ao.Entity;
 import net.java.ao.OneToMany;
-import net.java.ao.schema.Unique;
 
-public interface TypeOfDevice extends Entity{
+public interface TypeOfDevice extends Entity {
     String getTypeOfDeviceName();
 
     void setTypeOfDeviceName(String typeOfDeviceName);

@@ -19,6 +19,9 @@ package at.fellhofer.jira.adminhelper.activeobject;
 import com.atlassian.activeobjects.external.ActiveObjects;
 import net.java.ao.Query;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
 
@@ -31,31 +34,39 @@ public class TypeOfDeviceServiceImpl implements TypeOfDeviceService {
     }
 
     @Override
-    public TypeOfDevice getTypeOfDevice(String name) {
-        name = escapeHtml4(name);
-
-        TypeOfDevice[] typeOfDevices = ao.find(TypeOfDevice.class, Query.select().where("TYPE_OF_DEVICE_NAME = ?", name));
-        if (typeOfDevices.length == 0) {
-            return null;
-        } else if (typeOfDevices.length == 1) {
-            return typeOfDevices[0];
-        }
-
-        throw new RuntimeException("Should be unique - this should never happen!");
-    }
-
-    @Override
     public TypeOfDevice getOrCreateTypeOfDevice(String name) {
-        name = escapeHtml4(name);
+        if (name == null || name.trim().length() == 0) {
+            return null;
+        }
+        name = escapeHtml4(name.trim());
 
-        TypeOfDevice typeOfDevice = getTypeOfDevice(name);
-        if(typeOfDevice != null) {
-            return typeOfDevice;
+        TypeOfDevice[] typeOfDevices = ao.find(TypeOfDevice.class, Query.select()
+                .where("upper(TYPE_OF_DEVICE_NAME) = upper(?)", name));
+        if (typeOfDevices.length == 1) {
+            return typeOfDevices[0];
+        } else if (typeOfDevices.length > 1) {
+            throw new RuntimeException("Should be unique - this should never happen!");
         }
 
         final TypeOfDevice createdTypeOfDevice = ao.create(TypeOfDevice.class);
         createdTypeOfDevice.setTypeOfDeviceName(name);
         createdTypeOfDevice.save();
         return createdTypeOfDevice;
+    }
+
+    @Override
+    public List<TypeOfDevice> searchTypeOfDevice(String query) {
+        return Arrays.asList(ao.find(TypeOfDevice.class, Query.select()
+                .where("upper(TYPE_OF_DEVICE_NAME) LIKE upper(?)", "%" + query + "%")));
+    }
+
+    @Override
+    public void cleanUnused() {
+        List<TypeOfDevice> typeOfDeviceList = Arrays.asList(ao.find(TypeOfDevice.class));
+        for (TypeOfDevice typeOfDevice : typeOfDeviceList) {
+            if (typeOfDevice.getHardwareModels().length == 0) {
+                ao.delete(typeOfDevice);
+            }
+        }
     }
 }

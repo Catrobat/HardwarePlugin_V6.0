@@ -18,9 +18,14 @@ package at.fellhofer.jira.adminhelper.activeobject;
 
 import com.atlassian.activeobjects.tx.Transactional;
 
+import java.util.List;
+
 @Transactional
 public interface OperatingSystemService {
-    OperatingSystem getOperatingSystem(String operatingSystemName);
 
     OperatingSystem getOrCreateOperatingSystem(String operatingSystemName);
+
+    List<OperatingSystem> searchOperatingSystems(String query);
+
+    void cleanUnused();
 }

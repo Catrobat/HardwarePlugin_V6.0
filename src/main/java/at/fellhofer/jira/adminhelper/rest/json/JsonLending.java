@@ -17,27 +17,28 @@
 package at.fellhofer.jira.adminhelper.rest.json;
 
 import at.fellhofer.jira.adminhelper.activeobject.Lending;
+import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.user.util.UserManager;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
-
-import static org.apache.commons.beanutils.BeanUtils.copyProperties;
 
 @XmlRootElement
 public class JsonLending {
 
     @XmlElement
-    private int ID;
+    private int id;
 
     @XmlElement
     private JsonDevice device;
 
     @XmlElement
-    private String lentOutFrom;
+    private String lentOutBy;
+
+    @XmlElement
+    private String lentOutIssuer;
 
     @XmlElement
     @XmlJavaTypeAdapter(DateAdapter.class)
@@ -58,21 +59,24 @@ public class JsonLending {
     }
 
     public JsonLending(Lending toCopy, UserManager userManager) {
-        ID = toCopy.getID();
+        id = toCopy.getID();
         device = new JsonDevice(toCopy.getDevice());
-        lentOutFrom = userManager.getUserByKey(toCopy.getLendingUserKey()).getDisplayName();
+        ApplicationUser lentOutByUser = userManager.getUserByKey(toCopy.getLendingByUserKey());
+        lentOutBy = lentOutByUser == null ? toCopy.getLendingIssuerUserKey() : lentOutByUser.getUsername();
+        ApplicationUser lentOutIssuerUser = userManager.getUserByKey(toCopy.getLendingIssuerUserKey());
+        lentOutIssuer = lentOutIssuerUser == null ? toCopy.getLendingIssuerUserKey() : lentOutIssuerUser.getUsername();
         begin = toCopy.getBegin();
         end = toCopy.getEnd();
         purpose = toCopy.getPurpose();
         comment = toCopy.getComment();
     }
 
-    public int getID() {
-        return ID;
+    public int getId() {
+        return id;
     }
 
-    public void setID(int ID) {
-        this.ID = ID;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public JsonDevice getDevice() {
@@ -83,12 +87,12 @@ public class JsonLending {
         this.device = device;
     }
 
-    public String getLentOutFrom() {
-        return lentOutFrom;
+    public String getLentOutBy() {
+        return lentOutBy;
     }
 
-    public void setLentOutFrom(String lentOutFrom) {
-        this.lentOutFrom = lentOutFrom;
+    public void setLentOutBy(String lentOutBy) {
+        this.lentOutBy = lentOutBy;
     }
 
     public Date getBegin() {
@@ -121,5 +125,13 @@ public class JsonLending {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public String getLentOutIssuer() {
+        return lentOutIssuer;
+    }
+
+    public void setLentOutIssuer(String lentOutIssuer) {
+        this.lentOutIssuer = lentOutIssuer;
     }
 }

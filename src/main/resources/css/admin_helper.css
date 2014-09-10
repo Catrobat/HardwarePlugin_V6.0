@@ -14,3 +14,40 @@
  * limitations under the License.
  */
 
+.left-from-search-field {
+    width: 50%;
+    float: left;
+    height: 34px;
+}
+
+.search-field {
+    width: 50%;
+    float: right;
+    height: 50px;
+    text-align: right;
+}
+
+.search-field label {
+    padding-right: 10px;
+}
+
+.search-field-dialog {
+    margin-top: 20px;
+    width: 100%;
+    float: right;
+    height: 50px;
+    text-align: right;
+}
+
+.search-field-dialog label {
+    padding-right: 10px;
+}
+
+div.change-details {
+    float: right;
+    margin-top: 5px;
+}
+
+.tabs-pane form {
+    padding-top: 15px;
+}

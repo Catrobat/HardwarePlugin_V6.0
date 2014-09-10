@@ -17,7 +17,6 @@
 package at.fellhofer.jira.adminhelper.activeobject;
 
 import net.java.ao.Entity;
-import net.java.ao.OneToMany;
 import net.java.ao.Preload;
 
 import java.util.Date;
@@ -28,9 +27,13 @@ public interface Lending extends Entity {
 
     void setDevice(Device device);
 
-    String getLendingUserKey();
+    String getLendingByUserKey();
 
-    void setLendingUserKey(String lendingUserKey);
+    void setLendingByUserKey(String lendingByUserKey);
+
+    String getLendingIssuerUserKey();
+
+    void setLendingIssuerUserKey(String lendingIssuerUserKey);
 
     Date getBegin();
 

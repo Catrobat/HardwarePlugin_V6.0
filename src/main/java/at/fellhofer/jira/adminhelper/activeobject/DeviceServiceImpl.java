@@ -16,6 +16,7 @@
 
 package at.fellhofer.jira.adminhelper.activeobject;
 
+import at.fellhofer.jira.adminhelper.helper.HelperUtil;
 import com.atlassian.activeobjects.external.ActiveObjects;
 import net.java.ao.Query;
 
@@ -29,6 +30,8 @@ import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
 
 public class DeviceServiceImpl implements DeviceService {
 
+    private static final String DEFAULT_ORDER = "upper(hardware.NAME), upper(hardware.VERSION), " +
+            "upper(device.SERIAL_NUMBER), upper(device.IMEI), upper(device.INVENTORY_NUMBER)";
     private final ActiveObjects ao;
 
     public DeviceServiceImpl(ActiveObjects ao) {
@@ -36,8 +39,92 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
-    public Device add(HardwareModel hardwareModel, String imei, String serialNumber, String inventoryNumber, String receivedFrom, Date receivedDate, String usefulLifeOfAsset) {
-        if (!(isImeiUnique(imei) && isSerialNumberUnique(serialNumber) && isInventoryNumberUnique(inventoryNumber)) || hardwareModel == null) {
+    public Device getDeviceById(int deviceId) {
+        Device[] devices = ao.find(Device.class, Query.select().where("ID = ?", deviceId));
+        if (devices.length == 1) {
+            return devices[0];
+        }
+
+        return null;
+    }
+
+    @Override
+    public Device edit(Device device, HardwareModel hardwareModel, String imei, String serialNumber, String inventoryNumber,
+                       String receivedFrom, Date receivedDate, String usefulLifeOfAsset, Date sortedOutDate, String sortedOutComment) {
+        if (device == null || hardwareModel == null) {
+            return null;
+        }
+
+        imei = HelperUtil.formatString(imei);
+        serialNumber = HelperUtil.formatString(serialNumber);
+        inventoryNumber = HelperUtil.formatString(inventoryNumber);
+        receivedFrom = HelperUtil.formatString(receivedFrom);
+        usefulLifeOfAsset = HelperUtil.formatString(usefulLifeOfAsset);
+        sortedOutComment = HelperUtil.formatString(sortedOutComment);
+
+        if (!(isImeiUnique(imei, device.getID()) && isSerialNumberUnique(serialNumber, device.getID()) &&
+                isInventoryNumberUnique(inventoryNumber, device.getID()))
+                || hardwareModel == null) {
+            return null;
+        }
+
+        if (imei == null && serialNumber == null && inventoryNumber == null) {
+            return null;
+        }
+
+        device.setHardwareModel(hardwareModel);
+        device.setImei(imei);
+        device.setSerialNumber(serialNumber);
+        device.setInventoryNumber(inventoryNumber);
+        device.setReceivedFrom(receivedFrom);
+        device.setReceivedDate(receivedDate);
+        device.setUsefulLifeOfAsset(usefulLifeOfAsset);
+        device.setSortedOutDate(sortedOutDate);
+        device.setSortedOutComment(sortedOutComment);
+        device.save();
+
+        return device;
+    }
+
+    @Override
+    public Device add(HardwareModel hardwareModel, String imei, String serialNumber, String inventoryNumber,
+                      String receivedFrom, Date receivedDate, String usefulLifeOfAsset) {
+        if (imei != null && imei.trim().length() != 0) {
+            imei = escapeHtml4(imei.trim());
+        } else {
+            imei = null;
+        }
+
+        if (serialNumber != null && serialNumber.trim().length() != 0) {
+            serialNumber = escapeHtml4(serialNumber.trim());
+        } else {
+            serialNumber = null;
+        }
+
+        if (inventoryNumber != null && inventoryNumber.trim().length() != 0) {
+            inventoryNumber = escapeHtml4(inventoryNumber.trim());
+        } else {
+            inventoryNumber = null;
+        }
+
+        if (receivedFrom != null && receivedFrom.trim().length() != 0) {
+            receivedFrom = escapeHtml4(receivedFrom.trim());
+        } else {
+            receivedFrom = null;
+        }
+
+        if (usefulLifeOfAsset != null && usefulLifeOfAsset.trim().length() != 0) {
+            usefulLifeOfAsset = escapeHtml4(usefulLifeOfAsset.trim());
+        } else {
+            usefulLifeOfAsset = null;
+        }
+
+        if (!(isImeiUnique(imei, 0) && isSerialNumberUnique(serialNumber, 0) && isInventoryNumberUnique(inventoryNumber, 0))
+                || hardwareModel == null) {
+            return null;
+        }
+
+        if (imei == null && serialNumber == null && inventoryNumber == null) {
             return null;
         }
 
@@ -56,15 +143,30 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public List<Device> all() {
-        return Arrays.asList(ao.find(Device.class));
+        return Arrays.asList(ao.find(Device.class, Query.select()
+                .alias(Device.class, "device")
+                .alias(HardwareModel.class, "hardware")
+                .join(HardwareModel.class, "device.HARDWARE_MODEL_ID = hardware.ID")
+                .order(DEFAULT_ORDER)));
     }
 
     @Override
     public Device sortOutDevice(int id, Date sortedOutDate, String sortedOutComment) {
-        sortedOutComment = escapeHtml4(sortedOutComment);
         Device[] toSortOut = ao.find(Device.class, Query.select().where("ID = ?", id));
         if (toSortOut.length != 1)
             return null;
+
+        if (sortedOutDate == null)
+            return null;
+
+        if (toSortOut[0].getSortedOutDate() != null)
+            return null;
+
+        if (sortedOutComment != null && sortedOutComment.trim().length() != 0) {
+            sortedOutComment = escapeHtml4(sortedOutComment.trim());
+        } else {
+            sortedOutComment = null;
+        }
 
         toSortOut[0].setSortedOutDate(sortedOutDate);
         toSortOut[0].setSortedOutComment(sortedOutComment);
@@ -75,54 +177,58 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public List<Device> getCurrentlyAvailableDevices(int hardwareId) {
-        List<Device> allDevices = Arrays.asList(ao.find(Device.class, Query.select()
-                .where("HARDWARE_MODEL_ID = ?", hardwareId)));
+        List<Device> deviceList = new ArrayList<Device>();
+        deviceList.addAll(Arrays.asList(ao.find(Device.class, Query.select()
+                .alias(Device.class, "device")
+                .alias(HardwareModel.class, "hardware")
+                .join(HardwareModel.class, "device.HARDWARE_MODEL_ID = hardware.ID")
+                .order(DEFAULT_ORDER)
+                .where("device.HARDWARE_MODEL_ID = ? AND device.SORTED_OUT_DATE IS NULL", hardwareId))));
 
-        // Inner Join won't work on new hardware (no lending at the beginning)
-        List<Device> wantedDevices = new ArrayList<Device>();
-        for (Device device : allDevices) {
-            if (device.getLendings().length == 0) {
-                wantedDevices.add(device);
-            }
-        }
-
-        wantedDevices.addAll(Arrays.asList(ao.find(Device.class, Query.select()
+        deviceList.removeAll(Arrays.asList(ao.find(Device.class, Query.select()
                 .alias(Lending.class, "lending")
                 .alias(Device.class, "device")
                 .join(Lending.class, "lending.DEVICE_ID = device.ID")
-                .where("lending.END IS NULL AND device.SORTED_OUT_DATE IS NULL AND device.HARDWARE_MODEL_ID = ?", hardwareId))));
+                .where("lending.END IS NULL"))));
 
-        return allDevices;
+        return deviceList;
     }
 
     @Override
     public List<Device> getSortedOutDevices() {
-        return Arrays.asList(ao.find(Device.class, Query.select().where("SORTED_OUT_DATE IS NOT NULL")));
+        return Arrays.asList(ao.find(Device.class, Query.select()
+                .alias(Device.class, "device")
+                .alias(HardwareModel.class, "hardware")
+                .join(HardwareModel.class, "device.HARDWARE_MODEL_ID = hardware.ID")
+                .order(DEFAULT_ORDER)
+                .where("device.SORTED_OUT_DATE IS NOT NULL")));
     }
 
     @Override
-    public List<Device> getSortedOutDevicesOfHardware(int hardwareId) {
-        return Arrays.asList(ao.find(Device.class, Query.select().where("SORTED_OUT_DATE IS NOT NULL AND HARDWARE_MODEL_ID = ?", hardwareId)));
+    public List<Device> getSortedOutDevicesForHardware(int hardwareId) {
+        return Arrays.asList(ao.find(Device.class, Query.select()
+                .alias(Device.class, "device")
+                .alias(HardwareModel.class, "hardware")
+                .join(HardwareModel.class, "device.HARDWARE_MODEL_ID = hardware.ID")
+                .order(DEFAULT_ORDER)
+                .where("device.SORTED_OUT_DATE IS NOT NULL AND device.HARDWARE_MODEL_ID = ?", hardwareId)));
     }
 
-    private boolean isSerialNumberUnique(String serialNumber) {
-        if (serialNumber == null || serialNumber.equals(""))
-            return true;
+    private boolean isSerialNumberUnique(String serialNumber, int exceptId) {
+        return serialNumber == null || serialNumber.equals("") ||
+                ao.find(Device.class, Query.select().where("SERIAL_NUMBER = ? AND ID <> ?", serialNumber, exceptId)).length == 0;
 
-        return ao.find(Device.class, Query.select().where("SERIAL_NUMBER = ?", serialNumber)).length == 0;
     }
 
-    private boolean isImeiUnique(String imei) {
-        if (imei == null || imei.equals(""))
-            return true;
+    private boolean isImeiUnique(String imei, int exceptId) {
+        return imei == null || imei.equals("") ||
+                ao.find(Device.class, Query.select().where("IMEI = ? AND ID <> ?", imei, exceptId)).length == 0;
 
-        return ao.find(Device.class, Query.select().where("IMEI = ?", imei)).length == 0;
     }
 
-    private boolean isInventoryNumberUnique(String inventoryNumber) {
-        if (inventoryNumber == null || inventoryNumber.equals(""))
-            return true;
+    private boolean isInventoryNumberUnique(String inventoryNumber, int exceptId) {
+        return inventoryNumber == null || inventoryNumber.equals("") ||
+                ao.find(Device.class, Query.select().where("INVENTORY_NUMBER = ? AND ID <> ?", inventoryNumber, exceptId)).length == 0;
 
-        return ao.find(Device.class, Query.select().where("INVENTORY_NUMBER = ?", inventoryNumber)).length == 0;
     }
 }

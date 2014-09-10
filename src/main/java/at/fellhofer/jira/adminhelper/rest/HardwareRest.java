@@ -17,9 +17,14 @@
 package at.fellhofer.jira.adminhelper.rest;
 
 import at.fellhofer.jira.adminhelper.activeobject.*;
+import at.fellhofer.jira.adminhelper.helper.HelperUtil;
+import at.fellhofer.jira.adminhelper.helper.PermissionCondition;
 import at.fellhofer.jira.adminhelper.rest.json.JsonDevice;
+import at.fellhofer.jira.adminhelper.rest.json.JsonDeviceComment;
 import at.fellhofer.jira.adminhelper.rest.json.JsonHardwareModel;
+import at.fellhofer.jira.adminhelper.rest.json.JsonLending;
 import com.atlassian.jira.component.ComponentAccessor;
+import com.atlassian.jira.security.groups.GroupManager;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.sal.api.user.UserManager;
 
@@ -29,6 +34,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -40,20 +46,33 @@ public class HardwareRest {
     private final HardwareModelService hardwareModelService;
     private final DeviceService deviceService;
     private final LendingService lendingService;
+    private final TypeOfDeviceService typeOfDeviceService;
+    private final ProducerService producerService;
+    private final OperatingSystemService operatingSystemService;
+    private final DeviceCommentService deviceCommentService;
+    private final PermissionCondition permissionCondition;
 
-    public HardwareRest(UserManager userManager, HardwareModelService hardwareModelService, DeviceService deviceService, LendingService lendingService) {
+    public HardwareRest(UserManager userManager, HardwareModelService hardwareModelService, DeviceService deviceService,
+                        LendingService lendingService, TypeOfDeviceService typeOfDeviceService,
+                        ProducerService producerService, OperatingSystemService operatingSystemService,
+                        DeviceCommentService deviceCommentService, ConfigurationService configurationService,
+                        GroupManager groupManager) {
         this.userManager = checkNotNull(userManager);
         this.hardwareModelService = checkNotNull(hardwareModelService);
         this.deviceService = checkNotNull(deviceService);
         this.lendingService = checkNotNull(lendingService);
+        this.typeOfDeviceService = checkNotNull(typeOfDeviceService);
+        this.producerService = checkNotNull(producerService);
+        this.operatingSystemService = checkNotNull(operatingSystemService);
+        this.deviceCommentService = checkNotNull(deviceCommentService);
+        this.permissionCondition = new PermissionCondition(null, configurationService, userManager, groupManager);
     }
 
     @GET
-    @Path("/hardwares")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getHardwares(@Context HttpServletRequest request) {
+    public Response getHardwareModelList(@Context HttpServletRequest request) {
         String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
+        if (username == null || !permissionCondition.isApproved(username)) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
@@ -66,29 +85,94 @@ public class HardwareRest {
     }
 
     @PUT
-    @Path("/hardwares")
     @Produces(MediaType.APPLICATION_JSON)
     public Response putHardware(@Context HttpServletRequest request, JsonHardwareModel jsonHardwareModel) {
         String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
+        if (username == null || !permissionCondition.isApproved(username)) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
-        // TODO error detection here
+        if (jsonHardwareModel == null)
+            return Response.serverError().entity("No hardware model given").build();
 
-        hardwareModelService.add(jsonHardwareModel.getName(), jsonHardwareModel.getTypeOfDevice(),
-                jsonHardwareModel.getVersion(), jsonHardwareModel.getPrice(), jsonHardwareModel.getProducer(),
-                jsonHardwareModel.getOperatingSystem(), jsonHardwareModel.getArticleNumber());
+        if (jsonHardwareModel.getName() == null || jsonHardwareModel.getName().equals(""))
+            return Response.serverError().entity("Name must not be empty").build();
+
+        HardwareModel hardwareModel;
+        if (jsonHardwareModel.getId() == 0) {
+            hardwareModel = hardwareModelService.add(jsonHardwareModel.getName(),
+                    jsonHardwareModel.getTypeOfDevice(), jsonHardwareModel.getVersion(), jsonHardwareModel.getPrice(),
+                    jsonHardwareModel.getProducer(), jsonHardwareModel.getOperatingSystem(), jsonHardwareModel.getArticleNumber());
+        } else {
+            hardwareModel = hardwareModelService.edit(jsonHardwareModel.getId(), jsonHardwareModel.getName(),
+                    jsonHardwareModel.getTypeOfDevice(), jsonHardwareModel.getVersion(), jsonHardwareModel.getPrice(),
+                    jsonHardwareModel.getProducer(), jsonHardwareModel.getOperatingSystem(), jsonHardwareModel.getArticleNumber());
+        }
+
+        if (hardwareModel == null) {
+            return Response.serverError().entity("Could not save hardware model (maybe name and version are already existing)").build();
+        }
 
         return Response.noContent().build();
     }
 
     @GET
-    @Path("/hardwares/{hardwareId}")
+    @Path("/types")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getTypesOfDevices(@Context HttpServletRequest request, String query) {
+        String username = userManager.getRemoteUsername(request);
+        if (username == null || !permissionCondition.isApproved(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        List<String> typeList = new ArrayList<String>();
+        for (TypeOfDevice typeOfDevice : typeOfDeviceService.searchTypeOfDevice(query)) {
+            typeList.add(typeOfDevice.getTypeOfDeviceName());
+        }
+
+        return Response.ok(typeList).build();
+    }
+
+    @GET
+    @Path("/producers")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getProducers(@Context HttpServletRequest request, String query) {
+        String username = userManager.getRemoteUsername(request);
+        if (username == null || !permissionCondition.isApproved(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        List<String> producerList = new ArrayList<String>();
+        for (Producer producer : producerService.searchProducers(query)) {
+            producerList.add(producer.getProducerName());
+        }
+
+        return Response.ok(producerList).build();
+    }
+
+    @GET
+    @Path("/operating-systems")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getOperatingSystems(@Context HttpServletRequest request, String query) {
+        String username = userManager.getRemoteUsername(request);
+        if (username == null || !permissionCondition.isApproved(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        List<String> operatingSystemList = new ArrayList<String>();
+        for (OperatingSystem operatingSystem : operatingSystemService.searchOperatingSystems(query)) {
+            operatingSystemList.add(operatingSystem.getOperatingSystemName());
+        }
+
+        return Response.ok(operatingSystemList).build();
+    }
+
+    @GET
+    @Path("/{hardwareId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getHardware(@Context HttpServletRequest request, @PathParam("hardwareId") int hardwareId) {
         String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
+        if (username == null || !permissionCondition.isApproved(username)) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
@@ -96,12 +180,40 @@ public class HardwareRest {
         return Response.ok(jsonHardwareModel).build();
     }
 
+    @DELETE
+    @Path("/{hardwareId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteHardware(@Context HttpServletRequest request, @PathParam("hardwareId") int hardwareId, JsonHardwareModel moveToHardwareJson) {
+        String username = userManager.getRemoteUsername(request);
+        if (username == null || !permissionCondition.isApproved(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        int moveToHardwareId = moveToHardwareJson.getId();
+
+        HardwareModel toDelete = hardwareModelService.get(hardwareId);
+        if (toDelete == null) {
+            return Response.serverError().entity("No hardware model found").build();
+        }
+
+        if (toDelete.getDevices().length != 0) {
+            HardwareModel moveTo = hardwareModelService.get(moveToHardwareId);
+            if (moveTo == null) {
+                return Response.serverError().entity("No hardware model to move devices to was found").build();
+            }
+            hardwareModelService.moveDevices(toDelete, moveTo);
+        }
+
+        hardwareModelService.delete(toDelete);
+
+        return Response.noContent().build();
+    }
+
     @PUT
-    @Path("/hardwares/{hardwareId}/devices")
+    @Path("/{hardwareId}/devices")
     @Produces(MediaType.APPLICATION_JSON)
     public Response addDevice(@Context HttpServletRequest request, @PathParam("hardwareId") int hardwareId, JsonDevice jsonDevice) {
         String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
+        if (username == null || !permissionCondition.isApproved(username)) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
@@ -116,11 +228,18 @@ public class HardwareRest {
             return Response.serverError().entity("Hardware Device not found").build();
         }
 
-        Device device = deviceService.add(hardwareModel, jsonDevice.getImei(), jsonDevice.getSerialNumber(),
-                jsonDevice.getInventoryNumber(), jsonDevice.getReceivedFrom(), jsonDevice.getReceivedDate(),
-                jsonDevice.getUsefulLiveOfAsset());
+        Device device;
+        if (jsonDevice.getId() != 0) {
+            device = deviceService.edit(deviceService.getDeviceById(jsonDevice.getId()), hardwareModel, jsonDevice.getImei(),
+                    jsonDevice.getSerialNumber(), jsonDevice.getInventoryNumber(), jsonDevice.getReceivedFrom(),
+                    jsonDevice.getReceivedDate(), jsonDevice.getUsefulLiveOfAsset(), jsonDevice.getSortedOutDate(), jsonDevice.getSortedOutComment());
+        } else {
+            device = deviceService.add(hardwareModel, jsonDevice.getImei(), jsonDevice.getSerialNumber(),
+                    jsonDevice.getInventoryNumber(), jsonDevice.getReceivedFrom(), jsonDevice.getReceivedDate(),
+                    jsonDevice.getUsefulLiveOfAsset());
+        }
 
-        if(device == null) {
+        if (device == null) {
             return Response.serverError().entity("Device not created - maybe serial/inventory/imei already exists?").build();
         }
 
@@ -128,11 +247,11 @@ public class HardwareRest {
     }
 
     @GET
-    @Path("/hardwares/{hardwareId}/devices/available")
+    @Path("/{hardwareId}/devices/available")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDevicesAvailableForHardware(@Context HttpServletRequest request, @PathParam("hardwareId") int hardwareId) {
         String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
+        if (username == null || !permissionCondition.isApproved(username)) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
@@ -144,33 +263,140 @@ public class HardwareRest {
         return Response.ok(jsonDeviceList).build();
     }
 
-//    @GET
-//    @Path("/lendings")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response getLendings(@Context HttpServletRequest request) {
-//        String username = userManager.getRemoteUsername(request);
-//        if (username == null || !userManager.isSystemAdmin(username)) {
-//            return Response.status(Response.Status.UNAUTHORIZED).build();
-//        }
-//
-//        com.atlassian.jira.user.util.UserManager jiraUserManager = ComponentAccessor.getUserManager();
-//
-//        List<JsonDevice> jsonDeviceList = new ArrayList<JsonDevice>();
-//        for (Lending lending : lendingService.all()) {
-//            JsonDevice device = new JsonDevice(lending.getDevice());
-//            device.setCurrentlyLentOutFrom(jiraUserManager.getUserByKey(lending.getLendingUserKey()).getDisplayName());
-//            device.setCurrentlyLentOutSince(lending.getBegin());
-//            jsonDeviceList.add(device);
-//        }
-//
-//        return Response.ok(jsonDeviceList).build();
-//    }
+    @PUT
+    @Path("/devices/{deviceId}/lend-out")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response lendOutDevice(@Context HttpServletRequest request, @PathParam("deviceId") int deviceId, JsonLending jsonLending) {
+        String username = userManager.getRemoteUsername(request);
+        if (username == null || !permissionCondition.isApproved(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        Device device = deviceService.getDeviceById(deviceId);
+        if (device == null) {
+            return Response.serverError().entity("Device not found").build();
+        }
+
+        com.atlassian.jira.user.util.UserManager jiraUserManager = ComponentAccessor.getUserManager();
+        ApplicationUser lendingByUser = jiraUserManager.getUserByName(jsonLending.getLentOutBy());
+        ApplicationUser lendingIssuerUser = jiraUserManager.getUserByName(username);
+        if (lendingByUser == null || lendingIssuerUser == null) {
+            return Response.serverError().entity("User not found").build();
+        }
+
+        Date begin = jsonLending.getBegin();
+        if (begin == null) {
+            begin = new Date();
+        }
+
+        Lending lending = lendingService.lendOut(device, lendingByUser.getKey(), lendingIssuerUser.getKey(), jsonLending.getPurpose(), jsonLending.getComment(), begin);
+        if (lending == null) {
+            return Response.serverError().entity("Saving data failed").build();
+        }
+
+        if (jsonLending.getDevice() != null && jsonLending.getDevice().getComments() != null &&
+                jsonLending.getDevice().getComments().size() != 0 && jsonLending.getDevice().getComments().get(0) != null) {
+            deviceCommentService.addDeviceComment(device, lendingIssuerUser.getKey(), jsonLending.getDevice().getComments().get(0).getComment());
+        }
+
+        return Response.noContent().build();
+    }
+
+    @GET
+    @Path("/devices/{deviceId}/current-lending")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCurrentLendingForDevice(@Context HttpServletRequest request, @PathParam("deviceId") int deviceId) {
+        String username = userManager.getRemoteUsername(request);
+        if (username == null || !permissionCondition.isApproved(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        Device device = deviceService.getDeviceById(deviceId);
+        if (device == null) {
+            return Response.serverError().entity("No device found").build();
+        }
+
+        Lending currentLending = null;
+        for (Lending lending : device.getLendings()) {
+            if (lending.getEnd() == null) {
+                currentLending = lending;
+                break;
+            }
+        }
+
+        if (currentLending == null) {
+            return Response.serverError().entity("No current lending for device.").build();
+        }
+
+        JsonLending jsonLending = new JsonLending(currentLending, ComponentAccessor.getUserManager());
+
+        return Response.ok(jsonLending).build();
+    }
+
+    @PUT
+    @Path("/devices/{deviceId}/current-lending")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response bringBackCurrentLendingForDevice(@Context HttpServletRequest request, @PathParam("deviceId") int deviceId, JsonLending jsonLending) {
+        String username = userManager.getRemoteUsername(request);
+        if (username == null || !permissionCondition.isApproved(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        Device device = deviceService.getDeviceById(deviceId);
+        if (device == null) {
+            return Response.serverError().entity("No device found").build();
+        }
+
+        Lending currentLending = null;
+        for (Lending lending : device.getLendings()) {
+            if (lending.getEnd() == null) {
+                currentLending = lending;
+                break;
+            }
+        }
+
+        if (currentLending == null) {
+            return Response.serverError().entity("No current lending for device").build();
+        }
+
+        // just the date matters - not the time
+        if (jsonLending.getEnd() == null || HelperUtil.clearTime(jsonLending.getEnd()).getTime() < HelperUtil.clearTime(currentLending.getBegin()).getTime()) {
+            return Response.serverError().entity("No or invalid end date given").build();
+        }
+
+        Lending lending = lendingService.bringBack(currentLending, jsonLending.getPurpose(), jsonLending.getComment(), jsonLending.getEnd());
+        if (lending == null) {
+            return Response.serverError().entity("Saving data failed").build();
+        }
+
+
+        if (jsonLending.getDevice() != null && jsonLending.getDevice().getComments() != null &&
+                jsonLending.getDevice().getComments().size() != 0 && jsonLending.getDevice().getComments().get(0) != null) {
+            JsonDeviceComment comment = jsonLending.getDevice().getComments().get(0);
+            ApplicationUser user = ComponentAccessor.getUserManager().getUserByName(username);
+            String userKey = user == null ? username : user.getKey();
+            deviceCommentService.addDeviceComment(currentLending.getDevice(), userKey, comment.getComment());
+        }
+
+        return Response.noContent().build();
+    }
 
     @GET
     @Path("/devices")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDevices() {
-        return null;
+    public Response getDevices(@Context HttpServletRequest request) {
+        String username = userManager.getRemoteUsername(request);
+        if (username == null || !permissionCondition.isApproved(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        List<Device> deviceList = deviceService.all();
+        List<JsonDevice> jsonDeviceList = new ArrayList<JsonDevice>();
+        for (Device device : deviceList) {
+            jsonDeviceList.add(new JsonDevice(device));
+        }
+
+        return Response.ok(jsonDeviceList).build();
     }
 
     @GET
@@ -178,7 +404,7 @@ public class HardwareRest {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getSortedOutDevices(@Context HttpServletRequest request) {
         String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
+        if (username == null || !permissionCondition.isApproved(username)) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
@@ -191,23 +417,17 @@ public class HardwareRest {
     }
 
     @GET
-    @Path("/devices/ongoing-lendings")
+    @Path("/devices/ongoing-lending")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getLentOutList(@Context HttpServletRequest request) {
+    public Response getCurrentlyLentOut(@Context HttpServletRequest request) {
         String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
+        if (username == null || !permissionCondition.isApproved(username)) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-
-        com.atlassian.jira.user.util.UserManager jiraUserManager = ComponentAccessor.getUserManager();
 
         List<JsonDevice> jsonDeviceList = new ArrayList<JsonDevice>();
         for (Lending lending : lendingService.currentlyLentOut()) {
             JsonDevice device = new JsonDevice(lending.getDevice());
-            ApplicationUser user = jiraUserManager.getUserByKey(lending.getLendingUserKey());
-            if (user != null)
-                device.setCurrentlyLentOutFrom(user.getDisplayName());
-            device.setCurrentlyLentOutSince(lending.getBegin());
             jsonDeviceList.add(device);
         }
 
@@ -218,13 +438,40 @@ public class HardwareRest {
     @Path("/devices/{deviceId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDevice(@PathParam("deviceId") int deviceId) {
-        return null;
+        Device device = deviceService.getDeviceById(deviceId);
+        if (device == null) {
+            return Response.serverError().entity("Device not found").build();
+        }
+
+        JsonDevice jsonDevice = new JsonDevice(device, ComponentAccessor.getUserManager());
+        return Response.ok(jsonDevice).build();
     }
 
-//    @GET
-//    @Path("/devices/{deviceId}/comments")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response getDeviceComments() {
-//        return null;
-//    }
+    @PUT
+    @Path("/devices/{deviceId}/sort-out")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response sortOutDevice(@Context HttpServletRequest request, @PathParam("deviceId") int deviceId, JsonDevice jsonDevice) {
+        String username = userManager.getRemoteUsername(request);
+        if (username == null || !permissionCondition.isApproved(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        Device device = deviceService.getDeviceById(deviceId);
+        if (device == null) {
+            return Response.serverError().entity("No device found").build();
+        }
+
+        if (jsonDevice == null || jsonDevice.getSortedOutDate() == null) {
+            return Response.serverError().entity("No sorted out date given").build();
+        }
+
+        device = deviceService.sortOutDevice(deviceId, jsonDevice.getSortedOutDate(), jsonDevice.getSortedOutComment());
+        if (device == null) {
+            return Response.serverError().entity("Saving data failed").build();
+        }
+
+
+        return Response.noContent().build();
+    }
+
 }

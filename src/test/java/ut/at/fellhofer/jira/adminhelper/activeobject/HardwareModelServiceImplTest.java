@@ -43,7 +43,151 @@ public class HardwareModelServiceImplTest {
     public void setUp() throws Exception {
         assertNotNull(entityManager);
         ao = new TestActiveObjects(entityManager);
-        hardwareModelService = new HardwareModelServiceImpl(ao, new TypeOfDeviceServiceImpl(ao), new ProducerServiceImpl(ao), new OperatingSystemServiceImpl(ao));
+        hardwareModelService = new HardwareModelServiceImpl(ao, new TypeOfDeviceServiceImpl(ao),
+                new ProducerServiceImpl(ao), new OperatingSystemServiceImpl(ao));
+    }
+
+    @Test
+    public void testEscaping() {
+        String xss = " <script>alert('xss');</script>   ";
+
+        HardwareModel model = hardwareModelService.add(xss, xss, xss, xss, xss, xss, xss);
+        assertFalse(model.getID() == 0);
+        ao.flushAll();
+
+        model = hardwareModelService.get(model.getID());
+        assertEquals("Not escaped", escapeHtml4(xss.trim()), model.getName());
+        assertEquals("Not escaped", escapeHtml4(xss.trim()), model.getPrice());
+        assertEquals("Not escaped", escapeHtml4(xss.trim()), model.getVersion());
+        assertEquals("Not escaped", escapeHtml4(xss.trim()), model.getArticleNumber());
+        assertNotNull(model.getOperatingSystem());
+        assertEquals("Not escaped", escapeHtml4(xss.trim()), model.getOperatingSystem().getOperatingSystemName());
+        assertNotNull(model.getTypeOfDevice());
+        assertEquals("Not escaped", escapeHtml4(xss.trim()), model.getTypeOfDevice().getTypeOfDeviceName());
+        assertNotNull(model.getProducer());
+        assertEquals("Not escaped", escapeHtml4(xss.trim()), model.getProducer().getProducerName());
+
+        model = hardwareModelService.add(xss + "#2", (TypeOfDevice) null, xss, xss, null, null, xss);
+        assertFalse(model.getID() == 0);
+        ao.flushAll();
+
+        model = hardwareModelService.get(model.getID());
+        assertEquals("Not escaped", escapeHtml4((xss + "#2").trim()), model.getName());
+        assertEquals("Not escaped", escapeHtml4(xss.trim()), model.getPrice());
+        assertEquals("Not escaped", escapeHtml4(xss.trim()), model.getVersion());
+        assertEquals("Not escaped", escapeHtml4(xss.trim()), model.getArticleNumber());
+    }
+
+    @Test
+    public void testGet() {
+        HardwareModel model = ao.find(HardwareModel.class)[0];
+        HardwareModel modelGet = hardwareModelService.get(model.getID());
+
+        assertEquals(model.getID(), modelGet.getID());
+        assertEquals(model.getName(), modelGet.getName());
+        assertEquals(model.getVersion(), modelGet.getVersion());
+
+        assertNull(hardwareModelService.get(0));
+        assertNull(hardwareModelService.get(100));
+    }
+
+    @Test
+    public void testEdit() {
+        final String changedName = " <script>alert('name');</script>   ";
+        final String changedTypeOfDevice = " <script>alert('changedTypeOfDevice');</script>   ";
+        final String changedVersion = " <script>alert('changedVersion');</script>   ";
+        final String changedPrice = " <script>alert('changedPrice');</script>   ";
+        final String changedProducer = " <script>alert('changedProducer');</script>   ";
+        final String changedOperationSystem = " <script>alert('changedOperationSystem');</script>   ";
+        final String changedArticleNumber = " <script>alert('changedArticleNumber');</script>   ";
+        hardwareModelService.edit(1, changedName, changedTypeOfDevice, changedVersion, changedPrice, changedProducer,
+                changedOperationSystem, changedArticleNumber);
+        ao.flushAll();
+
+        HardwareModel model = hardwareModelService.get(1);
+        assertEquals(escapeHtml4(changedName.trim()), model.getName());
+        assertNotNull(model.getTypeOfDevice());
+        assertEquals(escapeHtml4(changedTypeOfDevice.trim()), model.getTypeOfDevice().getTypeOfDeviceName());
+        assertEquals(escapeHtml4(changedVersion.trim()), model.getVersion());
+        assertEquals(escapeHtml4(changedPrice.trim()), model.getPrice());
+        assertNotNull(model.getProducer());
+        assertEquals(escapeHtml4(changedProducer.trim()), model.getProducer().getProducerName());
+        assertNotNull(model.getOperatingSystem());
+        assertEquals(escapeHtml4(changedOperationSystem.trim()), model.getOperatingSystem().getOperatingSystemName());
+        assertEquals(escapeHtml4(changedArticleNumber.trim()), model.getArticleNumber());
+
+        model = hardwareModelService.get(2);
+        String originalName = model.getName();
+        String originalVersion = model.getVersion();
+        assertNull(hardwareModelService.edit(2, changedName, null, changedVersion, null, null, null, null));
+        ao.flushAll();
+
+        model = hardwareModelService.get(2);
+        assertEquals(originalName, model.getName());
+        assertEquals(originalVersion, model.getVersion());
+
+        assertNotNull(hardwareModelService.edit(1, "  b ", null, null, null, null, null, null));
+        assertNull(hardwareModelService.edit(1, "   ", null, null, null, null, null, null));
+        assertNull(hardwareModelService.edit(0, "a", "b", "c", "d", "e", "f", "g"));
+    }
+
+    @Test
+    public void testMoveDevices() {
+        // test to move 2 devices
+        HardwareModel from = hardwareModelService.get(1);
+        HardwareModel to = hardwareModelService.get(2);
+        assertEquals(2, from.getDevices().length);
+        assertEquals(0, to.getDevices().length);
+
+        hardwareModelService.moveDevices(from, to);
+        ao.flushAll();
+
+        from = hardwareModelService.get(1);
+        to = hardwareModelService.get(2);
+        assertEquals(0, from.getDevices().length);
+        assertEquals(2, to.getDevices().length);
+
+        // test empty hardware model
+        from = hardwareModelService.get(1);
+        to = hardwareModelService.get(3);
+        assertEquals(0, from.getDevices().length);
+        assertEquals(0, to.getDevices().length);
+
+        hardwareModelService.moveDevices(from, to);
+        ao.flushAll();
+
+        from = hardwareModelService.get(1);
+        to = hardwareModelService.get(3);
+        assertEquals(0, from.getDevices().length);
+        assertEquals(0, to.getDevices().length);
+
+        from = hardwareModelService.get(2);
+        assertEquals(2, from.getDevices().length);
+        hardwareModelService.moveDevices(from, null);
+        ao.flushAll();
+        from = hardwareModelService.get(2);
+        assertEquals(2, from.getDevices().length);
+        hardwareModelService.moveDevices(null, from);
+
+        ao.flushAll();
+        from = hardwareModelService.get(2);
+        assertEquals(2, from.getDevices().length);
+
+        // assert no exception thrown
+        hardwareModelService.moveDevices(null, null);
+    }
+
+    @Test
+    public void testDelete() {
+        HardwareModel model = hardwareModelService.get(1);
+        assertNotNull(model);
+        assertFalse(model.getID() == 0);
+
+        hardwareModelService.delete(model);
+        ao.flushAll();
+
+        model = hardwareModelService.get(1);
+        assertNull(model);
     }
 
     @Test
@@ -73,12 +217,37 @@ public class HardwareModelServiceImplTest {
         assertEquals(AdminHelperDatabaseUpdater.HARDWARE_ARTICLE_NUMBER_1, hardwareModels[0].getArticleNumber());
 
         assertEquals(name, hardwareModels[4].getName());
+        assertNotNull(hardwareModels[4].getTypeOfDevice());
         assertEquals(type, hardwareModels[4].getTypeOfDevice().getTypeOfDeviceName());
         assertEquals(model, hardwareModels[4].getVersion());
         assertEquals(escapeHtml4(price), hardwareModels[4].getPrice());
+        assertNotNull(hardwareModels[4].getProducer());
         assertEquals(producer, hardwareModels[4].getProducer().getProducerName());
+        assertNotNull(hardwareModels[4].getOperatingSystem());
         assertEquals(operatingSystem, hardwareModels[4].getOperatingSystem().getOperatingSystemName());
         assertEquals(articleNumber, hardwareModels[4].getArticleNumber());
+
+        assertNull(hardwareModelService.add("  ", (String) null, null, null, null, null, null));
+        assertNull(hardwareModelService.add("  ", (TypeOfDevice) null, null, null, null, null, null));
+
+        assertNull(hardwareModelService.add(null, (String) null, null, null, null, null, null));
+        assertNull(hardwareModelService.add(null, (TypeOfDevice) null, null, null, null, null, null));
+
+        assertNotNull(hardwareModelService.add(" a ", (String) null, null, null, null, null, null));
+        ao.flushAll();
+        assertNotNull(hardwareModelService.add(" b ", (TypeOfDevice) null, null, null, null, null, null));
+        ao.flushAll();
+
+        assertNull(hardwareModelService.add("a", (String) null, null, null, null, null, null));
+        assertNull(hardwareModelService.add("a", (TypeOfDevice) null, null, null, null, null, null));
+
+        assertNotNull(hardwareModelService.add(" a ", (String) null, " version 1 ", null, null, null, null));
+        ao.flushAll();
+        assertNotNull(hardwareModelService.add(" a ", (TypeOfDevice) null, "version 2", null, null, null, null));
+        ao.flushAll();
+
+        assertNull(hardwareModelService.add("a", (String) null, "  ", null, null, null, null));
+        assertNull(hardwareModelService.add("a", (TypeOfDevice) null, "   ", null, null, null, null));
     }
 
     @Test

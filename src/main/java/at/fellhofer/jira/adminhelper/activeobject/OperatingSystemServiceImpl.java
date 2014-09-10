@@ -19,6 +19,9 @@ package at.fellhofer.jira.adminhelper.activeobject;
 import com.atlassian.activeobjects.external.ActiveObjects;
 import net.java.ao.Query;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
 
@@ -31,32 +34,41 @@ public class OperatingSystemServiceImpl implements OperatingSystemService {
     }
 
     @Override
-    public OperatingSystem getOperatingSystem(String operatingSystemName) {
-        operatingSystemName = escapeHtml4(operatingSystemName);
-
-        OperatingSystem[] operatingSystems = ao.find(OperatingSystem.class, Query.select().where("OPERATING_SYSTEM_NAME = ?", operatingSystemName));
-        if (operatingSystems.length == 0) {
+    public OperatingSystem getOrCreateOperatingSystem(String operatingSystemName) {
+        if (operatingSystemName == null || operatingSystemName.trim().length() == 0) {
             return null;
-        } else if (operatingSystems.length == 1) {
-            return operatingSystems[0];
         }
 
-        throw new RuntimeException("Should be unique - this should never happen!");
-    }
+        operatingSystemName = escapeHtml4(operatingSystemName.trim());
 
-    @Override
-    public OperatingSystem getOrCreateOperatingSystem(String operatingSystemName) {
-        operatingSystemName = escapeHtml4(operatingSystemName);
-
-        OperatingSystem operatingSystem = getOperatingSystem(operatingSystemName);
-        if (operatingSystem != null) {
-            return operatingSystem;
+        OperatingSystem[] operatingSystems = ao.find(OperatingSystem.class, Query.select()
+                .where("upper(OPERATING_SYSTEM_NAME) = upper(?)", operatingSystemName));
+        if (operatingSystems.length == 1) {
+            return operatingSystems[0];
+        } else if (operatingSystems.length > 1) {
+            throw new RuntimeException("Should be unique - this should never happen!");
         }
 
         final OperatingSystem createdOperatingSystem = ao.create(OperatingSystem.class);
         createdOperatingSystem.setOperatingSystemName(operatingSystemName);
         createdOperatingSystem.save();
         return createdOperatingSystem;
+    }
+
+    @Override
+    public List<OperatingSystem> searchOperatingSystems(String query) {
+        return Arrays.asList(ao.find(OperatingSystem.class, Query.select()
+                .where("upper(OPERATING_SYSTEM_NAME) LIKE upper(?)", "%" + query + "%")));
+    }
+
+    @Override
+    public void cleanUnused() {
+        List<OperatingSystem> operatingSystemList = Arrays.asList(ao.find(OperatingSystem.class));
+        for (OperatingSystem operatingSystem : operatingSystemList) {
+            if (operatingSystem.getHardwareModels().length == 0) {
+                ao.delete(operatingSystem);
+            }
+        }
     }
 
 }

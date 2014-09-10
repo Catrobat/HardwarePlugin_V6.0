@@ -22,14 +22,11 @@ import at.fellhofer.jira.adminhelper.activeobject.LendingService;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.lang.reflect.InvocationTargetException;
-
-import static org.apache.commons.beanutils.BeanUtils.copyProperties;
 
 @XmlRootElement
 public class JsonHardwareModel {
     @XmlElement
-    private int ID;
+    private int id;
     @XmlElement
     private String name;
     @XmlElement
@@ -52,27 +49,33 @@ public class JsonHardwareModel {
     public JsonHardwareModel() {
     }
 
-    public JsonHardwareModel(HardwareModel toCopy, LendingService lendingService, DeviceService deviceService) {
-        ID = toCopy.getID();
+    public JsonHardwareModel(HardwareModel toCopy) {
+        id = toCopy.getID();
         name = toCopy.getName();
-        typeOfDevice = toCopy.getTypeOfDevice().getTypeOfDeviceName();
         version = toCopy.getVersion();
         price = toCopy.getPrice();
-        producer = toCopy.getProducer().getProducerName();
-        operatingSystem = toCopy.getOperatingSystem().getOperatingSystemName();
         articleNumber = toCopy.getArticleNumber();
 
-        sumOfDevices = toCopy.getDevices().length - deviceService.getSortedOutDevicesOfHardware(toCopy.getID()).size();
+        if (toCopy.getTypeOfDevice() != null)
+            typeOfDevice = toCopy.getTypeOfDevice().getTypeOfDeviceName();
+        if (toCopy.getProducer() != null)
+            producer = toCopy.getProducer().getProducerName();
+        if (toCopy.getOperatingSystem() != null)
+            operatingSystem = toCopy.getOperatingSystem().getOperatingSystemName();
+    }
+
+    public JsonHardwareModel(HardwareModel toCopy, LendingService lendingService, DeviceService deviceService) {
+        this(toCopy);
+        sumOfDevices = toCopy.getDevices().length - deviceService.getSortedOutDevicesForHardware(toCopy.getID()).size();
         available = sumOfDevices - lendingService.currentlyLentOutDevices(toCopy).size();
-
     }
 
-    public int getID() {
-        return ID;
+    public int getId() {
+        return id;
     }
 
-    public void setID(int ID) {
-        this.ID = ID;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {

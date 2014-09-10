@@ -18,11 +18,14 @@ package at.fellhofer.jira.adminhelper.activeobject;
 
 import com.atlassian.activeobjects.tx.Transactional;
 
+import java.util.List;
+
 @Transactional
 public interface TypeOfDeviceService {
 
-    TypeOfDevice getTypeOfDevice(String name);
-
     TypeOfDevice getOrCreateTypeOfDevice(String name);
 
+    List<TypeOfDevice> searchTypeOfDevice(String query);
+
+    void cleanUnused();
 }

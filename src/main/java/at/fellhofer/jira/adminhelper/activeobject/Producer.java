@@ -19,7 +19,6 @@ package at.fellhofer.jira.adminhelper.activeobject;
 import net.java.ao.Entity;
 import net.java.ao.OneToMany;
 import net.java.ao.Preload;
-import net.java.ao.schema.Unique;
 
 @Preload
 public interface Producer extends Entity {
@@ -28,7 +27,7 @@ public interface Producer extends Entity {
 
     void setProducerName(String producerName);
 
-    @OneToMany(reverse = "getTypeOfDevice")
+    @OneToMany(reverse = "getProducer")
     HardwareModel[] getHardwareModels();
 
 }

@@ -25,220 +25,171 @@
 <div id="aui-message-bar">
 #* will be filled out by JavaScript *#
 </div>
-<div class="aui-tabs horizontal-tabs" id="tabs-example1">
-<ul class="tabs-menu">
-    <li class="menu-item active-tab">
-        <a href="#tabs-overview"><strong>Overview</strong></a>
-    </li>
-    <li class="menu-item">
-        <a href="#tabs-example-second"><strong>Lent Out</strong></a>
-    </li>
-    <li class="menu-item">
-        <a href="#tabs-example-third"><strong>Sorted Out</strong></a>
-    </li>
-    <li class="menu-item">
-        <a href="#tabs-example-forth"><strong>Hardware Management</strong></a>
-    </li>
-</ul>
-<div class="tabs-pane active-pane" id="tabs-overview">
-    <h3>Overview</h3>
-    <table id="table-overview" class="aui aui-table-interactive aui-table-sortable">
-        <thead>
-        <tr>
-            <th class="aui-table-column-issue-key">Name</th>
-            <th>Version</th>
-            <th>Type of Device</th>
-            <th>OS</th>
-            <th>Available</th>
-            <th class="aui-table-column-unsortable">Lend Device Out</th>
-        </tr>
-        </thead>
-        <tbody id="table-overview-body">
-        #* will be filled out by JavaScript *#
-        </tbody>
-    </table>
-</div>
-
-<div class="tabs-pane" id="tabs-example-second">
-    <h3>Lent Out</h3>
-    <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
-        <thead>
-        <tr>
-            <th class="aui-table-column-issue-key">Name</th>
-            <th>Serialnumber</th>
-            <th>IMEI</th>
-            <th>Inventorynumber</th>
-            <th>Lent out from</th>
-            <th>Lent out since</th>
-            <th class="aui-table-column-unsortable">Details</th>
-            <th class="aui-table-column-unsortable">Return Device</th>
-        </tr>
-        </thead>
-        <tbody id="table-lent-out">
-        #* will be filled out by JavaScript *#
-        </tbody>
-    </table>
-</div>
-<div class="tabs-pane" id="tabs-example-third">
-    <h3>Sorted Out</h3>
-    <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
-        <thead>
-        <tr>
-            <th class="aui-table-column-issue-key">Name</th>
-            <th>Serialnumber</th>
-            <th>IMEI</th>
-            <th>Inventorynumber</th>
-            <th>Sorted out since</th>
-            <th class="aui-table-column-unsortable">Details</th>
-        </tr>
-        </thead>
-        <tbody id="table-sorted-out">
-        #* will be filled out by JavaScript *#
-        </tbody>
-    </table>
-</div>
-<div class="tabs-pane" id="tabs-example-forth">
-    <h3>Hardware Models</h3>
-    <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
-        <thead>
-        <tr>
-            <th class="aui-table-column-issue-key">Name</th>
-            <th>Type of Device</th>
-            <th>OS</th>
-            <th>Allocated Devices</th>
-            <th class="aui-table-column-unsortable">Edit</th>
-            <th class="aui-table-column-unsortable">Remove</th>
-        </tr>
-        </thead>
-        <tbody id="table-management">
-        #* will be filled out by JavaScript *#
-        </tbody>
-    </table>
-    <p>
-        <input class="aui-button aui-button-primary" id="new_model" type="button" value="New Hardware Model"/>
-        <input class="aui-button" id="new_device" type="button" value="New Device"/>
-    </p>
-#*
-<form action="#" method="post" id="d" class="aui">
-    <h3>New Hardware Model</h3>
-    <fieldset>
-        <div class="field-group">
-            <label for="d-fname">Name<span class="aui-icon icon-required"> required</span></label>
-            <input class="text" type="text" id="d-fname" name="d-fname" title="first name">
-
-            <div class="description">Name or short term for describing the hardware type</div>
+<div class="aui-tabs horizontal-tabs" id="tabs-hardware">
+    <ul class="tabs-menu">
+        <li class="menu-item active-tab">
+            <a href="#tabs-overview"><strong>Overview</strong></a>
+        </li>
+        <li class="menu-item">
+            <a href="#tabs-lent-out"><strong>Lent Out</strong></a>
+        </li>
+        <li class="menu-item">
+            <a href="#tabs-sorted-out"><strong>Sorted Out</strong></a>
+        </li>
+        <li class="menu-item">
+            <a href="#tabs-all-devices"><strong>All Devices</strong></a>
+        </li>
+        <li class="menu-item">
+            <a href="#tabs-hardware-management"><strong>Hardware Management</strong></a>
+        </li>
+    </ul>
+    <div class="tabs-pane active-pane" id="tabs-overview">
+        <div class="left-from-search-field">
+            <h3>Overview</h3>
         </div>
-
-        <div class="field-group">
-            <label for="d-fname">Type of device</label>
-            <input class="text" type="text" id="d-fname" name="d-fname" title="first name">
-
-            <div class="description">Type of device class for better grouping</div>
+        <div class="search-field">
+            <form class="aui" onsubmit="return false;">
+                <label for="search-filter-overview">Search Filter</label>
+                <input class="search text" type="text" id="search-filter-overview" name="search-filter-overview"
+                       title="search-filter-overview" autocomplete="off">
+            </form>
         </div>
-
-        <div class="field-group">
-            <label for="d-fname">Version</label>
-            <input class="text" type="text" id="d-fname" name="d-fname" title="first name">
-
-            <div class="description">e.g. 8 GB/16 GB Version</div>
-        </div>
-
-        <div class="field-group">
-            <label for="d-fname">Price</label>
-            <input class="text" type="text" id="d-fname" name="d-fname" title="first name">
-        </div>
-
-        <div class="field-group">
-            <label for="d-fname">Producer</label>
-            <input class="text" type="text" id="d-fname" name="d-fname" title="first name">
-
-            <div class="description">Main Producer or brand</div>
-        </div>
-
-        <div class="field-group">
-            <label for="d-fname">Operating System</label>
-            <input class="text" type="text" id="d-fname" name="d-fname" title="first name">
-
-            <div class="description">Android/iOS/Windows Phone</div>
-        </div>
-
-        <div class="field-group">
-            <label for="d-fname">Item number</label>
-            <input class="text" type="text" id="d-fname" name="d-fname" title="first name">
-
-            <div class="description">Unique item number for product (e.g. GTIN)</div>
-        </div>
-    </fieldset>
-    <div class="buttons-container">
-        <div class="buttons">
-            <input class="button submit" type="submit" value="Create" id="d-save-btn1">
-            <a class="cancel" href="#">Cancel</a>
-        </div>
+        <table id="table-overview" class="aui aui-table-interactive aui-table-sortable">
+            <thead>
+            <tr>
+                <th class="aui-table-column-issue-key">Name</th>
+                <th>Version</th>
+                <th>Type of Device</th>
+                <th>OS</th>
+                <th>Available</th>
+                <th class="aui-table-column-unsortable">Lend Device Out</th>
+            </tr>
+            </thead>
+            <tbody class="list" id="table-overview-body">
+            #* will be filled out by JavaScript *#
+            </tbody>
+        </table>
     </div>
-</form>
 
-<form action="#" method="post" id="d" class="aui">
-    <h3>New Device</h3>
-    <fieldset>
-        <div class="field-group">
-            <label for="dBase">Hardware Model<span class="aui-icon icon-required"> required</span></label>
-            <select class="select" id="dBase" name="dBase" title="database select">
-                <option>Select</option>
-                <option>Nexus 4</option>
-                <optgroup label="Group 1">
-                    <option>8 GB</option>
-                    <option>16 GB</option>
-                </optgroup>
-                <option>Nexus 7</option>
-            </select>
+    <div class="tabs-pane" id="tabs-lent-out">
+        <div class="left-from-search-field">
+            <h3>Lent Out</h3>
         </div>
-
-        <div class="field-group">
-            <label for="d-fname">Serial number<span class="aui-icon icon-required"> required</span></label>
-            <input class="text" type="text" id="d-fname" name="d-fname" title="first name">
-
-            <div class="description">Device unique number to identify the single device</div>
+        <div class="search-field">
+            <form class="aui" onsubmit="return false;">
+                <label for="search-filter-lent-out">Search Filter</label>
+                <input class="search text" type="text" id="search-filter-lent-out" name="search-filter-lent-out"
+                       title="search-filter-lent-out" autocomplete="off">
+            </form>
         </div>
-
-        <div class="field-group">
-            <label for="d-fname">IMEI</label>
-            <input class="text" type="text" id="d-fname" name="d-fname" title="first name">
-        </div>
-
-        <div class="field-group">
-            <label for="d-fname">Inventory number</label>
-            <input class="text" type="text" id="d-fname" name="d-fname" title="first name">
-        </div>
-
-        <div class="field-group">
-            <label for="d-fname">Received date</label>
-            <input class="text" type="date" id="date-picker" name="d-fname"/>
-        </div>
-
-        <div class="field-group">
-            <label for="d-fname">Received by</label>
-            <input class="text" type="text" id="d-fname" name="d-fname" title="first name">
-
-            <div class="description">Main Producer or brand</div>
-        </div>
-
-        <div class="field-group">
-            <label for="d-fname">Useful life of asset</label>
-            <input class="text" type="text" id="d-fname" name="d-fname" title="first name">
-
-            <div class="description">Amount of time when this device is obsolete</div>
-        </div>
-    </fieldset>
-    <div class="buttons-container">
-        <div class="buttons">
-            <input class="button submit" type="submit" value="Create" id="d-save-btn1">
-            <a class="cancel" href="#">Cancel</a>
-        </div>
+        <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
+            <thead>
+            <tr>
+                <th class="aui-table-column-issue-key">Name</th>
+                <th>Serialnumber</th>
+                <th>IMEI</th>
+                <th>Inventorynumber</th>
+                <th>Lent out by</th>
+                <th>Lent out since</th>
+                <th class="aui-table-column-unsortable">Details</th>
+                <th class="aui-table-column-unsortable">Return Device</th>
+            </tr>
+            </thead>
+            <tbody class="list" id="table-lent-out">
+            #* will be filled out by JavaScript *#
+            </tbody>
+        </table>
     </div>
-</form>
-*#
-</div>
-<!-- .aui-tabs -->
+    <div class="tabs-pane" id="tabs-sorted-out">
+        <div class="left-from-search-field">
+            <h3>Sorted Out</h3>
+        </div>
+        <div class="search-field">
+            <form class="aui" onsubmit="return false;">
+                <label for="search-filter-sorted-out">Search Filter</label>
+                <input class="search text" type="text" id="search-filter-sorted-out" name="search-filter-sorted-out"
+                       title="search-filter-sorted-out" autocomplete="off">
+            </form>
+        </div>
+        <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
+            <thead>
+            <tr>
+                <th class="aui-table-column-issue-key">Name</th>
+                <th>Serialnumber</th>
+                <th>IMEI</th>
+                <th>Inventorynumber</th>
+                <th>Sorted out since</th>
+                <th class="aui-table-column-unsortable">Details</th>
+            </tr>
+            </thead>
+            <tbody class="list" id="table-sorted-out">
+            #* will be filled out by JavaScript *#
+            </tbody>
+        </table>
+    </div>
+    <div class="tabs-pane" id="tabs-all-devices">
+        <div class="left-from-search-field">
+            <h3>All Devices</h3>
+        </div>
+        <div class="search-field">
+            <form class="aui" onsubmit="return false;">
+                <label for="search-filter-all-devices">Search Filter</label>
+                <input class="search text" type="text" id="search-filter-all-devices" name="search-filter-all-devices"
+                       title="search-filter-all-devices" autocomplete="off">
+            </form>
+        </div>
+        <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
+            <thead>
+            <tr>
+                <th class="aui-table-column-issue-key">Name</th>
+                <th>Serialnumber</th>
+                <th>IMEI</th>
+                <th>Inventorynumber</th>
+                <th>Lent out since</th>
+                <th>Lent out by</th>
+                <th>Sorted out since</th>
+                <th>Action</th>
+                <th class="aui-table-column-unsortable">Details</th>
+            </tr>
+            </thead>
+            <tbody class="list" id="table-all-devices">
+            #* will be filled out by JavaScript *#
+            </tbody>
+        </table>
+    </div>
+    <div class="tabs-pane" id="tabs-hardware-management">
+        <div class="left-from-search-field">
+            <h3>Hardware Management</h3>
+        </div>
+        <div class="search-field">
+            <form class="aui" onsubmit="return false;">
+                <label for="search-filter-management">Search Filter</label>
+                <input class="search text" type="text" id="search-filter-management" name="search-filter-management"
+                       title="search-filter-management" autocomplete="off">
+            </form>
+        </div>
+        <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
+            <thead>
+            <tr>
+                <th class="aui-table-column-issue-key">Name</th>
+                <th>Version</th>
+                <th>Type of Device</th>
+                <th>OS</th>
+                <th>Allocated Devices</th>
+                <th class="aui-table-column-unsortable">Edit</th>
+                <th class="aui-table-column-unsortable">Remove</th>
+            </tr>
+            </thead>
+            <tbody class="list" id="table-management">
+            #* will be filled out by JavaScript *#
+            </tbody>
+        </table>
+        <p>
+            <input class="aui-button aui-button-primary" id="new_model" type="button" value="New Hardware Model"/>
+            <input class="aui-button" id="new_device" type="button" value="New Device"/>
+        </p>
+    </div>
+    <!-- .aui-tabs -->
 </div>
 </body>
 </html>

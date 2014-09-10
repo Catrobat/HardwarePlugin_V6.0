@@ -27,24 +27,10 @@
     <resource type="i18n" name="i18n" location="at.fellhofer.jira.adminhelper.i18n"/>
 
     <!-- add our web resources -->
-    <!--
-    <web-resource key="AdminHelper-resources" name="AdminHelper Web Resources">
-        <dependency>com.atlassian.auiplugin:ajs</dependency>
-        <dependency>com.atlassian.auiplugin:jquery</dependency>
-        <dependency>com.atlassian.auiplugin:jquery-ui-other</dependency>
-
-        <resource type="i18n" name="i18n" location="at.fellhofer.jira.adminhelper.i18n"/>
-        <resource type="download" name="admin_helper.css" location="/css/admin_helper.css"/>
-        <resource type="download" name="AdminHelper.js" location="/js/AdminHelper.js"/>
-        <resource type="download" name="images/" location="/images"/>
-
-        <context>AdminHelper</context>
-    </web-resource>
-    -->
-
     <web-resource name="Admin Web Resources" key="admin-resources">
         <dependency>com.atlassian.auiplugin:ajs</dependency>
         <resource type="download" name="admin.js" location="js/admin.js"/>
+        <resource type="download" name="admin_helper.css" location="css/admin_helper.css"/>
     </web-resource>
 
     <web-resource name="Create User Resources" key="create-resources">
@@ -61,18 +47,22 @@
 
     <web-resource name="Hardware Overview" key="hardware-resources">
         <dependency>com.atlassian.auiplugin:ajs</dependency>
+        <dependency>com.atlassian.auiplugin:aui-select2</dependency>
         <dependency>com.atlassian.auiplugin:aui-experimental-table-sortable</dependency>
-        <dependency>com.atlassian.auiplugin:aui-date-picker</dependency>
-        <resource type="download" name="hardware_overview.js" location="js/hardware_overview.js"/>
+        <resource type="download" name="hardware.js" location="js/hardware.js"/>
+        <resource type="download" name="hardware_dialog_device_details.js"
+                  location="js/hardware_dialog_device_details.js"/>
+        <resource type="download" name="hardware_dialog_lendout.js" location="js/hardware_dialog_lendout.js"/>
+        <resource type="download" name="hardware_dialog_new_device.js" location="js/hardware_dialog_new_device.js"/>
+        <resource type="download" name="hardware_dialog_new_hardware.js" location="js/hardware_dialog_new_hardware.js"/>
+        <resource type="download" name="hardware_dialog_remove_hardware.js"
+                  location="js/hardware_dialog_remove_hardware.js"/>
+        <resource type="download" name="hardware_dialog_return.js" location="js/hardware_dialog_return.js"/>
+        <resource type="download" name="hardware_dialog_sortout.js" location="js/hardware_dialog_sortout.js"/>
+        <resource type="download" name="hardware_populate_tables.js" location="js/hardware_populate_tables.js"/>
         <resource type="download" name="admin_helper.css" location="css/admin_helper.css"/>
+        <resource type="download" name="list.min.js" location="js/list.min.js"/>
     </web-resource>
-
-    <!-- publish our component -->
-    <!--
-    <component key="myPluginComponent" class="at.fellhofer.jira.adminhelper.jira.MyPluginComponentImpl" public="true">
-        <interface>at.fellhofer.jira.adminhelper.jira.MyPluginComponent</interface>
-    </component>
-    -->
 
     <servlet key="create-user-servlet" class="at.fellhofer.jira.adminhelper.CreateUserServlet">
         <url-pattern>/admin_helper/create_user</url-pattern>
@@ -90,11 +80,7 @@
         <url-pattern>/admin_helper/hardware</url-pattern>
     </servlet>
 
-    <!-- TODO delete me -->
-    <servlet key="todo-list" class="at.fellhofer.jira.adminhelper.BlubTodoServlet">
-        <url-pattern>/todo/list</url-pattern>
-    </servlet>
-
+    <component key="configuration" class="at.fellhofer.jira.adminhelper.activeobject.ConfigurationServiceImpl"/>
     <component key="device" class="at.fellhofer.jira.adminhelper.activeobject.DeviceServiceImpl"/>
     <component key="deviceComments" class="at.fellhofer.jira.adminhelper.activeobject.DeviceCommentServiceImpl"/>
     <component key="hardwareModel" class="at.fellhofer.jira.adminhelper.activeobject.HardwareModelServiceImpl"/>
@@ -131,12 +117,19 @@
 
     <ao key="ao-module">
         <description>The module configuring the Active Objects service used by this plugin</description>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.ApprovedGroup</entity>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.Configuration</entity>
         <entity>at.fellhofer.jira.adminhelper.activeobject.Device</entity>
         <entity>at.fellhofer.jira.adminhelper.activeobject.DeviceComment</entity>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.GithubTeam</entity>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.Group</entity>
         <entity>at.fellhofer.jira.adminhelper.activeobject.HardwareModel</entity>
         <entity>at.fellhofer.jira.adminhelper.activeobject.Lending</entity>
         <entity>at.fellhofer.jira.adminhelper.activeobject.OperatingSystem</entity>
         <entity>at.fellhofer.jira.adminhelper.activeobject.Producer</entity>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.Team</entity>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.TeamToGithubTeam</entity>
+        <entity>at.fellhofer.jira.adminhelper.activeobject.TeamToGroup</entity>
         <entity>at.fellhofer.jira.adminhelper.activeobject.TypeOfDevice</entity>
     </ao>
 
@@ -161,6 +154,16 @@
         <description>Link to AdminHelper-admin page.</description>
         <label key="admin_helper.admin.label"/>
         <link linkId="admin_helper-admin-link">/plugins/servlet/admin_helper/admin</link>
+    </web-item>
+
+
+    <!-- Hardware Management Part -->
+    <web-item key="hardware_management" name="Link to Hardware Servlet" section="system.top.navigation.bar" weight="47">
+        <label>Hardware Management</label>
+        <link linkId="hardware_management_link">/plugins/servlet/admin_helper/hardware</link>
+        <!-- at.fellhofer.jira.adminhelper.helper.PermissionCondition -->
+        <condition class="at.fellhofer.jira.adminhelper.helper.PermissionCondition">
+        </condition>
     </web-item>
 
 </atlassian-plugin>

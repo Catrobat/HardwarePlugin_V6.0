@@ -16,6 +16,9 @@
 
 package at.fellhofer.jira.adminhelper;
 
+import at.fellhofer.jira.adminhelper.activeobject.ConfigurationService;
+import at.fellhofer.jira.adminhelper.helper.PermissionCondition;
+import com.atlassian.jira.security.groups.GroupManager;
 import com.atlassian.sal.api.auth.LoginUriProvider;
 import com.atlassian.sal.api.user.UserManager;
 import com.atlassian.sal.api.websudo.WebSudoManager;
@@ -29,24 +32,34 @@ import java.net.URI;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public abstract class HelperServlet extends HttpServlet{
+public abstract class HelperServlet extends HttpServlet {
     private final UserManager userManager;
     private final LoginUriProvider loginUriProvider;
     private final WebSudoManager webSudoManager;
+    private final GroupManager groupManager;
+    private final ConfigurationService configurationService;
 
-    public HelperServlet(final UserManager userManager, final LoginUriProvider loginUriProvider, final WebSudoManager webSudoManager) {
+    public HelperServlet(final UserManager userManager, final LoginUriProvider loginUriProvider,
+                         final WebSudoManager webSudoManager, final GroupManager groupManager,
+                         final ConfigurationService configurationService) {
         this.userManager = checkNotNull(userManager, "userManager");
         this.loginUriProvider = checkNotNull(loginUriProvider, "loginProvider");
         this.webSudoManager = checkNotNull(webSudoManager, "webSudoManager");
+        this.groupManager = checkNotNull(groupManager);
+        this.configurationService = checkNotNull(configurationService);
     }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        PermissionCondition permissionCondition = new PermissionCondition(null, configurationService, userManager, groupManager);
         String username = userManager.getRemoteUsername(request);
         if (username == null) {
             redirectToLogin(request, response);
             return;
         } else if (!userManager.isSystemAdmin(username)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        } else if (!permissionCondition.isApproved(username)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }

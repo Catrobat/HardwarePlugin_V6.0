@@ -23,9 +23,15 @@ import java.util.List;
 
 @Transactional
 public interface DeviceService {
+
+    Device edit(Device device, HardwareModel hardwareModel, String imei, String serialNumber, String inventoryNumber,
+                String receivedFrom, Date receivedDate, String usefulLifOfAsset, Date sortedOutDate, String sortedOutComment);
+
     Device add(HardwareModel hardwareModel, String imei, String serialNumber, String inventoryNumber, String receivedFrom, Date receivedDate, String usefulLifeOfAsset);
 
     List<Device> all();
+
+    Device getDeviceById(int deviceId);
 
     Device sortOutDevice(int id, Date sortedOutDate, String sortedOutComment);
 
@@ -33,5 +39,5 @@ public interface DeviceService {
 
     List<Device> getSortedOutDevices();
 
-    List<Device> getSortedOutDevicesOfHardware(int hardwareId);
+    List<Device> getSortedOutDevicesForHardware(int hardwareId);
 }

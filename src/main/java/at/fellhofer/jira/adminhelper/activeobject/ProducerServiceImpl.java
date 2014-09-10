@@ -19,10 +19,13 @@ package at.fellhofer.jira.adminhelper.activeobject;
 import com.atlassian.activeobjects.external.ActiveObjects;
 import net.java.ao.Query;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
 
-public class ProducerServiceImpl implements ProducerService{
+public class ProducerServiceImpl implements ProducerService {
 
     private final ActiveObjects ao;
 
@@ -31,32 +34,40 @@ public class ProducerServiceImpl implements ProducerService{
     }
 
     @Override
-    public Producer getProducer(String producerName) {
-        producerName = escapeHtml4(producerName);
-
-        Producer[] producers = ao.find(Producer.class, Query.select().where("PRODUCER_NAME = ?", producerName));
-        if (producers.length == 0) {
+    public Producer getOrCreateProducer(String producerName) {
+        if (producerName == null || producerName.trim().length() == 0) {
             return null;
-        } else if (producers.length == 1) {
-            return producers[0];
         }
 
-        throw new RuntimeException("Should be unique - this should never happen!");
-    }
+        producerName = escapeHtml4(producerName.trim());
 
-    @Override
-    public Producer getOrCreateProducer(String producerName) {
-        producerName = escapeHtml4(producerName);
-
-        Producer producer = getProducer(producerName);
-        if(producer != null) {
-            return producer;
+        Producer[] producers = ao.find(Producer.class, Query.select()
+                .where("upper(PRODUCER_NAME) = upper(?)", producerName));
+        if (producers.length == 1) {
+            return producers[0];
+        } else if (producers.length > 1) {
+            throw new RuntimeException("Should be unique - this should never happen!");
         }
 
         final Producer createdProducer = ao.create(Producer.class);
         createdProducer.setProducerName(producerName);
         createdProducer.save();
         return createdProducer;
+    }
+
+    @Override
+    public List<Producer> searchProducers(String query) {
+        return Arrays.asList(ao.find(Producer.class, Query.select().where("upper(PRODUCER_NAME) LIKE upper(?)", "%" + query + "%")));
+    }
+
+    @Override
+    public void cleanUnused() {
+        List<Producer> producerList = Arrays.asList(ao.find(Producer.class));
+        for (Producer producer : producerList) {
+            if (producer.getHardwareModels().length == 0) {
+                ao.delete(producer);
+            }
+        }
     }
 }
 

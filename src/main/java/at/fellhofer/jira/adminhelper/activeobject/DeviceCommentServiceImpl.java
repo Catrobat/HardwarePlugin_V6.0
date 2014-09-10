@@ -18,10 +18,10 @@ package at.fellhofer.jira.adminhelper.activeobject;
 
 import com.atlassian.activeobjects.external.ActiveObjects;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
 
 public class DeviceCommentServiceImpl implements DeviceCommentService {
 
@@ -32,7 +32,21 @@ public class DeviceCommentServiceImpl implements DeviceCommentService {
     }
 
     @Override
-    public List<DeviceComment> all() {
-        return Arrays.asList(ao.find(DeviceComment.class));
+    public DeviceComment addDeviceComment(Device device, String author, String comment) {
+        if (device == null || author == null || author.trim().length() == 0 || comment == null || comment.trim().length() == 0) {
+            return null;
+        }
+
+        author = escapeHtml4(author.trim());
+        comment = escapeHtml4(comment.trim());
+
+        DeviceComment deviceComment = ao.create(DeviceComment.class);
+        deviceComment.setDevice(device);
+        deviceComment.setAuthor(author);
+        deviceComment.setComment(comment);
+        deviceComment.setDate(new Date());
+        deviceComment.save();
+
+        return deviceComment;
     }
 }

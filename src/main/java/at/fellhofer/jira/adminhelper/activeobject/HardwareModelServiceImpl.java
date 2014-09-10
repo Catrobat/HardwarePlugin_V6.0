@@ -41,36 +41,51 @@ public class HardwareModelServiceImpl implements HardwareModelService {
 
     @Override
     public HardwareModel add(String name, String typeOfDeviceName, String version, String price, String producerName, String operationSystemName, String articleNumber) {
-        name = escapeHtml4(name);
-        typeOfDeviceName = escapeHtml4(typeOfDeviceName);
-        version = escapeHtml4(version);
-        price = escapeHtml4(price);
-        producerName = escapeHtml4(producerName);
-        operationSystemName = escapeHtml4(operationSystemName);
-        articleNumber = escapeHtml4(articleNumber);
-
         TypeOfDevice typeOfDevice = typeOfDeviceService.getOrCreateTypeOfDevice(typeOfDeviceName);
         Producer producer = producerService.getOrCreateProducer(producerName);
         OperatingSystem operatingSystem = operatingSystemService.getOrCreateOperatingSystem(operationSystemName);
 
-        final HardwareModel hardwareModel = ao.create(HardwareModel.class);
-        hardwareModel.setName(name);
-        hardwareModel.setTypeOfDevice(typeOfDevice);
-        hardwareModel.setVersion(version);
-        hardwareModel.setPrice(price);
-        hardwareModel.setProducer(producer);
-        hardwareModel.setOperatingSystem(operatingSystem);
-        hardwareModel.setArticleNumber(articleNumber);
-        hardwareModel.save();
-        return hardwareModel;
+        return add(name, typeOfDevice, version, price, producer, operatingSystem, articleNumber);
     }
 
     @Override
-    public HardwareModel add(String name, TypeOfDevice typeOfDevice, String version, String price, Producer producer, OperatingSystem operationSystem, String articleNumber) {
-        name = escapeHtml4(name);
-        version = escapeHtml4(version);
-        price = escapeHtml4(price);
-        articleNumber = escapeHtml4(articleNumber);
+    public HardwareModel add(String name, TypeOfDevice typeOfDevice, String version, String price, Producer producer,
+                             OperatingSystem operationSystem, String articleNumber) {
+        if (name == null || name.trim().length() == 0) {
+            return null;
+        }
+        name = escapeHtml4(name.trim());
+
+        if (version != null && version.trim().length() != 0) {
+            version = escapeHtml4(version.trim());
+        } else {
+            version = null;
+        }
+
+        if (price != null && price.trim().length() != 0) {
+            price = escapeHtml4(price.trim());
+        } else {
+            price = null;
+        }
+
+        if (articleNumber != null && articleNumber.trim().length() != 0) {
+            articleNumber = escapeHtml4(articleNumber.trim());
+        } else {
+            articleNumber = null;
+        }
+
+        HardwareModel[] hardwareModels = ao.find(HardwareModel.class, Query.select().where("upper(NAME) = upper(?)", name));
+        for (HardwareModel hardwareModel : hardwareModels) {
+            if ((hardwareModel.getVersion() != null && version != null &&
+                    hardwareModel.getVersion().toUpperCase().equals(version.toUpperCase())) ||
+                    (hardwareModel.getVersion() == null && version == null)) {
+                typeOfDeviceService.cleanUnused();
+                producerService.cleanUnused();
+                operatingSystemService.cleanUnused();
+
+                return null;
+            }
+        }
 
         final HardwareModel hardwareModel = ao.create(HardwareModel.class);
         hardwareModel.setName(name);
@@ -94,7 +109,81 @@ public class HardwareModelServiceImpl implements HardwareModelService {
     }
 
     @Override
+    public HardwareModel edit(int id, String name, String typeOfDeviceName, String version, String price,
+                              String producer, String operationSystem, String articleNumber) {
+        HardwareModel hardwareModel = get(id);
+        if (hardwareModel == null)
+            return null;
+
+        if (name == null || name.trim().length() == 0) {
+            return null;
+        }
+        name = escapeHtml4(name.trim());
+
+        if (version != null && version.trim().length() != 0) {
+            version = escapeHtml4(version.trim());
+        } else {
+            version = null;
+        }
+
+        if (price != null && price.trim().length() != 0) {
+            price = escapeHtml4(price.trim());
+        } else {
+            price = null;
+        }
+
+        if (articleNumber != null && articleNumber.trim().length() != 0) {
+            articleNumber = escapeHtml4(articleNumber.trim());
+        } else {
+            articleNumber = null;
+        }
+
+        HardwareModel[] hardwareModels = ao.find(HardwareModel.class, Query.select().where("upper(NAME) = upper(?)", name));
+        for (HardwareModel hardwareModelToCheck : hardwareModels) {
+            if (hardwareModelToCheck.getVersion() == null && version == null) {
+                return null;
+            } else if (hardwareModelToCheck.getVersion() != null && version != null && hardwareModelToCheck.getVersion().toUpperCase().equals(version.toUpperCase())) {
+                return null;
+            }
+        }
+
+        hardwareModel.setName(name);
+        hardwareModel.setVersion(version);
+        hardwareModel.setPrice(price);
+        hardwareModel.setArticleNumber(articleNumber);
+
+        hardwareModel.setTypeOfDevice(typeOfDeviceService.getOrCreateTypeOfDevice(typeOfDeviceName));
+        hardwareModel.setProducer(producerService.getOrCreateProducer(producer));
+        hardwareModel.setOperatingSystem(operatingSystemService.getOrCreateOperatingSystem(operationSystem));
+
+        hardwareModel.save();
+
+        typeOfDeviceService.cleanUnused();
+        producerService.cleanUnused();
+        operatingSystemService.cleanUnused();
+
+        return hardwareModel;
+    }
+
+    @Override
     public List<HardwareModel> all() {
-        return Arrays.asList(ao.find(HardwareModel.class));
+        return Arrays.asList(ao.find(HardwareModel.class, Query.select().order("upper(NAME), upper(VERSION)")));
+    }
+
+    @Override
+    public void moveDevices(HardwareModel from, HardwareModel to) {
+        if (from == null || to == null) {
+            return;
+        }
+
+        for (Device device : from.getDevices()) {
+            device.setHardwareModel(to);
+            device.save();
+        }
+    }
+
+    @Override
+    public void delete(HardwareModel toDelete) {
+        ao.delete(toDelete);
     }
 }

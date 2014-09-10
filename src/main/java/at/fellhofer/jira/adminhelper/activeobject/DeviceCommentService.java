@@ -18,9 +18,7 @@ package at.fellhofer.jira.adminhelper.activeobject;
 
 import com.atlassian.activeobjects.tx.Transactional;
 
-import java.util.List;
-
 @Transactional
 public interface DeviceCommentService {
-    List<DeviceComment> all();
+    DeviceComment addDeviceComment(Device device, String author, String comment);
 }

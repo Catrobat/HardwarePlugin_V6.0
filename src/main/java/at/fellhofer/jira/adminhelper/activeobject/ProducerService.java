@@ -18,9 +18,14 @@ package at.fellhofer.jira.adminhelper.activeobject;
 
 import com.atlassian.activeobjects.tx.Transactional;
 
+import java.util.List;
+
 @Transactional
 public interface ProducerService {
-    Producer getProducer(String producerName);
 
     Producer getOrCreateProducer(String producerName);
+
+    List<Producer> searchProducers(String query);
+
+    void cleanUnused();
 }

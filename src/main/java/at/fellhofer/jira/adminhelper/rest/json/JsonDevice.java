@@ -17,17 +17,24 @@
 package at.fellhofer.jira.adminhelper.rest.json;
 
 import at.fellhofer.jira.adminhelper.activeobject.Device;
+import at.fellhofer.jira.adminhelper.activeobject.DeviceComment;
+import at.fellhofer.jira.adminhelper.activeobject.Lending;
+import com.atlassian.jira.component.ComponentAccessor;
+import com.atlassian.jira.user.ApplicationUser;
+import com.atlassian.jira.user.util.UserManager;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @XmlRootElement
 public class JsonDevice {
 
     @XmlElement
-    private int ID;
+    private int id;
 
     @XmlElement
     private String hardwareModelName;
@@ -59,19 +66,31 @@ public class JsonDevice {
     private String sortedOutComment;
 
     @XmlElement
-    private String currentlyLentOutFrom;
+    private String currentlyLentOutBy;
 
     @XmlElement
     @XmlJavaTypeAdapter(DateAdapter.class)
     private Date currentlyLentOutSince;
+
+    @XmlElement
+    private List<JsonDeviceComment> comments;
+
+    @XmlElement
+    private List<JsonLending> lendings;
+
+    @XmlElement
+    private JsonHardwareModel hardwareModel;
 
     public JsonDevice() {
 
     }
 
     public JsonDevice(Device toCopy) {
-        ID = toCopy.getID();
+        id = toCopy.getID();
         hardwareModelName = toCopy.getHardwareModel().getName();
+        if (toCopy.getHardwareModel().getVersion() != null && toCopy.getHardwareModel().getVersion().length() != 0) {
+            hardwareModelName += " (" + toCopy.getHardwareModel().getVersion() + ")";
+        }
         serialNumber = toCopy.getSerialNumber();
         imei = toCopy.getImei();
         inventoryNumber = toCopy.getInventoryNumber();
@@ -80,14 +99,44 @@ public class JsonDevice {
         usefulLiveOfAsset = toCopy.getUsefulLifeOfAsset();
         sortedOutDate = toCopy.getSortedOutDate();
         sortedOutComment = toCopy.getSortedOutComment();
+
+        Lending[] lendingsArray = toCopy.getLendings();
+        for (int i = lendingsArray.length - 1; i >= 0; i--) {
+            if (lendingsArray[i].getEnd() == null) {
+                currentlyLentOutSince = lendingsArray[i].getBegin();
+                ApplicationUser user = ComponentAccessor.getUserManager().getUserByKey(lendingsArray[i].getLendingByUserKey());
+                if (user != null)
+                    currentlyLentOutBy = user.getUsername();
+                else
+                    currentlyLentOutBy = lendingsArray[i].getLendingByUserKey();
+            }
+        }
     }
 
-    public int getID() {
-        return ID;
+    public JsonDevice(Device toCopy, UserManager userManager) {
+        this(toCopy);
+
+        this.comments = new ArrayList<JsonDeviceComment>();
+        DeviceComment[] deviceComments = toCopy.getDeviceComments();
+        for (int i = 0; i < deviceComments.length; i++) {
+            this.comments.add(new JsonDeviceComment(deviceComments[i], userManager));
+        }
+
+        this.lendings = new ArrayList<JsonLending>();
+        Lending[] lendings = toCopy.getLendings();
+        for (int i = 0; i < lendings.length; i++) {
+            this.lendings.add(new JsonLending(lendings[i], userManager));
+        }
+
+        this.hardwareModel = new JsonHardwareModel(toCopy.getHardwareModel());
     }
 
-    public void setID(int ID) {
-        this.ID = ID;
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getHardwareModelName() {
@@ -162,12 +211,12 @@ public class JsonDevice {
         this.sortedOutComment = sortedOutComment;
     }
 
-    public String getCurrentlyLentOutFrom() {
-        return currentlyLentOutFrom;
+    public String getCurrentlyLentOutBy() {
+        return currentlyLentOutBy;
     }
 
-    public void setCurrentlyLentOutFrom(String currentlyLentOutFrom) {
-        this.currentlyLentOutFrom = currentlyLentOutFrom;
+    public void setCurrentlyLentOutBy(String currentlyLentOutBy) {
+        this.currentlyLentOutBy = currentlyLentOutBy;
     }
 
     public Date getCurrentlyLentOutSince() {
@@ -176,5 +225,29 @@ public class JsonDevice {
 
     public void setCurrentlyLentOutSince(Date currentlyLentOutSince) {
         this.currentlyLentOutSince = currentlyLentOutSince;
+    }
+
+    public List<JsonDeviceComment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<JsonDeviceComment> comments) {
+        this.comments = comments;
+    }
+
+    public List<JsonLending> getLendings() {
+        return lendings;
+    }
+
+    public void setLendings(List<JsonLending> lendings) {
+        this.lendings = lendings;
+    }
+
+    public JsonHardwareModel getHardwareModel() {
+        return hardwareModel;
+    }
+
+    public void setHardwareModel(JsonHardwareModel hardwareModel) {
+        this.hardwareModel = hardwareModel;
     }
 }

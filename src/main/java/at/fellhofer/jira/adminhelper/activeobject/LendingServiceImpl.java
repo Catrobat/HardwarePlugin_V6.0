@@ -16,14 +16,17 @@
 
 package at.fellhofer.jira.adminhelper.activeobject;
 
+import at.fellhofer.jira.adminhelper.helper.HelperUtil;
 import com.atlassian.activeobjects.external.ActiveObjects;
 import net.java.ao.Query;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
 
 public class LendingServiceImpl implements LendingService {
 
@@ -34,10 +37,27 @@ public class LendingServiceImpl implements LendingService {
     }
 
     @Override
-    public Lending add(Device device, String lendingUserKey, String purpose, String comment, Date begin) {
+    public Lending lendOut(Device device, String lendingByUserKey, String lendingIssuerUserKey, String purpose, String comment, Date begin) {
+        if (device == null || lendingByUserKey == null || lendingByUserKey.trim().length() == 0 || lendingIssuerUserKey == null ||
+                lendingIssuerUserKey.trim().length() == 0 || begin == null) {
+            return null;
+        }
+
+        if (ao.find(Lending.class, Query.select().where("DEVICE_ID = ? AND END IS NULL", device.getID())).length != 0) {
+            return null;
+        }
+
+        lendingByUserKey = escapeHtml4(lendingByUserKey.trim());
+        lendingIssuerUserKey = escapeHtml4(lendingIssuerUserKey.trim());
+        if (purpose != null)
+            purpose = escapeHtml4(purpose.trim());
+        if (comment != null)
+            comment = escapeHtml4(comment.trim());
+
         Lending lending = ao.create(Lending.class);
         lending.setDevice(device);
-        lending.setLendingUserKey(lendingUserKey);
+        lending.setLendingByUserKey(lendingByUserKey);
+        lending.setLendingIssuerUserKey(lendingIssuerUserKey);
         lending.setPurpose(purpose);
         lending.setComment(comment);
         lending.setBegin(begin);
@@ -47,11 +67,26 @@ public class LendingServiceImpl implements LendingService {
     }
 
     @Override
-    public void bringBack(Lending lending, String purpose, String comment, Date end) {
+    public Lending bringBack(Lending lending, String purpose, String comment, Date end) {
+        if (lending == null)
+            return null;
+
+        if (purpose != null)
+            purpose = escapeHtml4(purpose.trim());
+        if (comment != null)
+            comment = escapeHtml4(comment.trim());
+
+        // just the date matters - not the time
+        if (end == null || HelperUtil.clearTime(end).getTime() < HelperUtil.clearTime(lending.getBegin()).getTime()) {
+            return null;
+        }
+
         lending.setPurpose(purpose);
         lending.setComment(comment);
         lending.setEnd(end);
         lending.save();
+
+        return lending;
     }
 
     @Override
@@ -61,6 +96,9 @@ public class LendingServiceImpl implements LendingService {
 
     @Override
     public List<Lending> currentlyLentOutDevices(HardwareModel hardwareModel) {
+        if (hardwareModel == null)
+            return new ArrayList<Lending>();
+
         return Arrays.asList(ao.find(Lending.class, Query.select()
                 .alias(Lending.class, "lending")
                 .alias(Device.class, "device")

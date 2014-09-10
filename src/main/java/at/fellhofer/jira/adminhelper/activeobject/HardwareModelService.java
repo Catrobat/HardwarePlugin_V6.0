@@ -16,7 +16,6 @@
 
 package at.fellhofer.jira.adminhelper.activeobject;
 
-import at.fellhofer.jira.adminhelper.activeobject.HardwareModel;
 import com.atlassian.activeobjects.tx.Transactional;
 
 import java.util.List;
@@ -29,5 +28,11 @@ public interface HardwareModelService {
 
     HardwareModel get(int id);
 
+    HardwareModel edit(int id, String name, String typeOfDeviceName, String version, String price, String producer, String operationSystem, String articleNumber);
+
     List<HardwareModel> all();
+
+    void moveDevices(HardwareModel from, HardwareModel to);
+
+    void delete(HardwareModel toDelete);
 }

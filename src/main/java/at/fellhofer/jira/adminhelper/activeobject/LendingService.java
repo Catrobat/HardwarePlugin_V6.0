@@ -23,9 +23,9 @@ import java.util.List;
 
 @Transactional
 public interface LendingService {
-    Lending add(Device device, String lendingUserKey, String purpose, String comment, Date begin);
+    Lending lendOut(Device device, String lendingByUserKey, String lendingIssuerUserKey, String purpose, String comment, Date begin);
 
-    void bringBack(Lending lending, String purpose, String comment, Date end);
+    Lending bringBack(Lending lending, String purpose, String comment, Date end);
 
     List<Lending> currentlyLentOut();
 
