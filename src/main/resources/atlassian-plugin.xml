@@ -43,6 +43,7 @@
 
     <web-resource name="Create User Resources" key="modify-resources">
         <dependency>com.atlassian.auiplugin:ajs</dependency>
+        <dependency>com.atlassian.auiplugin:aui-select2</dependency>
         <dependency>com.atlassian.auiplugin:aui-experimental-table-sortable</dependency>
         <resource type="download" name="modify_user.js" location="js/modify_user.js"/>
         <resource type="download" name="user_helper.js" location="js/user_helper.js"/>

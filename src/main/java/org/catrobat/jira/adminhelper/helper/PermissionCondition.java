@@ -54,7 +54,7 @@ public class PermissionCondition extends AbstractPermissionCondition {
     }
 
     public boolean isApproved(ApplicationUser applicationUser) {
-        if (!userManager.isSystemAdmin(applicationUser.getUsername())) {
+        if (applicationUser == null || !userManager.isSystemAdmin(applicationUser.getUsername())) {
             return false;
         }
 

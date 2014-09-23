@@ -33,7 +33,7 @@ function populateTeamTable(baseUrl, tableId) {
 
 function getTeamList(baseUrl, callme) {
     AJS.$.ajax({
-        url: baseUrl + "/rest/admin-helper/1.0/config/getTeamList",
+        url: baseUrl + "/rest/admin-helper/latest/config/getTeamList",
         type: "GET",
         contentType: "application/json",
         success: function (result) {

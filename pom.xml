@@ -27,7 +27,7 @@
         <url>https://github.com/felly/jiraadminhelper</url>
     </organization>
     <name>AdminHelper</name>
-    <description>This plugin should help Admins to easily create new users.</description>
+    <description>This plugin should help Admins to easily create new users and manage hardware lending.</description>
     <packaging>atlassian-plugin</packaging>
     <dependencies>
         <dependency>

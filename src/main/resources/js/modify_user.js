@@ -109,13 +109,14 @@ AJS.toInit(function () {
     }
 
     function showChangeGithubDialog(userName, githubName) {
-        getTeamList(baseUrl, function (teamList) {
+        getConfigAndCallback(baseUrl, function (config) {
+            var teamList = config.teams;
             var checkboxSet = "<fieldset class=\"group\">\n" +
                 "<legend><span>Team</span></legend>\n";
             for (var i = 0; i < teamList.length; i++) {
                 checkboxSet += "<div class=\"checkbox\">\n" +
-                    "<input class=\"checkbox\" type=\"checkbox\" name=\"" + teamList[i] + "\" id=\"" + teamList[i] + "\">\n" +
-                    "<label for=\"" + teamList[i] + "\">" + teamList[i] + "</label>\n" +
+                    "<input class=\"checkbox\" type=\"checkbox\" name=\"" + teamList[i].name + "\" id=\"" + teamList[i].name + "\">\n" +
+                    "<label for=\"" + teamList[i].name + "\">" + teamList[i].name + "</label>\n" +
                     "</div>\n";
             }
             checkboxSet += "</fieldset>";
@@ -135,11 +136,11 @@ AJS.toInit(function () {
             dialog.addSubmit("OK", function (dialog) {
                 var selectedTeamList = [];
                 for (var i = 0; i < teamList.length; i++) {
-                    if (AJS.$("#" + teamList[i]).prop("checked")) {
-                        selectedTeamList.push(teamList[i]);
+                    if (AJS.$("#" + teamList[i].name).prop("checked")) {
+                        selectedTeamList.push(teamList[i].name);
                     }
                 }
-                changeGithubUser(userName, AJS.$("#github-name").val(), selectedTeamList);
+                changeGithubUser(userName, AJS.$("#github-name").auiSelect2("val"), selectedTeamList);
                 dialog.remove();
             });
             dialog.addLink("Cancel", function (dialog) {
@@ -147,6 +148,29 @@ AJS.toInit(function () {
             }, "#");
 
             dialog.show();
+
+            AJS.$("#github-name").auiSelect2({
+                placeholder: "Search for user",
+                minimumInputLength: 1,
+                ajax: {
+                    url: "https://api.github.com/search/users",
+                    dataType: "json",
+                    data: function (term, page) {
+                        return "q=" + term + "+type:User&order=asc&access_token=" + config.githubTokenPublic;
+                    },
+                    results: function (data, page) {
+                        var select2data = [];
+                        for (var i = 0; i < data.items.length; i++) {
+                            select2data.push({id: data.items[i].login, text: data.items[i].login});
+                        }
+                        return {results: select2data};
+                    }
+                }
+            });
+
+            if (githubName.length != 0) {
+                AJS.$("#github-name").auiSelect2("data", {id: githubName, text: githubName});
+            }
         });
     }
 
