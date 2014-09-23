@@ -26,13 +26,13 @@ public interface Team extends Entity {
 
     void setTeamName(String teamName);
 
-    Configuration getConfiguration();
+    AdminHelperConfig getConfiguration();
 
-    void setConfiguration(Configuration configuration);
+    void setConfiguration(AdminHelperConfig configuration);
 
-    @ManyToMany(value = TeamToGithubTeam.class)
+    @ManyToMany(value = TeamToGithubTeam.class, reverse = "getTeam", through = "getGithubTeam")
     GithubTeam[] getGithubTeams();
 
-    @ManyToMany(value = TeamToGroup.class)
+    @ManyToMany(value = TeamToGroup.class, reverse = "getTeam", through = "getGroup")
     Group[] getGroups();
 }

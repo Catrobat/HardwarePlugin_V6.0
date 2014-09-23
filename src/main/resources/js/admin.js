@@ -29,21 +29,109 @@ AJS.toInit(function () {
             url: baseUrl + "/rest/admin-helper/1.0/config/getConfig",
             dataType: "json",
             success: function (config) {
-                AJS.$("#github_token").attr("value", config.githubToken);
-                AJS.$("#github_organization").attr("value", config.githubOrganization);
+                if (config.githubToken)
+                    AJS.$("#github_token").attr("placeholder", config.githubToken);
+                if (config.githubTokenPublic)
+                    AJS.$("#github_token_public").val(config.githubTokenPublic);
+                if (config.githubOrganization)
+                    AJS.$("#github_organization").val(config.githubOrganization);
                 teams = [];
                 for (var i = 0; i < config.teams.length; i++) {
-                    var obj = config.teams[i];
-                    teams.push(obj['name']);
-                    AJS.$("#teams").append("<h3>" + obj['name'] + "</h3><fieldset>");
-                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + obj['name'] + "-github-teams\">GitHub Teams</label><input class=\"text\" type=\"text\" id=\"" + obj['name'] + "-github-teams\" name=\"github-teams\" value=\"" + obj['githubTeams'] + "\"><div class=\"description\">User gets added to those comma separated teams.</div></div>");
-                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + obj['name'] + "-coordinator\">Coordinator</label><input class=\"text\" type=\"text\" id=\"" + obj['name'] + "-coordinator\" value=\"" + obj['coordinatorGroups'] + "\"><div class=\"description\">User gets added to those comma separated groups.</div></div>");
-                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + obj['name'] + "-senior\">Senior</label><input class=\"text\" type=\"text\" id=\"" + obj['name'] + "-senior\" value=\"" + obj['seniorGroups'] + "\"><div class=\"description\">User gets added to those comma separated groups.</div></div>");
-                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + obj['name'] + "-developer\">Developer</label><input class=\"text\" type=\"text\" id=\"" + obj['name'] + "-developer\" value=\"" + obj['developerGroups'] + "\"><div class=\"description\">User gets added to those comma separated groups.</div></div>");
+                    var team = config.teams[i];
+                    teams.push(team['name']);
+                    AJS.$("#teams").append("<h3>" + team['name'] + "</h3><fieldset>");
+                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + team['name'] + "-github-teams\">GitHub Teams</label><input class=\"text github\" type=\"text\" id=\"" + team['name'] + "-github-teams\" name=\"github-teams\" value=\"" + team["githubTeams"] + "\"></div>");
+                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + team['name'] + "-coordinator\">Coordinator</label><input class=\"text jira-group\" type=\"text\" id=\"" + team['name'] + "-coordinator\" value=\"" + team['coordinatorGroups'] + "\"></div>");
+                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + team['name'] + "-senior\">Senior</label><input class=\"text jira-group\" type=\"text\" id=\"" + team['name'] + "-senior\" value=\"" + team['seniorGroups'] + "\"></div>");
+                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + team['name'] + "-developer\">Developer</label><input class=\"text jira-group\" type=\"text\" id=\"" + team['name'] + "-developer\" value=\"" + team['developerGroups'] + "\"></div>");
                     AJS.$("#teams").append("</fieldset>");
                 }
+
+                if(config.availableGithubTeams) {
+                    AJS.$(".github").auiSelect2({
+                        placeholder: "Search for teams",
+                        tags: config.availableGithubTeams,
+                        tokenSeparators: [",", " "]
+                    });
+                }
+
+                AJS.$("#plugin-permission").auiSelect2({
+                    placeholder: "Search for users and groups",
+                    minimumInputLength: 0,
+                    tags: true,
+                    tokenSeparators: [",", " "],
+                    ajax: {
+                        url: baseUrl + "/rest/api/2/groupuserpicker",
+                        dataType: "json",
+                        data: function (term, page) {
+                            return {query: term};
+                        },
+                        results: function (data, page) {
+                            var select2data = [];
+                            for (var i = 0; i < data.groups.groups.length; i++) {
+                                select2data.push({id: "groups-" + data.groups.groups[i].name, text: data.groups.groups[i].name});
+                            }
+                            for (var i = 0; i < data.users.users.length; i++) {
+                                select2data.push({id: "users-" + data.users.users[i].name, text: data.users.users[i].name});
+                            }
+                            return {results: select2data};
+                        }
+                    },
+                    initSelection: function (elements, callback) {
+                        var data = [];
+                        var array = elements.val().split(",");
+                        for (var i = 0; i < array.length; i++) {
+                            data.push({id: array[i], text: array[i].replace(/^users-/i, "").replace(/^groups-/i, "")});
+                        }
+                        callback(data);
+                    }
+                });
+
+                AJS.$(".jira-group").auiSelect2({
+                    placeholder: "Search for groups",
+                    minimumInputLength: 0,
+                    tags: true,
+                    tokenSeparators: [",", " "],
+                    ajax: {
+                        url: baseUrl + "/rest/api/2/groups/picker",
+                        dataType: "json",
+                        data: function (term, page) {
+                            return {query: term};
+                        },
+                        results: function (data, page) {
+                            var select2data = [];
+                            for (var i = 0; i < data.groups.length; i++) {
+                                select2data.push({id: data.groups[i].name, text: data.groups[i].name});
+                            }
+                            return {results: select2data};
+                        }
+                    },
+                    initSelection: function (elements, callback) {
+                        var data = [];
+                        var array = elements.val().split(",");
+                        for (var i = 0; i < array.length; i++) {
+                            data.push({id: array[i], text: array[i].replace(/^users-/i, "").replace(/^groups-/i, "")});
+                        }
+                        callback(data);
+                    }
+                });
+
+                var approved = [];
+                if (config.approvedGroups) {
+                    for (var i = 0; i < config.approvedGroups.length; i++) {
+                        approved.push({id: "groups-" + config.approvedGroups[i], text: config.approvedGroups[i]});
+                    }
+                }
+
+                if (config.approvedUsers) {
+                    for (var i = 0; i < config.approvedUsers.length; i++) {
+                        approved.push({id: "users-" + config.approvedUsers[i], text: config.approvedUsers[i]});
+                    }
+                }
+
+                AJS.$("#plugin-permission").auiSelect2("data", approved);
             },
-            error: function () {
+            error: function (error) {
                 AJS.messages.error({
                     title: "Error!",
                     body: "Something went wrong!"
@@ -53,17 +141,54 @@ AJS.toInit(function () {
     }
 
     function updateConfig() {
+        if ((!AJS.$("#github_token").val() && !AJS.$("#github_token").attr("placeholder")) || !AJS.$("#github_organization").val()
+            || !AJS.$("#github_token_public").val()) {
+            AJS.messages.error({
+                title: "Error!",
+                body: "API Tokens and Organisation must be filled out"
+            });
+            return;
+        }
+
         var config = {};
-        config.githubToken = AJS.$("#github_token").attr("value");
-        config.githubOrganization = AJS.$("#github_organization").attr("value");
+        config.githubToken = AJS.$("#github_token").val();
+        config.githubTokenPublic = AJS.$("#github_token_public").val();
+        config.githubOrganization = AJS.$("#github_organization").val();
+
+        var usersAndGroups = AJS.$("#plugin-permission").auiSelect2("val");
+        var approvedUsers = [];
+        var approvedGroups = [];
+        for (var i = 0; i < usersAndGroups.length; i++) {
+            if (usersAndGroups[i].match("^users-")) {
+                approvedUsers.push(usersAndGroups[i].split("users-")[1]);
+            } else if (usersAndGroups[i].match("^groups-")) {
+                approvedGroups.push(usersAndGroups[i].split("groups-")[1]);
+            }
+        }
+
+        config.approvedUsers = approvedUsers;
+        config.approvedGroups = approvedGroups;
         config.teams = [];
         for (var i = 0; i < teams.length; i++) {
             var tempTeam = {};
             tempTeam.name = teams[i];
-            tempTeam.githubTeams = AJS.$("#" + tempTeam.name + "-github-teams").attr("value").split(",");
-            tempTeam.coordinatorGroups = AJS.$("#" + tempTeam.name + "-coordinator").attr("value").split(",");
-            tempTeam.seniorGroups = AJS.$("#" + tempTeam.name + "-senior").attr("value").split(",");
-            tempTeam.developerGroups = AJS.$("#" + tempTeam.name + "-developer").attr("value").split(",");
+            tempTeam.githubTeams = AJS.$("#" + tempTeam.name + "-github-teams").auiSelect2("val");
+
+            tempTeam.coordinatorGroups = AJS.$("#" + tempTeam.name + "-coordinator").auiSelect2("val");
+            for(var i = 0; i < tempTeam.coordinatorGroups.length; i++) {
+                tempTeam.coordinatorGroups[i] = tempTeam.coordinatorGroups[i].replace(/^groups-/i, "");
+            }
+
+            tempTeam.seniorGroups = AJS.$("#" + tempTeam.name + "-senior").auiSelect2("val");
+            for(var i = 0; i < tempTeam.seniorGroups.length; i++) {
+                tempTeam.seniorGroups[i] = tempTeam.seniorGroups[i].replace(/^groups-/i, "");
+            }
+
+            tempTeam.developerGroups = AJS.$("#" + tempTeam.name + "-developer").auiSelect2("val");
+            for(var i = 0; i < tempTeam.developerGroups.length; i++) {
+                tempTeam.developerGroups[i] = tempTeam.developerGroups[i].replace(/^groups-/i, "");
+            }
+
             config.teams.push(tempTeam);
         }
 
@@ -79,10 +204,10 @@ AJS.toInit(function () {
                     body: "Settings saved!"
                 });
             },
-            error: function () {
+            error: function (error) {
                 AJS.messages.error({
                     title: "Error!",
-                    body: "Something went wrong!"
+                    body: error.responseText
                 });
             }
         });
@@ -155,5 +280,5 @@ AJS.toInit(function () {
     AJS.$("a[href='#tabs-general']").click(function () {
         AJS.$("#teams").html("");
         populateForm();
-    })
+    });
 });

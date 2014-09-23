@@ -68,13 +68,22 @@ public class AdminHelperDatabaseUpdater implements DatabaseUpdater {
 
     @Override
     public void update(EntityManager em) throws Exception {
+        em.migrate(AdminHelperConfig.class);
+        em.migrate(ApprovedGroup.class);
+        em.migrate(ApprovedUser.class);
         em.migrate(Device.class);
         em.migrate(DeviceComment.class);
+        em.migrate(GithubTeam.class);
+        em.migrate(Group.class);
         em.migrate(HardwareModel.class);
         em.migrate(Lending.class);
         em.migrate(OperatingSystem.class);
         em.migrate(Producer.class);
+        em.migrate(Team.class);
+        em.migrate(TeamToGithubTeam.class);
+        em.migrate(TeamToGroup.class);
         em.migrate(TypeOfDevice.class);
+
 
         final TypeOfDevice typeOfDevice1 = em.create(TypeOfDevice.class);
         typeOfDevice1.setTypeOfDeviceName(TYPE_OF_DEVICE_1);

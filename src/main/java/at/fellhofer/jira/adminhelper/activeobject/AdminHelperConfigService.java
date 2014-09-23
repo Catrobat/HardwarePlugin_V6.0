@@ -1,0 +1,55 @@
+/*
+ * Copyright 2014 Stephan Fellhofer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package at.fellhofer.jira.adminhelper.activeobject;
+
+import com.atlassian.activeobjects.tx.Transactional;
+
+import java.util.List;
+
+@Transactional
+public interface AdminHelperConfigService {
+    AdminHelperConfig getConfiguration();
+
+    AdminHelperConfig setPublicApiToken(String publicApiToken);
+
+    AdminHelperConfig setApiToken(String apiToken);
+
+    AdminHelperConfig setOrganisation(String organisation);
+
+    Team addTeam(String teamName, List<Integer> githubTeamIdList, List<String> coordinatorGroups,
+                 List<String> seniorGroups, List<String> developerGroups);
+
+    AdminHelperConfig removeTeam(String teamName);
+
+    List<String> getGroupsForRole(String teamName, TeamToGroup.Role role);
+
+    boolean isGroupApproved(String groupName);
+
+    boolean isUserApproved(String userKey);
+
+    ApprovedGroup addApprovedGroup(String approvedGroupName);
+
+    AdminHelperConfig removeApprovedGroup(String approvedGroupName);
+
+    ApprovedUser addApprovedUser(String approvedUserKey);
+
+    AdminHelperConfig removeApprovedUser(String approvedUserKey);
+
+    void clearApprovedGroups();
+
+    void clearApprovedUsers();
+}

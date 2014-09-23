@@ -52,7 +52,7 @@ AJS.toInit(function () {
         AJS.$("#firstname").attr("value", "");
         AJS.$("#lastname").attr("value", "");
         AJS.$("#email").attr("value", "");
-        AJS.$("#github").attr("value", "");
+        AJS.$("#github").auiSelect2("data", null);
 
         for (var i = 0; i < teamList.length; i++) {
             AJS.$("#" + teamList[i] + "-none").prop("checked", true);
@@ -65,7 +65,7 @@ AJS.toInit(function () {
         userToCreate.firstName = AJS.$("#firstname").attr("value");
         userToCreate.lastName = AJS.$("#lastname").attr("value");
         userToCreate.email = AJS.$("#email").attr("value");
-        userToCreate.githubName = AJS.$("#github").attr("value");
+        userToCreate.githubName = AJS.$("#github").auiSelect2("val");
         userToCreate.coordinatorList = [];
         userToCreate.seniorList = [];
         userToCreate.developerList = [];
@@ -104,22 +104,23 @@ AJS.toInit(function () {
 
     populateTeamTable(baseUrl, "#team-body");
 
-    AJS.$('#github').change(function () {
-        var user_input = AJS.$(this).val();
-        jQuery.ajax({
-            url: baseUrl + "/rest/admin-helper/1.0/github/searchUser",
-            type: "PUT",
-            contentType: "application/json",
-            data: user_input,
-            success: function (response) {
-                if (response == "success") {
-                    AJS.$('#github-error').hide();
-                } else {
-                    AJS.$('#github-error').show();
+    getConfigAndCallback(baseUrl, function (config) {
+        AJS.$("#github").auiSelect2({
+            placeholder: "Search for user",
+            minimumInputLength: 1,
+            ajax: {
+                url: "https://api.github.com/search/users",
+                dataType: "json",
+                data: function (term, page) {
+                    return "q=" + term + "+type:User&order=asc&access_token=" + config.githubTokenPublic;
+                },
+                results: function (data, page) {
+                    var select2data = [];
+                    for (var i = 0; i < data.items.length; i++) {
+                        select2data.push({id: data.items[i].login, text: data.items[i].login});
+                    }
+                    return {results: select2data};
                 }
-            },
-            error: function () {
-                AJS.$('#github-error').show();
             }
         });
     });

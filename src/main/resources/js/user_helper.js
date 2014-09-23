@@ -17,27 +17,16 @@
 "use strict";
 
 function populateTeamTable(baseUrl, tableId) {
-    AJS.$.ajax({
-        url: baseUrl + "/rest/admin-helper/1.0/config/getConfig",
-        dataType: "json",
-        success: function (config) {
-            AJS.$(tableId).empty();
-            for (var i = 0; i < config.teams.length; i++) {
-                var obj = config.teams[i];
-                AJS.$(tableId).append("<tr><td headers=\"basic-team\">" + obj['name'] +
-                    "</td><td headers=\"basic-coordinator\"><input class=\"radio\" type=\"radio\" name=\"" + obj['name'] +
-                    "\" id=\"" + obj['name'] + "-coordinator\" value=\"coordinator\"></td><td headers=\"basic-senior\"><input class=\"radio\" type=\"radio\" name=\"" +
-                    obj['name'] + "\" id=\"" + obj['name'] + "-senior\" value=\"senior\"></td><td headers=\"basic-developer\"><input class=\"radio\" type=\"radio\" name=\"" +
-                    obj['name'] + "\" id=\"" + obj['name'] + "-developer\" value=\"developer\"></td><td headers=\"basic-none\"><input class=\"radio\" type=\"radio\" checked=\"checked\" name=\"" +
-                    obj['name'] + "\" id=\"" + obj['name'] + "-none\" value=\"none\"></td></tr>");
-            }
-
-        },
-        error: function () {
-            AJS.messages.error({
-                title: "Error!",
-                body: "Something went wrong!"
-            });
+    getConfigAndCallback(baseUrl, function (config) {
+        AJS.$(tableId).empty();
+        for (var i = 0; i < config.teams.length; i++) {
+            var obj = config.teams[i];
+            AJS.$(tableId).append("<tr><td headers=\"basic-team\">" + obj['name'] +
+                "</td><td headers=\"basic-coordinator\"><input class=\"radio\" type=\"radio\" name=\"" + obj['name'] +
+                "\" id=\"" + obj['name'] + "-coordinator\" value=\"coordinator\"></td><td headers=\"basic-senior\"><input class=\"radio\" type=\"radio\" name=\"" +
+                obj['name'] + "\" id=\"" + obj['name'] + "-senior\" value=\"senior\"></td><td headers=\"basic-developer\"><input class=\"radio\" type=\"radio\" name=\"" +
+                obj['name'] + "\" id=\"" + obj['name'] + "-developer\" value=\"developer\"></td><td headers=\"basic-none\"><input class=\"radio\" type=\"radio\" checked=\"checked\" name=\"" +
+                obj['name'] + "\" id=\"" + obj['name'] + "-none\" value=\"none\"></td></tr>");
         }
     });
 }
@@ -49,6 +38,22 @@ function getTeamList(baseUrl, callme) {
         contentType: "application/json",
         success: function (result) {
             callme(result);
+        }
+    });
+}
+
+function getConfigAndCallback(baseUrl, callback) {
+    AJS.$.ajax({
+        url: baseUrl + "/rest/admin-helper/latest/config/getConfig",
+        dataType: "json",
+        success: function (config) {
+            callback(config);
+        },
+        error: function () {
+            AJS.messages.error({
+                title: "Error!",
+                body: "Something went wrong!"
+            });
         }
     });
 }

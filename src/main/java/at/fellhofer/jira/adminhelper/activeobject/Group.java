@@ -16,9 +16,7 @@
 
 package at.fellhofer.jira.adminhelper.activeobject;
 
-import net.java.ao.Entity;
-import net.java.ao.ManyToMany;
-import net.java.ao.Preload;
+import net.java.ao.*;
 
 @Preload
 public interface Group extends Entity {
@@ -26,6 +24,9 @@ public interface Group extends Entity {
 
     void setGroupName(String groupName);
 
-    @ManyToMany(value = TeamToGroup.class)
+    @OneToMany(reverse = "getGroup")
+    TeamToGroup[] getTeamToGroups();
+
+    @ManyToMany(value = TeamToGroup.class, reverse = "getGroup", through = "getTeam")
     Team[] getTeams();
 }

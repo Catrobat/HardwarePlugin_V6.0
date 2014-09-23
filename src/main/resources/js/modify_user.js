@@ -75,13 +75,16 @@ AJS.toInit(function () {
                     var actionClass = obj['active'] ? "inactivate" : "activate";
                     var githubColumnText = obj['githubName'] ? obj['githubName'] : "add GitHub name";
                     var githubColumn = "<a id=\"" + obj['userName'] + "\" class=\"change-github\" href=\"#\">" + githubColumnText + "</a>";
-                    AJS.$("#user-body").append("<tr><td headers=\"basic-username\">" + username + "</td>" +
-                        "<td headers=\"basic-first-name\">" + obj['firstName'] + "</td>" +
-                        "<td headers=\"basic-last-name\">" + obj['lastName'] + "</td>" +
-                        "<td headers=\"basic-email\">" + obj['email'] + "</td>" +
-                        "<td headers=\"basic-github\">" + githubColumn + "</td>" +
-                        "<td headers=\"basic-action\"><a id=\"" + obj['userName'] + "\" class=\"" + actionClass + "\" href=\"#\">" + actionClass + "</a></tr>");
+                    AJS.$("#user-body").append("<tr><td headers=\"basic-username\" class=\"username\">" + username + "</td>" +
+                        "<td headers=\"basic-first-name\" class=\"first-name\">" + obj['firstName'] + "</td>" +
+                        "<td headers=\"basic-last-name\" class=\"last-name\">" + obj['lastName'] + "</td>" +
+                        "<td headers=\"basic-email\" class=\"email\">" + obj['email'] + "</td>" +
+                        "<td headers=\"basic-github\" class=\"github\">" + githubColumn + "</td>" +
+                        "<td headers=\"basic-action\" class=\"action\"><a id=\"" + obj['userName'] + "\" class=\"" + actionClass + "\" href=\"#\">" + actionClass + "</a></tr>");
                 }
+
+                AJS.$("#user-table").trigger("update");
+                var userList = new List("modify-user", {valueNames: ["username", "first-name", "last-name", "email", "github", "action"]});
             },
             error: function () {
                 AJS.messages.error({

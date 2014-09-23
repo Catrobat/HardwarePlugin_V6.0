@@ -26,6 +26,6 @@ public interface GithubTeam extends Entity {
 
     void setGithubId(int id);
 
-    @ManyToMany(value = TeamToGithubTeam.class)
+    @ManyToMany(value = TeamToGithubTeam.class, reverse = "getGithubTeam", through = "getTeam")
     Team[] getTeams();
 }

@@ -16,7 +16,7 @@
 
 package at.fellhofer.jira.adminhelper;
 
-import at.fellhofer.jira.adminhelper.activeobject.ConfigurationService;
+import at.fellhofer.jira.adminhelper.activeobject.AdminHelperConfigService;
 import com.atlassian.jira.security.groups.GroupManager;
 import com.atlassian.sal.api.auth.LoginUriProvider;
 import com.atlassian.sal.api.user.UserManager;
@@ -32,7 +32,7 @@ public class AdminServlet extends HelperServlet {
     private final TemplateRenderer renderer;
 
     public AdminServlet(UserManager userManager, LoginUriProvider loginUriProvider, TemplateRenderer renderer,
-                        WebSudoManager webSudoManager, GroupManager groupManager, ConfigurationService configurationService) {
+                        WebSudoManager webSudoManager, GroupManager groupManager, AdminHelperConfigService configurationService) {
         super(userManager, loginUriProvider, webSudoManager, groupManager, configurationService);
         this.renderer = renderer;
     }

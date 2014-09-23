@@ -18,36 +18,48 @@
 <html>
 <head>
     <title>Create New User</title>
-    <meta name="decorator" content="atl.admin" />
+    <meta name="decorator" content="atl.admin"/>
     <meta name="application-base-url" content="$applicationProperties.getBaseUrl()">
     $webResourceManager.requireResource("at.fellhofer.jira.AdminHelper:modify-resources")
 </head>
 <body class="aui-layout aui-theme-default">
 <div id="aui-message-bar"></div>
-<header class="aui-page-header">
-    <div class="aui-page-header-inner">
-        <h2>Users</h2>
+<div id="modify-user">
+    <header class="aui-page-header">
+        <div class="left-from-search-field">
+            <h2>Users</h2>
+        </div>
+        <div class="search-field">
+            <form class="aui" onsubmit="return false;">
+                <label for="search-filter-overview">Search Filter</label>
+                <input class="search text" type="text" id="search-filter-overview" name="search-filter-overview"
+                       title="search-filter-overview" autocomplete="off">
+            </form>
+        </div>
+    </header>
+    <div class="aui-page-panel">
+        <div class="aui-page-panel-inner">
+            <section class="aui-page-panel-content">
+                <table id="user-table" class="aui aui-table-interactive aui-table-sortable">
+                    <thead>
+                    <tr>
+                        <th id="basic-username">Username</th>
+                        <th id="basic-fist-name">First Name</th>
+                        <th id="basic-last-name">Last Name</th>
+                        <th id="basic-email">E-Mail</th>
+                        <th id="basic-github">GitHub Username</th>
+                        <th id="basic-action">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody class="list" id="user-body">
+                    #* will be filled out by JavaScript *#
+                    </tbody>
+                </table>
+            </section>
+        </div>
     </div>
-</header>
-<div class="aui-page-panel">
-    <div class="aui-page-panel-inner">
-        <section class="aui-page-panel-content">
-            <table class="aui">
-                <thead>
-                <tr>
-                    <th id="basic-username">Username</th>
-                    <th id="basic-fist-name">First Name</th>
-                    <th id="basic-last-name">Last Name</th>
-                    <th id="basic-email">E-Mail</th>
-                    <th id="basic-github">GitHub Username</th>
-                    <th id="basic-action">Action</th>
-                </tr>
-                </thead>
-                <tbody id="user-body">
-
-                </tbody>
-            </table>
-        </section>
+    <div class="note">
+        Note that Jira System Administrators will not be shown in this list.
     </div>
 </div>
 </body>

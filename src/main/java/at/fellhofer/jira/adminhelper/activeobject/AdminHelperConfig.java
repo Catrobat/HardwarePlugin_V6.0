@@ -16,26 +16,30 @@
 
 package at.fellhofer.jira.adminhelper.activeobject;
 
-import com.atlassian.activeobjects.tx.Transactional;
+import net.java.ao.Entity;
+import net.java.ao.OneToMany;
+import net.java.ao.Preload;
 
-import java.util.List;
+@Preload
+public interface AdminHelperConfig extends Entity {
+    String getPublicGithubApiToken();
 
-@Transactional
-public interface ConfigurationService {
-    Configuration getConfiguration();
+    void setPublicGithubApiToken(String publicGithubApiToken);
 
-    Configuration setApiToken(String apiToken);
+    String getGithubApiToken();
 
-    Configuration setOrganisation(String organisation);
+    void setGithubApiToken(String githubApiToken);
 
-    Team addTeam(String teamName, List<Integer> githubTeamIdList, List<String> coordinatorGroups,
-                 List<String> seniorGroups, List<String> developerGroups);
+    String getGithubOrganisation();
 
-    Configuration removeTeam(String teamName);
+    void setGithubOrganisation(String githubOrganisation);
 
-    boolean isApproved(String groupName);
+    @OneToMany(reverse = "getConfiguration")
+    ApprovedGroup[] getApprovedGroups();
 
-    ApprovedGroup addApprovedGroup(String approvedGroupName);
+    @OneToMany(reverse = "getConfiguration")
+    ApprovedUser[] getApprovedUsers();
 
-    Configuration removeApprovedGroup(String approvedGroupName);
+    @OneToMany(reverse = "getConfiguration")
+    Team[] getTeams();
 }

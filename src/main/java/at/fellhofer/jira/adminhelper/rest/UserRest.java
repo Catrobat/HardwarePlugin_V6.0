@@ -16,6 +16,8 @@
 
 package at.fellhofer.jira.adminhelper.rest;
 
+import at.fellhofer.jira.adminhelper.activeobject.AdminHelperConfigService;
+import at.fellhofer.jira.adminhelper.helper.GithubHelper;
 import at.fellhofer.jira.adminhelper.rest.json.JsonConfig;
 import at.fellhofer.jira.adminhelper.rest.json.JsonTeam;
 import at.fellhofer.jira.adminhelper.rest.json.JsonUser;
@@ -31,14 +33,13 @@ import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.exception.CreateException;
 import com.atlassian.jira.exception.PermissionException;
 import com.atlassian.jira.exception.RemoveException;
+import com.atlassian.jira.security.PermissionManager;
 import com.atlassian.jira.security.groups.GroupManager;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.user.ApplicationUsers;
 import com.atlassian.jira.user.preferences.ExtendedPreferences;
 import com.atlassian.jira.user.preferences.UserPreferencesManager;
 import com.atlassian.jira.user.util.UserUtil;
-import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
-import com.atlassian.sal.api.transaction.TransactionTemplate;
 import com.atlassian.sal.api.user.UserManager;
 import org.apache.commons.validator.routines.EmailValidator;
 
@@ -50,31 +51,29 @@ import javax.ws.rs.core.Response;
 import java.util.*;
 
 @Path("/user")
-public class UserRest {
+public class UserRest extends RestHelper {
     public static final String GITHUB_PROPERTY = "github";
     public static final String DISABLED_GROUP = "Disabled";
     public static final String DEFAULT_PASSWORD = "catrobat";
 
-    private final UserManager userManager;
-    private final PluginSettingsFactory pluginSettingsFactory;
-    private final TransactionTemplate transactionTemplate;
     private final UserPreferencesManager userPreferencesManager;
+    private final AdminHelperConfigService configService;
 
-    public UserRest(final UserManager userManager, final PluginSettingsFactory pluginSettingsFactory,
-                    final TransactionTemplate transactionTemplate, final UserPreferencesManager userPreferencesManager) {
-        this.userManager = userManager;
-        this.pluginSettingsFactory = pluginSettingsFactory;
-        this.transactionTemplate = transactionTemplate;
+    public UserRest(final UserManager userManager, final UserPreferencesManager userPreferencesManager,
+                    final AdminHelperConfigService configService, final PermissionManager permissionManager,
+                    final GroupManager groupManager) {
+        super(permissionManager, configService, userManager, groupManager);
         this.userPreferencesManager = userPreferencesManager;
+        this.configService = configService;
     }
 
     @PUT
     @Path("/createUser")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(final JsonUser jsonUser, @Context HttpServletRequest request) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         if (jsonUser.getFirstName() == null || jsonUser.getLastName() == null ||
@@ -82,8 +81,7 @@ public class UserRest {
             return Response.serverError().entity("Please check all input fields.").build();
         }
 
-        ConfigResourceRest configResourceRest = new ConfigResourceRest(userManager, pluginSettingsFactory, transactionTemplate);
-        JsonConfig config = configResourceRest.getConfigFromSettings();
+        JsonConfig config = new JsonConfig(configService.getConfiguration(), configService);
 
         User jiraUser = null;
         UserUtil userUtil = ComponentAccessor.getUserUtil();
@@ -119,9 +117,9 @@ public class UserRest {
     @Path("/getUsers")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsers(@Context HttpServletRequest request) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         UserUtil userUtil = ComponentAccessor.getUserUtil();
@@ -168,9 +166,9 @@ public class UserRest {
     @Path("/activateUser")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response activateUser(final JsonUser jsonUser, @Context HttpServletRequest request) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         if (jsonUser == null) {
@@ -186,8 +184,7 @@ public class UserRest {
             return Response.serverError().entity("No Team selected").build();
         }
 
-        ConfigResourceRest configResourceRest = new ConfigResourceRest(userManager, pluginSettingsFactory, transactionTemplate);
-        JsonConfig config = configResourceRest.getConfigFromSettings();
+        JsonConfig config = new JsonConfig(configService.getConfiguration(), configService);
 
         // remove user from all groups (especially from DISABLED_GROUP) since he will be added to chosen groups afterwards
         try {
@@ -213,9 +210,9 @@ public class UserRest {
     @Path("/inactivateUser")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response inactivateUser(final String inactivateUser, @Context HttpServletRequest request) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         if (inactivateUser == null) {
@@ -231,7 +228,7 @@ public class UserRest {
         ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(applicationUser);
         String githubName = extendedPreferences.getText(GITHUB_PROPERTY);
         if (githubName != null) {
-            GithubHelperRest githubHelper = new GithubHelperRest(userManager, pluginSettingsFactory, transactionTemplate);
+            GithubHelper githubHelper = new GithubHelper(configService);
             String error = githubHelper.removeUserFromAllTeams(githubName);
             if (error != null) {
                 return Response.serverError().entity(error).build();
@@ -241,7 +238,10 @@ public class UserRest {
         // remove user from all groups and add user to DISABLED_GROUP
         try {
             removeFromAllGroups(ApplicationUsers.toDirectoryUser(applicationUser));
-            addToGroups(applicationUser.getDirectoryUser(), Arrays.asList(DISABLED_GROUP));
+            Response error = addToGroups(applicationUser.getDirectoryUser(), Arrays.asList(DISABLED_GROUP));
+            if (error != null) {
+                return error;
+            }
         } catch (RemoveException e) {
             e.printStackTrace();
             return Response.serverError().entity(e.getMessage()).build();
@@ -268,10 +268,10 @@ public class UserRest {
         return Response.ok().build();
     }
 
-    private void addToGroups(User user, List<String> groupList) throws UserNotFoundException, OperationFailedException,
+    private Response addToGroups(User user, List<String> groupList) throws UserNotFoundException, OperationFailedException,
             GroupNotFoundException, OperationNotPermittedException, InvalidGroupException {
         if (user == null || groupList == null)
-            return;
+            return Response.serverError().entity("user/group may not be null").build();
 
         GroupManager groupManager = ComponentAccessor.getGroupManager();
         Collection<Group> groupCollection;
@@ -287,21 +287,24 @@ public class UserRest {
                 }
             }
             if (!groupExists) {
-                Group newGroup = groupManager.createGroup(groupString);
-                groupManager.addUserToGroup(user, newGroup);
+                return Response.serverError().entity("Group \"" + groupString + "\" does not exist").build();
             }
         }
+
+        return null; // everything ok
     }
 
     public Response addUserToGithubAndJiraGroups(JsonUser jsonUser, User jiraUser, JsonConfig config) {
         Set<String> githubTeamSet = new HashSet<String>();
-        GithubHelperRest githubHelper = new GithubHelperRest(userManager, pluginSettingsFactory, transactionTemplate);
         try {
             if (jsonUser.getCoordinatorList() != null) {
                 for (String coordinatorOf : jsonUser.getCoordinatorList()) {
                     for (JsonTeam team : config.getTeams()) {
                         if (team.getName().equals(coordinatorOf)) {
-                            addToGroups(jiraUser, team.getCoordinatorGroups());
+                            Response error = addToGroups(jiraUser, team.getCoordinatorGroups());
+                            if (error != null) {
+                                return error;
+                            }
                             githubTeamSet.addAll(team.getGithubTeams());
                         }
                     }
@@ -311,7 +314,10 @@ public class UserRest {
                 for (String seniorOf : jsonUser.getSeniorList()) {
                     for (JsonTeam team : config.getTeams()) {
                         if (team.getName().equals(seniorOf)) {
-                            addToGroups(jiraUser, team.getSeniorGroups());
+                            Response error = addToGroups(jiraUser, team.getSeniorGroups());
+                            if (error != null) {
+                                return error;
+                            }
                             githubTeamSet.addAll(team.getGithubTeams());
                         }
                     }
@@ -321,7 +327,10 @@ public class UserRest {
                 for (String developerOf : jsonUser.getDeveloperList()) {
                     for (JsonTeam team : config.getTeams()) {
                         if (team.getName().equals(developerOf)) {
-                            addToGroups(jiraUser, team.getDeveloperGroups());
+                            Response error = addToGroups(jiraUser, team.getDeveloperGroups());
+                            if (error != null) {
+                                return error;
+                            }
                             githubTeamSet.addAll(team.getGithubTeams());
                         }
                     }
@@ -344,6 +353,7 @@ public class UserRest {
             return Response.serverError().entity(e.getMessage()).build();
         }
 
+        GithubHelper githubHelper = new GithubHelper(configService);
         if (jsonUser.getGithubName() != null && !jsonUser.getGithubName().equals("")) {
             StringBuilder errors = new StringBuilder();
             for (String team : githubTeamSet) {

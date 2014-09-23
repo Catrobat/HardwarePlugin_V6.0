@@ -17,22 +17,15 @@
 package at.fellhofer.jira.adminhelper.activeobject;
 
 import net.java.ao.Entity;
-import net.java.ao.OneToMany;
 import net.java.ao.Preload;
 
 @Preload
-public interface Configuration extends Entity {
-    String getGithubApiToken();
+public interface ApprovedUser extends Entity {
+    AdminHelperConfig getConfiguration();
 
-    void setGithubApiToken(String githubApiToken);
+    void setConfiguration(AdminHelperConfig configuration);
 
-    String getGithubOrganisation();
+    String getUserKey();
 
-    void setGithubOrganisation(String githubOrganisation);
-
-    @OneToMany(reverse = "getConfiguration")
-    Team[] getTeams();
-
-    @OneToMany(reverse = "getConfiguration")
-    ApprovedGroup[] getApprovedGroups();
+    void setUserKey(String userKey);
 }

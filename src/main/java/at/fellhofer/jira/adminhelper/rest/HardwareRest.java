@@ -24,6 +24,7 @@ import at.fellhofer.jira.adminhelper.rest.json.JsonDeviceComment;
 import at.fellhofer.jira.adminhelper.rest.json.JsonHardwareModel;
 import at.fellhofer.jira.adminhelper.rest.json.JsonLending;
 import com.atlassian.jira.component.ComponentAccessor;
+import com.atlassian.jira.security.PermissionManager;
 import com.atlassian.jira.security.groups.GroupManager;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.sal.api.user.UserManager;
@@ -40,7 +41,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @Path("/hardware")
-public class HardwareRest {
+public class HardwareRest extends RestHelper{
 
     private final UserManager userManager;
     private final HardwareModelService hardwareModelService;
@@ -55,8 +56,9 @@ public class HardwareRest {
     public HardwareRest(UserManager userManager, HardwareModelService hardwareModelService, DeviceService deviceService,
                         LendingService lendingService, TypeOfDeviceService typeOfDeviceService,
                         ProducerService producerService, OperatingSystemService operatingSystemService,
-                        DeviceCommentService deviceCommentService, ConfigurationService configurationService,
-                        GroupManager groupManager) {
+                        DeviceCommentService deviceCommentService, AdminHelperConfigService configurationService,
+                        GroupManager groupManager, PermissionManager permissionManager) {
+        super(permissionManager, configurationService, userManager, groupManager);
         this.userManager = checkNotNull(userManager);
         this.hardwareModelService = checkNotNull(hardwareModelService);
         this.deviceService = checkNotNull(deviceService);
@@ -71,9 +73,9 @@ public class HardwareRest {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getHardwareModelList(@Context HttpServletRequest request) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         List<JsonHardwareModel> hardwareModelList = new ArrayList<JsonHardwareModel>();
@@ -87,9 +89,9 @@ public class HardwareRest {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     public Response putHardware(@Context HttpServletRequest request, JsonHardwareModel jsonHardwareModel) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         if (jsonHardwareModel == null)
@@ -120,9 +122,9 @@ public class HardwareRest {
     @Path("/types")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTypesOfDevices(@Context HttpServletRequest request, String query) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         List<String> typeList = new ArrayList<String>();
@@ -137,9 +139,9 @@ public class HardwareRest {
     @Path("/producers")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProducers(@Context HttpServletRequest request, String query) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         List<String> producerList = new ArrayList<String>();
@@ -154,9 +156,9 @@ public class HardwareRest {
     @Path("/operating-systems")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getOperatingSystems(@Context HttpServletRequest request, String query) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         List<String> operatingSystemList = new ArrayList<String>();
@@ -171,9 +173,9 @@ public class HardwareRest {
     @Path("/{hardwareId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getHardware(@Context HttpServletRequest request, @PathParam("hardwareId") int hardwareId) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         JsonHardwareModel jsonHardwareModel = new JsonHardwareModel(hardwareModelService.get(hardwareId), lendingService, deviceService);
@@ -184,9 +186,9 @@ public class HardwareRest {
     @Path("/{hardwareId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteHardware(@Context HttpServletRequest request, @PathParam("hardwareId") int hardwareId, JsonHardwareModel moveToHardwareJson) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
         int moveToHardwareId = moveToHardwareJson.getId();
 
@@ -212,9 +214,9 @@ public class HardwareRest {
     @Path("/{hardwareId}/devices")
     @Produces(MediaType.APPLICATION_JSON)
     public Response addDevice(@Context HttpServletRequest request, @PathParam("hardwareId") int hardwareId, JsonDevice jsonDevice) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         if (((jsonDevice.getSerialNumber() == null || jsonDevice.getSerialNumber().equals("")) &&
@@ -250,9 +252,9 @@ public class HardwareRest {
     @Path("/{hardwareId}/devices/available")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDevicesAvailableForHardware(@Context HttpServletRequest request, @PathParam("hardwareId") int hardwareId) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         List<JsonDevice> jsonDeviceList = new ArrayList<JsonDevice>();
@@ -267,9 +269,9 @@ public class HardwareRest {
     @Path("/devices/{deviceId}/lend-out")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response lendOutDevice(@Context HttpServletRequest request, @PathParam("deviceId") int deviceId, JsonLending jsonLending) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         Device device = deviceService.getDeviceById(deviceId);
@@ -279,7 +281,7 @@ public class HardwareRest {
 
         com.atlassian.jira.user.util.UserManager jiraUserManager = ComponentAccessor.getUserManager();
         ApplicationUser lendingByUser = jiraUserManager.getUserByName(jsonLending.getLentOutBy());
-        ApplicationUser lendingIssuerUser = jiraUserManager.getUserByName(username);
+        ApplicationUser lendingIssuerUser = jiraUserManager.getUserByName(userManager.getRemoteUsername(request));
         if (lendingByUser == null || lendingIssuerUser == null) {
             return Response.serverError().entity("User not found").build();
         }
@@ -306,9 +308,9 @@ public class HardwareRest {
     @Path("/devices/{deviceId}/current-lending")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCurrentLendingForDevice(@Context HttpServletRequest request, @PathParam("deviceId") int deviceId) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         Device device = deviceService.getDeviceById(deviceId);
@@ -337,9 +339,9 @@ public class HardwareRest {
     @Path("/devices/{deviceId}/current-lending")
     @Produces(MediaType.APPLICATION_JSON)
     public Response bringBackCurrentLendingForDevice(@Context HttpServletRequest request, @PathParam("deviceId") int deviceId, JsonLending jsonLending) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         Device device = deviceService.getDeviceById(deviceId);
@@ -373,6 +375,7 @@ public class HardwareRest {
         if (jsonLending.getDevice() != null && jsonLending.getDevice().getComments() != null &&
                 jsonLending.getDevice().getComments().size() != 0 && jsonLending.getDevice().getComments().get(0) != null) {
             JsonDeviceComment comment = jsonLending.getDevice().getComments().get(0);
+            String username = userManager.getRemoteUsername(request);
             ApplicationUser user = ComponentAccessor.getUserManager().getUserByName(username);
             String userKey = user == null ? username : user.getKey();
             deviceCommentService.addDeviceComment(currentLending.getDevice(), userKey, comment.getComment());
@@ -385,9 +388,9 @@ public class HardwareRest {
     @Path("/devices")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDevices(@Context HttpServletRequest request) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         List<Device> deviceList = deviceService.all();
@@ -403,9 +406,9 @@ public class HardwareRest {
     @Path("/devices/sorted-out")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getSortedOutDevices(@Context HttpServletRequest request) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         List<JsonDevice> jsonDeviceList = new ArrayList<JsonDevice>();
@@ -420,9 +423,9 @@ public class HardwareRest {
     @Path("/devices/ongoing-lending")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCurrentlyLentOut(@Context HttpServletRequest request) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         List<JsonDevice> jsonDeviceList = new ArrayList<JsonDevice>();
@@ -437,7 +440,12 @@ public class HardwareRest {
     @GET
     @Path("/devices/{deviceId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDevice(@PathParam("deviceId") int deviceId) {
+    public Response getDevice(@Context HttpServletRequest request, @PathParam("deviceId") int deviceId) {
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
+        }
+
         Device device = deviceService.getDeviceById(deviceId);
         if (device == null) {
             return Response.serverError().entity("Device not found").build();

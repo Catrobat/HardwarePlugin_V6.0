@@ -15,9 +15,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>at.fellhofer.jira</groupId>
     <artifactId>AdminHelper</artifactId>
@@ -160,7 +158,6 @@
     </dependencies>
     <build>
         <plugins>
-
             <plugin>
                 <groupId>com.atlassian.maven.plugins</groupId>
                 <artifactId>maven-jira-plugin</artifactId>
@@ -199,10 +196,9 @@
             </plugin>
         </plugins>
     </build>
-
     <properties>
-        <jira.version>6.2.7</jira.version>
-        <amps.version>5.0.3</amps.version>
+        <jira.version>6.3.5</jira.version>
+        <amps.version>5.0.4</amps.version>
         <ao.version>0.23.2</ao.version>
         <plugin.testrunner.version>1.2.0</plugin.testrunner.version>
         <!-- TestKit version 5.x for JIRA 5.x, 6.x for JIRA 6.x -->

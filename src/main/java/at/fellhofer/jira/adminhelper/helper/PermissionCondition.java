@@ -16,7 +16,7 @@
 
 package at.fellhofer.jira.adminhelper.helper;
 
-import at.fellhofer.jira.adminhelper.activeobject.ConfigurationService;
+import at.fellhofer.jira.adminhelper.activeobject.AdminHelperConfigService;
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.plugin.webfragment.conditions.AbstractPermissionCondition;
 import com.atlassian.jira.plugin.webfragment.model.JiraHelper;
@@ -30,11 +30,11 @@ import java.util.Map;
 
 public class PermissionCondition extends AbstractPermissionCondition {
 
-    private final ConfigurationService configurationService;
+    private final AdminHelperConfigService configurationService;
     private final GroupManager groupManager;
     private final UserManager userManager;
 
-    public PermissionCondition(PermissionManager permissionManager, ConfigurationService configurationService,
+    public PermissionCondition(PermissionManager permissionManager, AdminHelperConfigService configurationService,
                                UserManager userManager, GroupManager groupManager) {
         super(permissionManager);
         this.configurationService = configurationService;
@@ -58,9 +58,13 @@ public class PermissionCondition extends AbstractPermissionCondition {
             return false;
         }
 
+        if(configurationService.isUserApproved(applicationUser.getKey())) {
+            return true;
+        }
+
         Collection<String> groupNameCollection = groupManager.getGroupNamesForUser(applicationUser);
         for (String groupName : groupNameCollection) {
-            if (configurationService.isApproved(groupName))
+            if (configurationService.isGroupApproved(groupName))
                 return true;
         }
 

@@ -21,9 +21,9 @@ import net.java.ao.Preload;
 
 @Preload
 public interface ApprovedGroup extends Entity {
-    Configuration getConfiguration();
+    AdminHelperConfig getConfiguration();
 
-    void setConfiguration(Configuration configuration);
+    void setConfiguration(AdminHelperConfig configuration);
 
     String getGroupName();
 

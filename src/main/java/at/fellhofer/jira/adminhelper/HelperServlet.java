@@ -16,7 +16,7 @@
 
 package at.fellhofer.jira.adminhelper;
 
-import at.fellhofer.jira.adminhelper.activeobject.ConfigurationService;
+import at.fellhofer.jira.adminhelper.activeobject.AdminHelperConfigService;
 import at.fellhofer.jira.adminhelper.helper.PermissionCondition;
 import com.atlassian.jira.security.groups.GroupManager;
 import com.atlassian.sal.api.auth.LoginUriProvider;
@@ -37,11 +37,11 @@ public abstract class HelperServlet extends HttpServlet {
     private final LoginUriProvider loginUriProvider;
     private final WebSudoManager webSudoManager;
     private final GroupManager groupManager;
-    private final ConfigurationService configurationService;
+    private final AdminHelperConfigService configurationService;
 
     public HelperServlet(final UserManager userManager, final LoginUriProvider loginUriProvider,
                          final WebSudoManager webSudoManager, final GroupManager groupManager,
-                         final ConfigurationService configurationService) {
+                         final AdminHelperConfigService configurationService) {
         this.userManager = checkNotNull(userManager, "userManager");
         this.loginUriProvider = checkNotNull(loginUriProvider, "loginProvider");
         this.webSudoManager = checkNotNull(webSudoManager, "webSudoManager");

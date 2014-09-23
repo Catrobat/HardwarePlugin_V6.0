@@ -17,153 +17,128 @@
 package at.fellhofer.jira.adminhelper.rest;
 
 
+import at.fellhofer.jira.adminhelper.activeobject.AdminHelperConfigService;
+import at.fellhofer.jira.adminhelper.activeobject.GithubTeam;
+import at.fellhofer.jira.adminhelper.activeobject.Team;
 import at.fellhofer.jira.adminhelper.rest.json.JsonConfig;
 import at.fellhofer.jira.adminhelper.rest.json.JsonTeam;
-import com.atlassian.sal.api.pluginsettings.PluginSettings;
+import com.atlassian.jira.component.ComponentAccessor;
+import com.atlassian.jira.security.PermissionManager;
+import com.atlassian.jira.security.groups.GroupManager;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
-import com.atlassian.sal.api.transaction.TransactionCallback;
 import com.atlassian.sal.api.transaction.TransactionTemplate;
 import com.atlassian.sal.api.user.UserManager;
+import org.eclipse.egit.github.core.service.TeamService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Path("/config")
-public class ConfigResourceRest {
-    public static final String KEY_BASE = "at.fellhofer.jira.adminhelper.";
-    public static final String KEY_TOKEN = KEY_BASE + "githubToken";
-    public static final String KEY_ORGANIZATION = KEY_BASE + "githubOrganization";
-    public static final String KEY_TEAMS = KEY_BASE + "teams";
+public class ConfigResourceRest extends RestHelper{
+    private final AdminHelperConfigService configService;
 
-    public static final String SUBKEY_COORDINATORS = ".coordinators";
-    public static final String SUBKEY_GITHUB = ".github";
-    public static final String SUBKEY_DEVELOPERS = ".developers";
-    public static final String SUBKEY_SENIORS = ".seniors";
-
-    private final UserManager userManager;
-    private final PluginSettingsFactory pluginSettingsFactory;
-    private final TransactionTemplate transactionTemplate;
-
-    public ConfigResourceRest(UserManager userManager, PluginSettingsFactory pluginSettingsFactory,
-                              TransactionTemplate transactionTemplate) {
-        this.userManager = userManager;
-        this.pluginSettingsFactory = pluginSettingsFactory;
-        this.transactionTemplate = transactionTemplate;
+    public ConfigResourceRest(final UserManager userManager, final PluginSettingsFactory pluginSettingsFactory,
+                              final TransactionTemplate transactionTemplate, final AdminHelperConfigService configService,
+                              final PermissionManager permissionManager, final GroupManager groupManager) {
+        super(permissionManager, configService, userManager, groupManager);
+        this.configService = configService;
     }
 
     @GET
     @Path("/getConfig")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getConfig(@Context HttpServletRequest request) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
-        return Response.ok(getConfigFromSettings()).build();
-    }
-
-    public JsonConfig getConfigFromSettings() {
-        return (JsonConfig) transactionTemplate.execute(new TransactionCallback() {
-            public Object doInTransaction() {
-                PluginSettings settings = pluginSettingsFactory.createGlobalSettings();
-
-                JsonConfig config = new JsonConfig();
-                config.setGithubToken((String) settings.get(KEY_TOKEN));
-                config.setGithubOrganization((String) settings.get(KEY_ORGANIZATION));
-
-
-                if (settings.get(KEY_TEAMS) == null)
-                    settings.put(KEY_TEAMS, new ArrayList<String>());
-
-                List<JsonTeam> teamList = new ArrayList<JsonTeam>();
-                @SuppressWarnings("unchecked")
-                List<String> settingsTeamList = (List<String>) settings.get(KEY_TEAMS);
-                for (String teamName : settingsTeamList) {
-                    JsonTeam tempTeam = new JsonTeam(teamName);
-
-                    @SuppressWarnings("unchecked")
-                    List<String> githubTeams = (List<String>) settings.get(KEY_BASE + teamName + SUBKEY_GITHUB);
-                    tempTeam.setGithubTeams(githubTeams);
-                    @SuppressWarnings("unchecked")
-                    List<String> developerGroups = (List<String>) settings.get(KEY_BASE + teamName + SUBKEY_DEVELOPERS);
-                    tempTeam.setDeveloperGroups(developerGroups);
-                    @SuppressWarnings("unchecked")
-                    List<String> seniorGroups = (List<String>) settings.get(KEY_BASE + teamName + SUBKEY_SENIORS);
-                    tempTeam.setSeniorGroups(seniorGroups);
-                    @SuppressWarnings("unchecked")
-                    List<String> coordinatorGroups = (List<String>) settings.get(KEY_BASE + teamName + SUBKEY_COORDINATORS);
-                    tempTeam.setCoordinatorGroups(coordinatorGroups);
-                    teamList.add(tempTeam);
-                }
-
-                config.setTeams(teamList);
-
-                return config;
-            }
-        });
+        return Response.ok(new JsonConfig(configService.getConfiguration(), configService)).build();
     }
 
     @GET
     @Path("/getTeamList")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTeamList(@Context HttpServletRequest request) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
-        return Response.ok(transactionTemplate.execute(new TransactionCallback() {
-            public Object doInTransaction() {
-                PluginSettings settings = pluginSettingsFactory.createGlobalSettings();
-                @SuppressWarnings("unchecked")
-                List<String> teamList = (List<String>) settings.get(KEY_TEAMS);
+        List<String> teamList = new ArrayList<String>();
+        for (Team team : configService.getConfiguration().getTeams()) {
+            teamList.add(team.getTeamName());
+        }
 
-                return teamList;
-            }
-        })).build();
+        return Response.ok(teamList).build();
     }
 
     @PUT
     @Path("/saveConfig")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response setConfig(final JsonConfig config, @Context HttpServletRequest request) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+    public Response setConfig(final JsonConfig jsonConfig, @Context HttpServletRequest request) {
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
-        transactionTemplate.execute(new TransactionCallback() {
-            public Object doInTransaction() {
-                PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
-                pluginSettings.put(KEY_TOKEN, config.getGithubToken());
-                pluginSettings.put(KEY_ORGANIZATION, config.getGithubOrganization());
+        if (jsonConfig.getGithubToken() != null && jsonConfig.getGithubToken().length() != 0) {
+            configService.setApiToken(jsonConfig.getGithubToken());
+        }
+        configService.setPublicApiToken(jsonConfig.getGithubTokenPublic());
+        configService.setOrganisation(jsonConfig.getGithubOrganization());
 
-                if (config.getTeams() == null)
-                    config.setTeams(new ArrayList<JsonTeam>());
+        if (jsonConfig.getApprovedGroups() != null) {
+            configService.clearApprovedGroups();
+            for (String approvedGroupName : jsonConfig.getApprovedGroups()) {
+                configService.addApprovedGroup(approvedGroupName);
+            }
+        }
 
-                List<String> teamNames = new ArrayList<String>();
-                for (JsonTeam team : config.getTeams()) {
-                    if (teamNames.contains(team.getName())) {
-                        continue;
+        com.atlassian.jira.user.util.UserManager jiraUserManager = ComponentAccessor.getUserManager();
+        if (jsonConfig.getApprovedUsers() != null) {
+            configService.clearApprovedUsers();
+            for (String approvedUserName : jsonConfig.getApprovedUsers()) {
+                configService.addApprovedUser(jiraUserManager.getUserByName(approvedUserName).getKey());
+            }
+        }
+
+        if (jsonConfig.getTeams() != null) {
+            String token = configService.getConfiguration().getGithubApiToken();
+            String organisation = configService.getConfiguration().getGithubOrganisation();
+            TeamService teamService = new TeamService();
+            teamService.getClient().setOAuth2Token(token);
+            try {
+                List<org.eclipse.egit.github.core.Team> githubTeamList = teamService.getTeams(organisation);
+
+                for (JsonTeam jsonTeam : jsonConfig.getTeams()) {
+                    configService.removeTeam(jsonTeam.getName());
+
+                    List<Integer> githubIdList = new ArrayList<Integer>();
+                    for(String teamName : jsonTeam.getGithubTeams()) {
+                        for(org.eclipse.egit.github.core.Team githubTeam : githubTeamList) {
+                            if(teamName.toLowerCase().equals(githubTeam.getName().toLowerCase())) {
+                                githubIdList.add(githubTeam.getId());
+                                break;
+                            }
+                        }
                     }
 
-                    teamNames.add(team.getName());
-                    pluginSettings.put(KEY_BASE + team.getName() + SUBKEY_GITHUB, team.getGithubTeams());
-                    pluginSettings.put(KEY_BASE + team.getName() + SUBKEY_DEVELOPERS, team.getDeveloperGroups());
-                    pluginSettings.put(KEY_BASE + team.getName() + SUBKEY_SENIORS, team.getSeniorGroups());
-                    pluginSettings.put(KEY_BASE + team.getName() + SUBKEY_COORDINATORS, team.getCoordinatorGroups());
+                    configService.addTeam(jsonTeam.getName(), githubIdList, jsonTeam.getCoordinatorGroups(),
+                            jsonTeam.getSeniorGroups(), jsonTeam.getDeveloperGroups());
                 }
-                pluginSettings.put(KEY_TEAMS, teamNames);
-
-                return null;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return Response.serverError().entity("Some error with GitHub API (e.g. maybe wrong tokens, organisation, teams) occured").build();
             }
-        });
+        }
+
         return Response.noContent().build();
     }
 
@@ -171,30 +146,12 @@ public class ConfigResourceRest {
     @Path("/addTeam")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addTeam(final String modifyTeam, @Context HttpServletRequest request) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
-
-        boolean successful = (Boolean) transactionTemplate.execute(new TransactionCallback() {
-            public Object doInTransaction() {
-                PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
-                @SuppressWarnings("unchecked")
-                List<String> teamList = (List<String>) pluginSettings.get(ConfigResourceRest.KEY_TEAMS);
-
-                for (String teamName : teamList) {
-                    if (teamName.equals(modifyTeam)) {
-                        return Boolean.FALSE;
-                    }
-                }
-
-                teamList.add(modifyTeam);
-                pluginSettings.put(ConfigResourceRest.KEY_TEAMS, teamList);
-
-                return Boolean.TRUE;
-            }
-        });
+        boolean successful = configService.addTeam(modifyTeam, null, null, null, null) != null;
 
         if (successful)
             return Response.noContent().build();
@@ -206,34 +163,12 @@ public class ConfigResourceRest {
     @Path("/removeTeam")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response removeTeam(final String modifyTeam, @Context HttpServletRequest request) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !userManager.isSystemAdmin(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
-
-        boolean successful = (Boolean) transactionTemplate.execute(new TransactionCallback() {
-            public Object doInTransaction() {
-                PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
-                @SuppressWarnings("unchecked")
-                List<String> teamList = (List<String>) pluginSettings.get(ConfigResourceRest.KEY_TEAMS);
-
-                for (String teamName : teamList) {
-                    if (teamName.equals(modifyTeam)) {
-                        teamList.remove(teamName);
-                        pluginSettings.put(ConfigResourceRest.KEY_TEAMS, teamList);
-                        pluginSettings.remove(KEY_BASE + teamName + SUBKEY_GITHUB);
-                        pluginSettings.remove(KEY_BASE + teamName + SUBKEY_DEVELOPERS);
-                        pluginSettings.remove(KEY_BASE + teamName + SUBKEY_SENIORS);
-                        pluginSettings.remove(KEY_BASE + teamName + SUBKEY_COORDINATORS);
-
-                        return Boolean.TRUE;
-                    }
-                }
-
-                return Boolean.FALSE;
-            }
-        });
+        boolean successful = configService.removeTeam(modifyTeam) != null;
 
         if (successful)
             return Response.noContent().build();
