@@ -24,7 +24,7 @@
     </plugin-info>
 
     <!-- add our i18n resource -->
-    <resource type="i18n" name="i18n" location="at.fellhofer.jira.adminhelper.i18n"/>
+    <resource type="i18n" name="i18n" location="org.catrobat.jira.adminhelper.i18n"/>
 
     <!-- add our web resources -->
     <web-resource name="Admin Web Resources" key="admin-resources">
@@ -69,30 +69,31 @@
         <resource type="download" name="list.min.js" location="js/list.min.js"/>
     </web-resource>
 
-    <servlet key="create-user-servlet" class="at.fellhofer.jira.adminhelper.CreateUserServlet">
-        <url-pattern>/admin_helper/create_user</url-pattern>
+    <servlet key="create-user-servlet" class="org.catrobat.jira.adminhelper.CreateUserServlet">
+    <url-pattern>/admin_helper/create_user</url-pattern>
     </servlet>
 
-    <servlet key="modify-user-servlet" class="at.fellhofer.jira.adminhelper.ModifyUserServlet">
-        <url-pattern>/admin_helper/modify_user</url-pattern>
+    <servlet key="modify-user-servlet" class="org.catrobat.jira.adminhelper.ModifyUserServlet">
+    <url-pattern>/admin_helper/modify_user</url-pattern>
     </servlet>
 
-    <servlet key="admin-servlet" class="at.fellhofer.jira.adminhelper.AdminServlet">
-        <url-pattern>/admin_helper/admin</url-pattern>
+    <servlet key="admin-servlet" class="org.catrobat.jira.adminhelper.AdminServlet">
+    <url-pattern>/admin_helper/admin</url-pattern>
     </servlet>
 
-    <servlet key="hardware-servlet" class="at.fellhofer.jira.adminhelper.HardwareServlet">
-        <url-pattern>/admin_helper/hardware</url-pattern>
+    <servlet key="hardware-servlet" class="org.catrobat.jira.adminhelper.HardwareServlet">
+    <url-pattern>/admin_helper/hardware</url-pattern>
     </servlet>
 
-    <component key="adminHelperConfiguration" class="at.fellhofer.jira.adminhelper.activeobject.AdminHelperConfigServiceImpl"/>
-    <component key="device" class="at.fellhofer.jira.adminhelper.activeobject.DeviceServiceImpl"/>
-    <component key="deviceComments" class="at.fellhofer.jira.adminhelper.activeobject.DeviceCommentServiceImpl"/>
-    <component key="hardwareModel" class="at.fellhofer.jira.adminhelper.activeobject.HardwareModelServiceImpl"/>
-    <component key="lending" class="at.fellhofer.jira.adminhelper.activeobject.LendingServiceImpl"/>
-    <component key="operatingSystem" class="at.fellhofer.jira.adminhelper.activeobject.OperatingSystemServiceImpl"/>
-    <component key="producer" class="at.fellhofer.jira.adminhelper.activeobject.ProducerServiceImpl"/>
-    <component key="typeOfDevice" class="at.fellhofer.jira.adminhelper.activeobject.TypeOfDeviceServiceImpl"/>
+    <component key="adminHelperConfiguration"
+               class="org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigServiceImpl"/>
+    <component key="device" class="org.catrobat.jira.adminhelper.activeobject.DeviceServiceImpl"/>
+    <component key="deviceComments" class="org.catrobat.jira.adminhelper.activeobject.DeviceCommentServiceImpl"/>
+    <component key="hardwareModel" class="org.catrobat.jira.adminhelper.activeobject.HardwareModelServiceImpl"/>
+    <component key="lending" class="org.catrobat.jira.adminhelper.activeobject.LendingServiceImpl"/>
+    <component key="operatingSystem" class="org.catrobat.jira.adminhelper.activeobject.OperatingSystemServiceImpl"/>
+    <component key="producer" class="org.catrobat.jira.adminhelper.activeobject.ProducerServiceImpl"/>
+    <component key="typeOfDevice" class="org.catrobat.jira.adminhelper.activeobject.TypeOfDeviceServiceImpl"/>
 
 
     <!-- import from the product container -->
@@ -122,26 +123,26 @@
 
     <ao key="ao-module">
         <description>The module configuring the Active Objects service used by this plugin</description>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.AdminHelperConfig</entity>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.ApprovedGroup</entity>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.ApprovedUser</entity>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.Device</entity>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.DeviceComment</entity>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.GithubTeam</entity>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.Group</entity>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.HardwareModel</entity>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.Lending</entity>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.OperatingSystem</entity>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.Producer</entity>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.Team</entity>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.TeamToGithubTeam</entity>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.TeamToGroup</entity>
-        <entity>at.fellhofer.jira.adminhelper.activeobject.TypeOfDevice</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.AdminHelperConfig</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.ApprovedGroup</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.ApprovedUser</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.Device</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.DeviceComment</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.GithubTeam</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.Group</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.HardwareModel</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.Lending</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.OperatingSystem</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.Producer</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.Team</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.TeamToGithubTeam</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.TeamToGroup</entity>
+        <entity>org.catrobat.jira.adminhelper.activeobject.TypeOfDevice</entity>
     </ao>
 
     <web-section key="admin-helper-config-section" location="admin_plugins_menu">
         <label key="admin_helper.admin.section"/>
-        <condition class="at.fellhofer.jira.adminhelper.helper.PermissionCondition">
+        <condition class="org.catrobat.jira.adminhelper.helper.PermissionCondition">
         </condition>
     </web-section>
 
@@ -169,7 +170,7 @@
     <web-item key="hardware_management" name="Link to Hardware Servlet" section="system.top.navigation.bar" weight="47">
         <label>Hardware Management</label>
         <link linkId="hardware_management_link">/plugins/servlet/admin_helper/hardware</link>
-        <condition class="at.fellhofer.jira.adminhelper.helper.PermissionCondition">
+        <condition class="org.catrobat.jira.adminhelper.helper.PermissionCondition">
         </condition>
     </web-item>
 

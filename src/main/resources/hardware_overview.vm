@@ -19,7 +19,7 @@
     <title>$i18n.getText("admin_helper.admin.label")</title>
     <meta name="decorator" content="atl.general"/>
     <meta name="application-base-url" content="$applicationProperties.getBaseUrl()">
-    $webResourceManager.requireResource("at.fellhofer.jira.AdminHelper:hardware-resources")
+    $webResourceManager.requireResource("org.catrobat.jira.AdminHelper:hardware-resources")
 </head>
 <body>
 <div id="aui-message-bar">

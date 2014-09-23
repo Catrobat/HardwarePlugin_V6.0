@@ -1,4 +1,3 @@
-#requireResource("at.fellhofer.jira.adminhelper.jira.AdminHelper:AdminHelper-resources")
 <!--
   ~ Copyright 2014 Stephan Fellhofer
   ~
@@ -20,7 +19,7 @@
     <title>Create New User</title>
     <meta name="decorator" content="atl.admin"/>
     <meta name="application-base-url" content="$applicationProperties.getBaseUrl()">
-    $webResourceManager.requireResource("at.fellhofer.jira.AdminHelper:modify-resources")
+    $webResourceManager.requireResource("org.catrobat.jira.AdminHelper:modify-resources")
 </head>
 <body class="aui-layout aui-theme-default">
 <div id="aui-message-bar"></div>
