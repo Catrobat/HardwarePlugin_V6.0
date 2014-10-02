@@ -66,6 +66,14 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
     }
 
     @Override
+    public AdminHelperConfig setUserDirectoryId(long userDirectoryId) {
+        AdminHelperConfig config = getConfiguration();
+        config.setUserDirectoryId(userDirectoryId);
+        config.save();
+        return config;
+    }
+
+    @Override
     public Team addTeam(String teamName, List<Integer> githubTeamIdList, List<String> coordinatorGroups, List<String> seniorGroups, List<String> developerGroups) {
         if (teamName == null || teamName.trim().length() == 0) {
             return null;

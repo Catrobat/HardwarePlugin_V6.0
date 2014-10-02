@@ -18,14 +18,14 @@ package org.catrobat.jira.adminhelper.rest;
 
 import com.atlassian.core.AtlassianCoreException;
 import com.atlassian.crowd.embedded.api.Group;
+import com.atlassian.crowd.embedded.api.PasswordCredential;
 import com.atlassian.crowd.embedded.api.User;
-import com.atlassian.crowd.exception.GroupNotFoundException;
-import com.atlassian.crowd.exception.OperationFailedException;
-import com.atlassian.crowd.exception.OperationNotPermittedException;
-import com.atlassian.crowd.exception.UserNotFoundException;
+import com.atlassian.crowd.exception.*;
 import com.atlassian.crowd.exception.embedded.InvalidGroupException;
+import com.atlassian.crowd.manager.directory.DirectoryManager;
+import com.atlassian.crowd.manager.directory.DirectoryPermissionException;
+import com.atlassian.crowd.model.user.UserTemplate;
 import com.atlassian.jira.component.ComponentAccessor;
-import com.atlassian.jira.exception.CreateException;
 import com.atlassian.jira.exception.PermissionException;
 import com.atlassian.jira.exception.RemoveException;
 import com.atlassian.jira.security.PermissionManager;
@@ -58,13 +58,15 @@ public class UserRest extends RestHelper {
 
     private final UserPreferencesManager userPreferencesManager;
     private final AdminHelperConfigService configService;
+    private final DirectoryManager directoryManager;
 
     public UserRest(final UserManager userManager, final UserPreferencesManager userPreferencesManager,
                     final AdminHelperConfigService configService, final PermissionManager permissionManager,
-                    final GroupManager groupManager) {
+                    final GroupManager groupManager, final DirectoryManager directoryManager) {
         super(permissionManager, configService, userManager, groupManager);
         this.userPreferencesManager = userPreferencesManager;
         this.configService = configService;
+        this.directoryManager = directoryManager;
     }
 
     @PUT
@@ -81,31 +83,55 @@ public class UserRest extends RestHelper {
             return Response.serverError().entity("Please check all input fields.").build();
         }
 
+        UserUtil userUtil = ComponentAccessor.getUserUtil();
+        if (userUtil.getUserByName(jsonUser.getUserName()) != null) {
+            return Response.serverError().entity("User already exists!").build();
+        }
+
         JsonConfig config = new JsonConfig(configService.getConfiguration(), configService);
 
-        User jiraUser = null;
-        UserUtil userUtil = ComponentAccessor.getUserUtil();
         try {
-            jiraUser = userUtil.createUserNoNotification(jsonUser.getUserName(), DEFAULT_PASSWORD, jsonUser.getEmail(),
-                    jsonUser.getFirstName() + " " + jsonUser.getLastName());
-        } catch (PermissionException e) {
+            UserTemplate user = new UserTemplate(jsonUser.getUserName(), config.getUserDirectoryId());
+            user.setFirstName(jsonUser.getFirstName());
+            user.setLastName(jsonUser.getLastName());
+            user.setEmailAddress(jsonUser.getEmail());
+            user.setDisplayName(jsonUser.getFirstName() + " " + jsonUser.getLastName());
+            user.setActive(true);
+            PasswordCredential credential = new PasswordCredential(DEFAULT_PASSWORD);
+            directoryManager.addUser(config.getUserDirectoryId(), user, credential);
+        } catch (DirectoryNotFoundException e) {
             e.printStackTrace();
-        } catch (CreateException e) {
+            return Response.serverError().entity("User-Directory was not found. Please check the settings!").build();
+        } catch (InvalidCredentialException e) {
             e.printStackTrace();
+            return Response.serverError().entity("User's credential do not meet requirements of directory.").build();
+        } catch (InvalidUserException e) {
+            e.printStackTrace();
+            return Response.serverError().entity("Required user properties are not given.").build();
+        } catch (UserAlreadyExistsException e) {
+            e.printStackTrace();
+            return Response.serverError().entity("User already exists in this directory!").build();
+        } catch (OperationFailedException e) {
+            e.printStackTrace();
+            return Response.serverError().entity("Operation failed on directory implementation.").build();
+        } catch (DirectoryPermissionException e) {
+            e.printStackTrace();
+            return Response.serverError().entity("Not enough permissions to create user in directory").build();
         }
 
+        ApplicationUser jiraUser = userUtil.getUserByName(jsonUser.getUserName());
         if (jiraUser == null) {
-            return Response.serverError().build();
+            return Response.serverError().entity("User creation failed.").build();
         }
 
-        ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(ApplicationUsers.from(jiraUser));
+        ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(jiraUser);
         try {
             extendedPreferences.setText(GITHUB_PROPERTY, jsonUser.getGithubName());
         } catch (AtlassianCoreException e) {
             e.printStackTrace();
         }
 
-        Response errorResponse = addUserToGithubAndJiraGroups(jsonUser, jiraUser, config);
+        Response errorResponse = addUserToGithubAndJiraGroups(jsonUser, ApplicationUsers.toDirectoryUser(jiraUser), config);
         if (errorResponse != null) {
             return errorResponse;
         }
@@ -198,7 +224,8 @@ public class UserRest extends RestHelper {
         }
 
         // add user to all desired GitHub teams and groups
-        ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(ApplicationUsers.from(applicationUser.getDirectoryUser()));
+        ExtendedPreferences extendedPreferences = userPreferencesManager
+                .getExtendedPreferences(ApplicationUsers.from(applicationUser.getDirectoryUser()));
         jsonUser.setGithubName(extendedPreferences.getText(GITHUB_PROPERTY));
         addUserToGithubAndJiraGroups(jsonUser, applicationUser.getDirectoryUser(), config);
 

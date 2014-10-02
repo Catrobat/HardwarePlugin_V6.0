@@ -17,6 +17,7 @@
 package org.catrobat.jira.adminhelper.rest;
 
 import com.atlassian.core.AtlassianCoreException;
+import com.atlassian.crowd.manager.directory.DirectoryManager;
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.security.PermissionManager;
 import com.atlassian.jira.security.groups.GroupManager;
@@ -45,15 +46,18 @@ public class GithubHelperRest extends RestHelper {
     private final PermissionManager permissionManager;
     private final GroupManager groupManager;
     private final GithubHelper githubHelper;
+    private final DirectoryManager directoryManager;
 
     public GithubHelperRest(final UserManager userManager, final AdminHelperConfigService configService,
-                            final PermissionManager permissionManager, final GroupManager groupManager) {
+                            final PermissionManager permissionManager, final GroupManager groupManager,
+                            final DirectoryManager directoryManager) {
         super(permissionManager, configService, userManager, groupManager);
         this.configService = configService;
         this.userManager = userManager;
         this.permissionManager = permissionManager;
         this.groupManager = groupManager;
         this.githubHelper = new GithubHelper(configService);
+        this.directoryManager = directoryManager;
     }
 
     @PUT
@@ -120,7 +124,7 @@ public class GithubHelperRest extends RestHelper {
             return Response.serverError().entity(e.getMessage()).build();
         }
 
-        UserRest userRest = new UserRest(userManager, userPreferencesManager, configService, permissionManager, groupManager);
+        UserRest userRest = new UserRest(userManager, userPreferencesManager, configService, permissionManager, groupManager, directoryManager);
         userRest.addUserToGithubAndJiraGroups(jsonUser, applicationUser.getDirectoryUser(), new JsonConfig(configService.getConfiguration(), configService));
 
         return Response.ok().build();

@@ -34,6 +34,10 @@ public interface AdminHelperConfig extends Entity {
 
     void setGithubOrganisation(String githubOrganisation);
 
+    long getUserDirectoryId();
+
+    void setUserDirectoryId(long userDirectoryId);
+
     @OneToMany(reverse = "getConfiguration")
     ApprovedGroup[] getApprovedGroups();
 

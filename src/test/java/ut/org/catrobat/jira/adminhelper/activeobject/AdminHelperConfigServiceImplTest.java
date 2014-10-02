@@ -145,6 +145,27 @@ public class AdminHelperConfigServiceImplTest {
     }
 
     @Test
+    public void testSetUserDirectoryId() {
+        AdminHelperConfig config = configurationService.getConfiguration();
+        assertEquals(0, config.getUserDirectoryId());
+
+        assertNotNull(configurationService.setUserDirectoryId(1));
+        ao.flushAll();
+        config = configurationService.getConfiguration();
+        assertEquals(1, config.getUserDirectoryId());
+
+        assertNotNull(configurationService.setUserDirectoryId(Long.MAX_VALUE));
+        ao.flushAll();
+        config = configurationService.getConfiguration();
+        assertEquals(Long.MAX_VALUE, config.getUserDirectoryId());
+
+        assertNotNull(configurationService.setUserDirectoryId(Long.MIN_VALUE));
+        ao.flushAll();
+        config = configurationService.getConfiguration();
+        assertEquals(Long.MIN_VALUE, config.getUserDirectoryId());
+    }
+
+    @Test
     public void testAddTeam() {
         AdminHelperConfig config;
 

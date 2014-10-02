@@ -16,6 +16,8 @@
 
 package org.catrobat.jira.adminhelper.rest.json;
 
+import com.atlassian.crowd.exception.DirectoryNotFoundException;
+import com.atlassian.crowd.manager.directory.DirectoryManager;
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.user.util.UserManager;
@@ -48,6 +50,10 @@ public final class JsonConfig {
     private List<String> approvedUsers;
     @XmlElement
     private List<String> availableGithubTeams;
+    @XmlElement
+    private long userDirectoryId;
+    @XmlElement
+    private String userDirectoryName;
 
     public JsonConfig() {
 
@@ -85,6 +91,16 @@ public final class JsonConfig {
 
         GithubHelper githubHelper = new GithubHelper(configService);
         this.availableGithubTeams = githubHelper.getAvailableTeams();
+
+        this.userDirectoryId = toCopy.getUserDirectoryId();
+        DirectoryManager directoryManager = ComponentAccessor.getComponent(DirectoryManager.class);
+        try {
+            this.userDirectoryName = directoryManager.findDirectoryById(userDirectoryId).getName();
+        } catch (DirectoryNotFoundException e) {
+            this.userDirectoryId = -1;
+            this.userDirectoryName = null;
+        }
+
     }
 
     public String getGithubToken() {
@@ -141,5 +157,21 @@ public final class JsonConfig {
 
     public void setApprovedUsers(List<String> approvedUsers) {
         this.approvedUsers = approvedUsers;
+    }
+
+    public long getUserDirectoryId() {
+        return userDirectoryId;
+    }
+
+    public void setUserDirectoryId(long userDirectoryId) {
+        this.userDirectoryId = userDirectoryId;
+    }
+
+    public String getUserDirectoryName() {
+        return userDirectoryName;
+    }
+
+    public void setUserDirectoryName(String userDirectoryName) {
+        this.userDirectoryName = userDirectoryName;
     }
 }

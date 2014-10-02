@@ -26,7 +26,7 @@ AJS.toInit(function () {
 
     function populateForm() {
         AJS.$.ajax({
-            url: baseUrl + "/rest/admin-helper/1.0/config/getConfig",
+            url: baseUrl + "/rest/admin-helper/latest/config/getConfig",
             dataType: "json",
             success: function (config) {
                 if (config.githubToken)
@@ -54,6 +54,26 @@ AJS.toInit(function () {
                         tokenSeparators: [",", " "]
                     });
                 }
+
+                AJS.$("#userdirectory").auiSelect2({
+                    placeholder: "Search for directories",
+                    minimumInputLength: 0,
+                    ajax: {
+                        url: baseUrl + "/rest/admin-helper/latest/config/getDirectories",
+                        dataType: "json",
+                        data: function (term, page) {
+                            return {query: term};
+                        },
+                        results: function (data, page) {
+                            var select2data = [];
+                            for (var i = 0; i < data.length; i++) {
+                                select2data.push({id: data[i].userDirectoryId, text: data[i].userDirectoryName});
+                            }
+                            return {results: select2data};
+                        }
+                    }
+
+                });
 
                 AJS.$("#plugin-permission").auiSelect2({
                     placeholder: "Search for users and groups",
@@ -130,6 +150,7 @@ AJS.toInit(function () {
                 }
 
                 AJS.$("#plugin-permission").auiSelect2("data", approved);
+                AJS.$("#userdirectory").auiSelect2("data", {id: config.userDirectoryId, text: config.userDirectoryName});
             },
             error: function (error) {
                 AJS.messages.error({
@@ -154,6 +175,7 @@ AJS.toInit(function () {
         config.githubToken = AJS.$("#github_token").val();
         config.githubTokenPublic = AJS.$("#github_token_public").val();
         config.githubOrganization = AJS.$("#github_organization").val();
+        config.userDirectoryId = AJS.$("#userdirectory").auiSelect2("val");
 
         var usersAndGroups = AJS.$("#plugin-permission").auiSelect2("val");
         var approvedUsers = [];

@@ -17,6 +17,8 @@
 package org.catrobat.jira.adminhelper.rest;
 
 
+import com.atlassian.crowd.embedded.api.Directory;
+import com.atlassian.crowd.manager.directory.DirectoryManager;
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.security.PermissionManager;
 import com.atlassian.jira.security.groups.GroupManager;
@@ -40,11 +42,13 @@ import java.util.List;
 @Path("/config")
 public class ConfigResourceRest extends RestHelper {
     private final AdminHelperConfigService configService;
+    private final DirectoryManager directoryManager;
 
     public ConfigResourceRest(final UserManager userManager, final AdminHelperConfigService configService,
-                              final PermissionManager permissionManager, final GroupManager groupManager) {
+                              final PermissionManager permissionManager, final GroupManager groupManager, final DirectoryManager directoryManager) {
         super(permissionManager, configService, userManager, groupManager);
         this.configService = configService;
+        this.directoryManager = directoryManager;
     }
 
     @GET
@@ -57,6 +61,27 @@ public class ConfigResourceRest extends RestHelper {
         }
 
         return Response.ok(new JsonConfig(configService.getConfiguration(), configService)).build();
+    }
+
+    @GET
+    @Path("/getDirectories")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDirectories(@Context HttpServletRequest request) {
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
+        }
+
+        List<Directory> directoryList = directoryManager.findAllDirectories();
+        List<JsonConfig> jsonDirectoryList = new ArrayList<JsonConfig>();
+        for(Directory directory : directoryList) {
+            JsonConfig config = new JsonConfig();
+            config.setUserDirectoryId(directory.getId());
+            config.setUserDirectoryName(directory.getName());
+            jsonDirectoryList.add(config);
+        }
+
+        return Response.ok(jsonDirectoryList).build();
     }
 
     @GET
@@ -90,6 +115,7 @@ public class ConfigResourceRest extends RestHelper {
         }
         configService.setPublicApiToken(jsonConfig.getGithubTokenPublic());
         configService.setOrganisation(jsonConfig.getGithubOrganization());
+        configService.setUserDirectoryId(jsonConfig.getUserDirectoryId());
 
         if (jsonConfig.getApprovedGroups() != null) {
             configService.clearApprovedGroups();

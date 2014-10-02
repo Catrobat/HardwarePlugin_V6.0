@@ -39,7 +39,18 @@
             <!-- fake fields are a workaround for chrome autofill getting the wrong fields -->
             <input style="display:none" type="text" name="fakeusernameremembered"/>
             <input style="display:none" type="password" name="fakepasswordremembered"/>
+            <h2>General</h2>
+            <fieldset>
+                <div class="field-group">
+                    <label for="plugin-permission">Userdirectory</label>
+                    <input class="text" type="text" id="userdirectory" name="userdirectory"
+                           title="userdirectory">
 
+                    <div class="description">
+                        Adds user to given user directory.
+                    </div>
+                </div>
+            </fieldset>
             <h2>Permission</h2>
             <fieldset>
                 <div class="field-group">

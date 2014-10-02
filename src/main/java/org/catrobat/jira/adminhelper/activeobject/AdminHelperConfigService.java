@@ -30,6 +30,8 @@ public interface AdminHelperConfigService {
 
     AdminHelperConfig setOrganisation(String organisation);
 
+    AdminHelperConfig setUserDirectoryId(long userDirectoryId);
+
     Team addTeam(String teamName, List<Integer> githubTeamIdList, List<String> coordinatorGroups,
                  List<String> seniorGroups, List<String> developerGroups);
 
