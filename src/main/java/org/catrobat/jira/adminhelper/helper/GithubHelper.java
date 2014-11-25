@@ -17,14 +17,16 @@
 package org.catrobat.jira.adminhelper.helper;
 
 import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
-import org.eclipse.egit.github.core.Team;
-import org.eclipse.egit.github.core.User;
-import org.eclipse.egit.github.core.service.TeamService;
-import org.eclipse.egit.github.core.service.UserService;
+import org.kohsuke.github.GHOrganization;
+import org.kohsuke.github.GHTeam;
+import org.kohsuke.github.GHUser;
+import org.kohsuke.github.GitHub;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class GithubHelper {
 
@@ -42,10 +44,9 @@ public class GithubHelper {
         String token = configService.getConfiguration().getGithubApiToken();
 
         try {
-            UserService userService = new UserService();
-            userService.getClient().setOAuth2Token(token);
+            GitHub gitHub = GitHub.connectUsingOAuth(token);
+            GHUser user = gitHub.getUser(userName);
 
-            User user = userService.getUser(userName);
             if (user != null) {
                 return true;
             }
@@ -56,30 +57,19 @@ public class GithubHelper {
         return false;
     }
 
-    public String removeUserFromAllTeams(final String user) {
-        if (!doesUserExist(user)) {
+    public String removeUserFromAllTeams(final String userName) {
+        if (!doesUserExist(userName)) {
             return "User does not exist on GitHub";
         }
 
         String token = configService.getConfiguration().getGithubApiToken();
-        String organisation = configService.getConfiguration().getGithubOrganisation();
+        String organizationName = configService.getConfiguration().getGithubOrganisation();
 
         try {
-            TeamService teamService = new TeamService();
-            teamService.getClient().setOAuth2Token(token);
-
-            List<Team> teamList = teamService.getTeams(organisation);
-            for (Team githubTeam : teamList) {
-                // Owner group must not me empty
-                // getMembersCount() just filled when getting single team
-                if (githubTeam.getName().equals("Owners") && teamService.getTeam(githubTeam.getId()).getMembersCount() <= 1) {
-                    continue;
-                }
-
-                if (teamService.isMember(githubTeam.getId(), user)) {
-                    teamService.removeMember(githubTeam.getId(), user);
-                }
-            }
+            GitHub gitHub = GitHub.connectUsingOAuth(token);
+            GHOrganization organization = gitHub.getOrganization(organizationName);
+            GHUser user = gitHub.getUser(userName);
+            organization.remove(user);
         } catch (IOException e) {
             e.printStackTrace();
             return e.getMessage();
@@ -88,30 +78,20 @@ public class GithubHelper {
         return null; // everything went fine
     }
 
-    public String addUserToTeam(final String user, final String team) {
-        if (user == null || !doesUserExist(user)) {
+    public String addUserToTeam(final String userName, final String teamName) {
+        if (userName == null || !doesUserExist(userName)) {
             return "User does not exist on GitHub";
         }
 
         String token = configService.getConfiguration().getGithubApiToken();
-        String organisation = configService.getConfiguration().getGithubOrganisation();
+        String organizationName = configService.getConfiguration().getGithubOrganisation();
 
         try {
-            TeamService teamService = new TeamService();
-            teamService.getClient().setOAuth2Token(token);
-
-            List<Team> teamList = teamService.getTeams(organisation);
-            Integer id = null;
-            for (Team githubTeam : teamList) {
-                if (githubTeam.getName().toLowerCase().equals(team.toLowerCase())) {
-                    id = githubTeam.getId();
-                    break;
-                }
-            }
-            if (id == null)
-                return "Team not found";
-
-            teamService.addMember(id, user);
+            GitHub gitHub = GitHub.connectUsingOAuth(token);
+            GHOrganization organization = gitHub.getOrganization(organizationName);
+            GHTeam team = organization.getTeamByName(teamName);
+            GHUser user = gitHub.getUser(userName);
+            team.add(user);
         } catch (IOException e) {
             e.printStackTrace();
             return e.getMessage();
@@ -123,24 +103,20 @@ public class GithubHelper {
 
     public List<String> getAvailableTeams() {
         String token = configService.getConfiguration().getGithubApiToken();
-        String organisation = configService.getConfiguration().getGithubOrganisation();
-        if (organisation == null || organisation.length() == 0) {
+        String organizationName = configService.getConfiguration().getGithubOrganisation();
+        if (organizationName == null || organizationName.length() == 0) {
             return null;
         }
 
-        List<String> teamNameList = new ArrayList<String>();
+        Map<String, GHTeam> teams = new TreeMap<String, GHTeam>();
         try {
-            TeamService teamService = new TeamService();
-            teamService.getClient().setOAuth2Token(token);
-
-            List<Team> teamList = teamService.getTeams(organisation);
-            for (Team githubTeam : teamList) {
-                teamNameList.add(githubTeam.getName());
-            }
+            GitHub gitHub = GitHub.connectUsingOAuth(token);
+            GHOrganization organization = gitHub.getOrganization(organizationName);
+            teams = organization.getTeams();
         } catch (IOException e) {
             // is ok - return the list anyway
         }
 
-        return teamNameList;
+        return new ArrayList<String>(teams.keySet());
     }
 }

@@ -34,9 +34,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -282,8 +280,15 @@ public class HardwareRest extends RestHelper {
         com.atlassian.jira.user.util.UserManager jiraUserManager = ComponentAccessor.getUserManager();
         ApplicationUser lendingByUser = jiraUserManager.getUserByName(jsonLending.getLentOutBy());
         ApplicationUser lendingIssuerUser = jiraUserManager.getUserByName(userManager.getRemoteUsername(request));
-        if (lendingByUser == null || lendingIssuerUser == null) {
-            return Response.serverError().entity("User not found").build();
+        if (lendingIssuerUser == null) {
+            return Response.serverError().entity("Issuing user not found").build();
+        }
+
+        String lendingByUserName;
+        if(lendingByUser == null) {
+            lendingByUserName = jsonLending.getLentOutBy();
+        } else {
+            lendingByUserName = lendingByUser.getKey();
         }
 
         Date begin = jsonLending.getBegin();
@@ -291,7 +296,7 @@ public class HardwareRest extends RestHelper {
             begin = new Date();
         }
 
-        Lending lending = lendingService.lendOut(device, lendingByUser.getKey(), lendingIssuerUser.getKey(), jsonLending.getPurpose(), jsonLending.getComment(), begin);
+        Lending lending = lendingService.lendOut(device, lendingByUserName, lendingIssuerUser.getKey(), jsonLending.getPurpose(), jsonLending.getComment(), begin);
         if (lending == null) {
             return Response.serverError().entity("Saving data failed").build();
         }
@@ -385,6 +390,27 @@ public class HardwareRest extends RestHelper {
     }
 
     @GET
+    @Path("/received-from")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getReceivedFrom(@Context HttpServletRequest request) {
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
+        }
+
+        Map<String, JsonDevice> deviceMap = new TreeMap<String, JsonDevice>();
+        for(Device device : deviceService.all()) {
+            if(device != null && device.getReceivedFrom() != null && !deviceMap.containsKey(device.getReceivedFrom())) {
+                JsonDevice jsonDevice = new JsonDevice();
+                jsonDevice.setReceivedFrom(device.getReceivedFrom());
+                deviceMap.put(device.getReceivedFrom(), jsonDevice);
+            }
+        }
+
+        return Response.ok(deviceMap.values()).build();
+    }
+
+    @GET
     @Path("/devices")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDevices(@Context HttpServletRequest request) {
@@ -435,6 +461,24 @@ public class HardwareRest extends RestHelper {
         }
 
         return Response.ok(jsonDeviceList).build();
+    }
+
+    @GET
+    @Path("/lending/all-for-user")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getLendingForUser(@Context HttpServletRequest request, @QueryParam("user") String userKey) {
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
+        }
+
+        ArrayList<JsonLending> lendingArrayList = new ArrayList<JsonLending>();
+        com.atlassian.jira.user.util.UserManager jiraUserManager = ComponentAccessor.getUserManager();
+        for(Lending lending : lendingService.searchAllForUser(userKey)) {
+            lendingArrayList.add(new JsonLending(lending, jiraUserManager));
+        }
+
+        return Response.ok(lendingArrayList).build();
     }
 
     @GET

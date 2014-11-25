@@ -94,6 +94,7 @@ function showNewHardwareDialogAjax(baseUrl, editableHardwareModel) {
         "            <div class=\"field-group\">\n" +
         "                <label for=\"price\">Price</label>\n" +
         "                <input class=\"text\" type=\"text\" id=\"price\" name=\"price\" title=\"price\" value=\"" + hardwareModel.price + "\">\n" +
+        "                <div class=\"description\">For better comparability use Euro as currency</div>\n" +
         "            </div>\n" +
         "\n" +
         "            <div class=\"field-group\">\n" +
@@ -160,7 +161,6 @@ function showNewHardwareDialogAjax(baseUrl, editableHardwareModel) {
 
     AJS.$("#type-of-device").auiSelect2({
         placeholder: "Existing types of devices",
-        minimumInputLength: 1,
         ajax: {
             url: baseUrl + urlSuffixTypes,
             dataType: "json",
@@ -189,8 +189,7 @@ function showNewHardwareDialogAjax(baseUrl, editableHardwareModel) {
     }).auiSelect2("val", hardwareModel.typeOfDevice);
 
     AJS.$("#producer").auiSelect2({
-        placeholder: "Existing types of devices",
-        minimumInputLength: 1,
+        placeholder: "Existing producers",
         ajax: {
             url: baseUrl + urlSuffixProducers,
             dataType: "json",
@@ -219,8 +218,7 @@ function showNewHardwareDialogAjax(baseUrl, editableHardwareModel) {
     }).auiSelect2("val", hardwareModel.producer);
 
     AJS.$("#operating-system").auiSelect2({
-        placeholder: "Existing types of devices",
-        minimumInputLength: 1,
+        placeholder: "Existing operating systems",
         ajax: {
             url: baseUrl + urlSuffixOperatingSystems,
             dataType: "json",

@@ -36,7 +36,7 @@ function showNewDeviceDialogAjax(baseUrl, hardwareList, editableDevice) {
     var dialog = new AJS.Dialog({
         width: 600,
         height: 500,
-        id: "example-dialog",
+        id: "new-device-dialog",
         closeOnOutsideClick: true
     });
 
@@ -102,8 +102,8 @@ function showNewDeviceDialogAjax(baseUrl, hardwareList, editableDevice) {
         "\n" +
         "<div class=\"field-group\">\n" +
         "<label for=\"life_of_asset\">Useful life of asset</label>\n" +
-        "<input class=\"text\" type=\"text\" id=\"life_of_asset\" name=\"life_of_asset\" title=\"life of asset\" value=\"" + device.usefulLiveOfAsset + "\">\n" +
-        "<div class=\"description\">Amount of time when this device is obsolete</div>\n" +
+        "<input class=\"text medium-field\" type=\"text\" id=\"life_of_asset\" name=\"life_of_asset\" title=\"life of asset\" value=\"" + device.usefulLiveOfAsset + "\"> months\n" +
+        "<div class=\"description\">Amount of months when this device is obsolete</div>\n" +
         "</div>\n";
     if (device.id != 0) {
         content += "<div class=\"field-group\">\n" +
@@ -127,7 +127,7 @@ function showNewDeviceDialogAjax(baseUrl, hardwareList, editableDevice) {
             device.imei = AJS.$("#imei").val();
             device.inventoryNumber = AJS.$("#inventory").val();
             device.receivedDate = new Date(AJS.$("#received_date").val());
-            device.receivedFrom = AJS.$("#received_from").val();
+            device.receivedFrom = AJS.$("#received_from").auiSelect2("val");
             device.usefulLiveOfAsset = AJS.$("#life_of_asset").val();
             device.sortedOutComment = AJS.$("#sort-out-comment").val();
             device.sortedOutDate = new Date(AJS.$("#sort-out-date").val());
@@ -197,4 +197,34 @@ function showNewDeviceDialogAjax(baseUrl, hardwareList, editableDevice) {
             AJS.$("#select_hardware_error").show();
         }
     });
+
+    AJS.$("#received_from").auiSelect2({
+        placeholder: "Search for existing entries",
+        ajax: {
+            url: baseUrl + urlSuffixReceivedFrom,
+            dataType: "json",
+            data: function (term, page) {
+                return term;
+            },
+            results: function (data, page) {
+                var select2data = [];
+                select2data.push({id: null, text: "<none>"});
+                for (var i = 0; i < data.length; i++) {
+                    select2data.push({id: data[i].receivedFrom, text: data[i].receivedFrom});
+                }
+                return {results: select2data};
+            }
+        },
+        //Allow manually entered text in drop down.
+        createSearchChoice: function (term, data) {
+            if (AJS.$(data).filter(function () {
+                return this.text.localeCompare(term) === 0;
+            }).length === 0) {
+                return {id: term, text: term};
+            }
+        },
+        initSelection: function (element, callback) {
+            callback({id: element.val(), text: element.val()});
+        }
+    }).auiSelect2("val", device.receivedFrom);
 }

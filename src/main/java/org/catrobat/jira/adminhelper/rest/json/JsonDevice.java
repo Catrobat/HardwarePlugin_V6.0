@@ -41,6 +41,9 @@ public class JsonDevice {
     private String hardwareModelName;
 
     @XmlElement
+    private int hardwareModelId;
+
+    @XmlElement
     private String serialNumber;
 
     @XmlElement
@@ -92,6 +95,7 @@ public class JsonDevice {
         if (toCopy.getHardwareModel().getVersion() != null && toCopy.getHardwareModel().getVersion().length() != 0) {
             hardwareModelName += " (" + toCopy.getHardwareModel().getVersion() + ")";
         }
+        hardwareModelId = toCopy.getHardwareModel().getID();
         serialNumber = toCopy.getSerialNumber();
         imei = toCopy.getImei();
         inventoryNumber = toCopy.getInventoryNumber();
@@ -250,5 +254,13 @@ public class JsonDevice {
 
     public void setHardwareModel(JsonHardwareModel hardwareModel) {
         this.hardwareModel = hardwareModel;
+    }
+
+    public int getHardwareModelId() {
+        return hardwareModelId;
+    }
+
+    public void setHardwareModelId(int hardwareModelId) {
+        this.hardwareModelId = hardwareModelId;
     }
 }

@@ -33,6 +33,11 @@ public class DeviceCommentServiceImpl implements DeviceCommentService {
 
     @Override
     public DeviceComment addDeviceComment(Device device, String author, String comment) {
+        return addDeviceComment(device, author, comment, new Date());
+    }
+
+    @Override
+    public DeviceComment addDeviceComment(Device device, String author, String comment, Date date) {
         if (device == null || author == null || author.trim().length() == 0 || comment == null || comment.trim().length() == 0) {
             return null;
         }
@@ -44,7 +49,7 @@ public class DeviceCommentServiceImpl implements DeviceCommentService {
         deviceComment.setDevice(device);
         deviceComment.setAuthor(author);
         deviceComment.setComment(comment);
-        deviceComment.setDate(new Date());
+        deviceComment.setDate(date);
         deviceComment.save();
 
         return deviceComment;

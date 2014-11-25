@@ -37,6 +37,8 @@ public final class JsonUser {
     @XmlElement
     private String githubName;
     @XmlElement
+    private String displayName;
+    @XmlElement
     private List<String> coordinatorList;
     @XmlElement
     private List<String> seniorList;
@@ -115,5 +117,13 @@ public final class JsonUser {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 }

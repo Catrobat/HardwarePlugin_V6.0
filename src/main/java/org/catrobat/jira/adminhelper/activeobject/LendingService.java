@@ -32,4 +32,6 @@ public interface LendingService {
     List<Lending> currentlyLentOutDevices(HardwareModel hardwareModel);
 
     List<Lending> all();
+
+    List<Lending> searchAllForUser(String lendingByUserKey);
 }

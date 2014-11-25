@@ -164,4 +164,20 @@ public class LendingServiceImplTest {
         assertEquals(2, lendingService.all().size());
     }
 
+    @Test
+    public void testSearchAllForUser() {
+        assertEquals(0, lendingService.searchAllForUser("user1").size());
+        assertEquals(0, lendingService.searchAllForUser("user2").size());
+
+        lendingService.lendOut(ao.find(Device.class)[0], "user1", "user2", "purpose", "comment", new Date());
+        lendingService.lendOut(ao.find(Device.class)[1], "user1", "user2", "purpose", "comment", new Date());
+
+        assertEquals(2, lendingService.searchAllForUser("user1").size());
+        assertEquals(2, lendingService.searchAllForUser("uSEr1").size());
+        assertEquals(0, lendingService.searchAllForUser("user2").size());
+
+        assertNull(lendingService.searchAllForUser(null));
+        assertNull(lendingService.searchAllForUser(""));
+        assertNull(lendingService.searchAllForUser("   "));
+    }
 }

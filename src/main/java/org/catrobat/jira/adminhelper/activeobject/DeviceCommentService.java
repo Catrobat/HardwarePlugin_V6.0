@@ -18,7 +18,10 @@ package org.catrobat.jira.adminhelper.activeobject;
 
 import com.atlassian.activeobjects.tx.Transactional;
 
+import java.util.Date;
+
 @Transactional
 public interface DeviceCommentService {
     DeviceComment addDeviceComment(Device device, String author, String comment);
+    DeviceComment addDeviceComment(Device device, String author, String comment, Date date);
 }

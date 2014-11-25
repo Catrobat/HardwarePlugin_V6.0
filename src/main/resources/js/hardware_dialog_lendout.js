@@ -16,12 +16,12 @@
 
 "use strict";
 
-function showLendoutDialog(baseUrl, hardwareId) {
+function showLendoutDialog(baseUrl, hardwareId, deviceId) {
     AJS.$.ajax({
         url: baseUrl + urlSuffixSingleHardwareModelDevicesAvailable.replace("{0}", hardwareId),
         type: "GET",
         success: function (deviceList) {
-            showLendOutDialogAjax(baseUrl, hardwareId, deviceList)
+            showLendOutDialogAjax(baseUrl, hardwareId, deviceList, deviceId)
         },
         error: function (error) {
             AJS.messages.error({
@@ -32,7 +32,7 @@ function showLendoutDialog(baseUrl, hardwareId) {
     });
 }
 
-function showLendOutDialogAjax(baseUrl, hardwareId, deviceList) {
+function showLendOutDialogAjax(baseUrl, hardwareId, deviceList, deviceId) {
     // may be in background and therefore needs to be removed
     if (lendingOutDialog) {
         try {
@@ -122,7 +122,7 @@ function showLendOutDialogAjax(baseUrl, hardwareId, deviceList) {
         "    </fieldset>\n" +
         "</form>";
 
-    lendingOutDialog.addHeader("Lending Out");
+    lendingOutDialog.addHeader("Lending Out - " + deviceList[0].hardwareModelName);
     lendingOutDialog.addPanel("Choose device", contentDevices, "panel-body-device");
 
     lendingOutDialog.addPanel("Details", contentDetails, "panel-body-details");
@@ -152,7 +152,7 @@ function showLendOutDialogAjax(baseUrl, hardwareId, deviceList) {
 
         var lendingOut = {
             lentOutBy: AJS.$("#user").auiSelect2("val"),
-            begin: new Date(AJS.$("begin_Date").val()),
+            begin: new Date(AJS.$("#begin_date").val()),
             purpose: AJS.$("#lending_purpose").val(),
             comment: AJS.$("#lending-comment").val(),
             device: {comments: [
@@ -205,17 +205,26 @@ function showLendOutDialogAjax(baseUrl, hardwareId, deviceList) {
         placeholder: "Search for user",
         minimumInputLength: 1,
         ajax: {
-            url: baseUrl + "/rest/api/2/user/picker",
+            //url: baseUrl + "/rest/api/2/user/picker",
+            url: baseUrl + urlSuffixUserSearch,
             dataType: "json",
             data: function (term, page) {
                 return {query: term};
             },
             results: function (data, page) {
                 var select2data = [];
-                for (var i = 0; i < data.users.length; i++) {
-                    select2data.push({id: data.users[i].key, text: data.users[i].name});
+                for (var i = 0; i < data.length; i++) {
+                    select2data.push({id: data[i].userName, text: data[i].displayName});
                 }
                 return {results: select2data};
+            }
+        },
+        //Allow manually entered text in drop down.
+        createSearchChoice: function (term, data) {
+            if (AJS.$(data).filter(function () {
+                return this.text.localeCompare(term) === 0;
+            }).length === 0) {
+                return {id: term, text: term};
             }
         }
     });
@@ -231,4 +240,16 @@ function showLendOutDialogAjax(baseUrl, hardwareId, deviceList) {
     lendingOutDialog.show();
 
     var lendOutDialogList = new List("lend-out-dialog", {valueNames: ["serial", "imei", "inventory"]});
+
+    if(typeof deviceId != 'undefined') {
+        AJS.$("#lend-out-dialog").find("a#" + deviceId).closest("tr").css("background-color", "");
+        AJS.$("#lend-out-dialog").find("a#" + deviceId).closest("tr").css("background-color", "#e0e0e0");
+
+        lendingOutDialog.gotoPanel(1);
+        selectedDeviceId = deviceId;
+
+        AJS.$("#serial").val(deviceList[deviceList.map[deviceId]].serialNumber);
+        AJS.$("#imei").val(deviceList[deviceList.map[deviceId]].imei);
+        AJS.$("#inventory").val(deviceList[deviceList.map[deviceId]].inventoryNumber);
+    }
 }

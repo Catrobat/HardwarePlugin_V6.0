@@ -124,7 +124,7 @@ public class GithubHelperRest extends RestHelper {
             return Response.serverError().entity(e.getMessage()).build();
         }
 
-        UserRest userRest = new UserRest(userManager, userPreferencesManager, configService, permissionManager, groupManager, directoryManager);
+        UserRest userRest = new UserRest(userManager, userPreferencesManager, configService, permissionManager, groupManager, directoryManager, null);
         userRest.addUserToGithubAndJiraGroups(jsonUser, applicationUser.getDirectoryUser(), new JsonConfig(configService.getConfiguration(), configService));
 
         return Response.ok().build();

@@ -22,29 +22,34 @@ var returnDialog;
 var removeHardwareDialog;
 var sortOutDialog;
 
-var urlRest = "/rest/admin-helper/latest/hardware";
+var urlRest = "/rest/admin-helper/latest";
+var urlRestHardware = urlRest + "/hardware";
+var urlSuffixUserSearch = urlRest + "/user/search";
 
-var urlSuffixHardwareModels = urlRest;
-var urlSuffixSingleHardwareModel = urlRest + "/{0}";
-var urlSuffixSingleHardwareModelDevices = urlRest + "/{0}/devices";
-var urlSuffixSingleHardwareModelDevicesAvailable = urlRest + "/{0}/devices/available";
+var urlSuffixHardwareModels = urlRestHardware;
+var urlSuffixSingleHardwareModel = urlRestHardware + "/{0}";
+var urlSuffixSingleHardwareModelDevices = urlRestHardware + "/{0}/devices";
+var urlSuffixSingleHardwareModelDevicesAvailable = urlRestHardware + "/{0}/devices/available";
 
-var urlSuffixDevices = urlRest + "/devices";
-var urlSuffixDevicesOngoingLending = urlRest + "/devices/ongoing-lending";
-var urlSuffixDevicesSortedOut = urlRest + "/devices/sorted-out";
-var urlSuffixSingleDevice = urlRest + "/devices/{0}";
-var urlSuffixSingleDeviceLendOut = urlRest + "/devices/{0}/lend-out";
-var urlSuffixSingleDeviceCurrentLending = urlRest + "/devices/{0}/current-lending";
-var urlSuffixSingleDeviceSortOut = urlRest + "/devices/{0}/sort-out";
+var urlSuffixDevices = urlRestHardware + "/devices";
+var urlSuffixDevicesOngoingLending = urlRestHardware + "/devices/ongoing-lending";
+var urlSuffixDevicesSortedOut = urlRestHardware + "/devices/sorted-out";
+var urlSuffixSingleDevice = urlRestHardware + "/devices/{0}";
+var urlSuffixSingleDeviceLendOut = urlRestHardware + "/devices/{0}/lend-out";
+var urlSuffixLendingForUser = urlRestHardware + "/lending/all-for-user";
+var urlSuffixSingleDeviceCurrentLending = urlRestHardware + "/devices/{0}/current-lending";
+var urlSuffixSingleDeviceSortOut = urlRestHardware + "/devices/{0}/sort-out";
 
-var urlSuffixTypes = urlRest + "/types";
-var urlSuffixProducers = urlRest + "/producers";
-var urlSuffixOperatingSystems = urlRest + "/operating-systems";
+var urlSuffixTypes = urlRestHardware + "/types";
+var urlSuffixProducers = urlRestHardware + "/producers";
+var urlSuffixOperatingSystems = urlRestHardware + "/operating-systems";
+var urlSuffixReceivedFrom = urlRestHardware + "/received-from";
 
 AJS.toInit(function () {
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
     fillOutAllTables(baseUrl);
     handleEvents(baseUrl);
+    initIndividualRelatedLendingTab(baseUrl);
 });
 
 function fillOutAllTables(baseUrl) {
@@ -95,6 +100,7 @@ function fillOutAllTables(baseUrl) {
         url: baseUrl + urlSuffixDevices,
         type: "GET",
         success: function (deviceList) {
+            populateActiveDevicesTable(deviceList);
             populateAllDevicesTable(deviceList);
         },
         error: function (error) {
@@ -106,10 +112,80 @@ function fillOutAllTables(baseUrl) {
     });
 }
 
+function initIndividualRelatedLendingTab(baseUrl) {
+    var individualList;
+    AJS.$("#individual-lending-search").auiSelect2({
+        placeholder: "Search for user",
+        minimumInputLength: 1,
+        ajax: {
+            url: baseUrl + urlSuffixUserSearch,
+            dataType: "json",
+            data: function (term, page) {
+                return {query: term};
+            },
+            results: function (data, page) {
+                var select2data = [];
+                for (var i = 0; i < data.length; i++) {
+                    select2data.push({id: data[i].userName, text: data[i].displayName});
+                }
+                return {results: select2data};
+            }
+        }
+    })
+        .on("select2-selecting", function (e) {
+            AJS.$.ajax({
+                url: baseUrl + urlSuffixLendingForUser,
+                type: "GET",
+                dataType: "json",
+                data: {user: e.val},
+                success: function (lendingList) {
+                    if(lendingList.length == 0) {
+                        AJS.$("#table-individual").html('<tr><td colspan="10">No entry found for this user.</td></tr>');
+                    } else {
+                        var tableHtml = "";
+                        for(var i = 0; i < lendingList.length; i++) {
+                            tableHtml += '<tr><td class="name">' + lendingList[i].device.hardwareModelName + '</td>' +
+                                '<td class="serial">' + lendingList[i].device.serialNumber + '</td>' +
+                                '<td class="imei">' + lendingList[i].device.imei + '</td>' +
+                                '<td class="inventory">' + lendingList[i].device.inventoryNumber + '</td>' +
+                                '<td class="issuer">' + lendingList[i].lentOutIssuer + '</td>' +
+                                '<td class="begin">' + getShortDate(lendingList[i].begin) + '</td>' +
+                                '<td class="end">' + getShortDate(lendingList[i].end) + '</td>' +
+                                '<td class="purpose">' + lendingList[i].purpose + '</td>' +
+                                '<td class="comment">' + lendingList[i].comment + '</td>' +
+                                '<td><a class="device_details" id="' + lendingList[i].id + '" href="#">Details</a></td></tr>';
+                        }
+                        AJS.$("#table-individual").html(tableHtml);
+                    }
+                    AJS.$("#search-filter-individual").val('');
+                    individualList = new List("tabs-individual-lending", {valueNames: ["name", "serial", "imei",
+                        "inventory", "issuer", "begin", "end", "purpose", "comment"]});
+                    AJS.$("#table-individual").trigger("update");
+                },
+                error: function (error) {
+                    AJS.messages.error({
+                        title: "Error!",
+                        body: error.responseText
+                    });
+                }
+            });
+        });
+
+    AJS.$("#table-individual").html('<tr><td colspan="10">Please use above input mask to search for an user.</td></tr>');
+    AJS.$("#table-individual").trigger("update");
+}
+
 function handleEvents(baseUrl) {
     AJS.$(document).on("click", ".lending_out", function (e) {
         e.preventDefault();
         showLendoutDialog(baseUrl, e.target.id);
+    });
+
+    AJS.$(document).on("click", ".direct_lending_out", function (e) {
+        var hardwareId = e.target.id.split(",")[0];
+        var deviceId = e.target.id.split(",")[1];
+        e.preventDefault();
+        showLendoutDialog(baseUrl, hardwareId, deviceId);
     });
 
     AJS.$(document).on("click", ".device_sort_out", function (e) {

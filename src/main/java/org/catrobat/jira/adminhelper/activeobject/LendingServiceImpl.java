@@ -110,4 +110,15 @@ public class LendingServiceImpl implements LendingService {
     public List<Lending> all() {
         return Arrays.asList(ao.find(Lending.class));
     }
+
+    @Override
+    public List<Lending> searchAllForUser(String lendingByUserKey) {
+        if(lendingByUserKey == null || lendingByUserKey.trim().length() == 0) {
+            return null;
+        }
+
+        return Arrays.asList(ao.find(Lending.class, Query.select()
+                .where("upper(LENDING_BY_USER_KEY) = upper(?)", lendingByUserKey.trim())
+                .order("BEGIN ASC")));
+    }
 }

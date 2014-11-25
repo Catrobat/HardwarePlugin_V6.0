@@ -86,6 +86,14 @@
     <url-pattern>/admin_helper/hardware</url-pattern>
     </servlet>
 
+    <servlet key="download-servlet" class="org.catrobat.jira.adminhelper.DownloadCsvServlet">
+        <url-pattern>/admin_helper/download</url-pattern>
+    </servlet>
+
+    <servlet key="upload-servlet" class="org.catrobat.jira.adminhelper.UploadCsvServlet">
+        <url-pattern>/admin_helper/upload</url-pattern>
+    </servlet>
+
     <component key="adminHelperConfiguration"
                class="org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigServiceImpl"/>
     <component key="device" class="org.catrobat.jira.adminhelper.activeobject.DeviceServiceImpl"/>

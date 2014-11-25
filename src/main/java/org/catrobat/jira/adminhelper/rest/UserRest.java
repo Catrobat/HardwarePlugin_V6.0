@@ -38,6 +38,9 @@ import com.atlassian.jira.user.util.UserUtil;
 import com.atlassian.sal.api.user.UserManager;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
+import org.catrobat.jira.adminhelper.activeobject.Lending;
+import org.catrobat.jira.adminhelper.activeobject.LendingService;
+import org.catrobat.jira.adminhelper.activeobject.LendingServiceImpl;
 import org.catrobat.jira.adminhelper.helper.GithubHelper;
 import org.catrobat.jira.adminhelper.rest.json.JsonConfig;
 import org.catrobat.jira.adminhelper.rest.json.JsonTeam;
@@ -45,6 +48,7 @@ import org.catrobat.jira.adminhelper.rest.json.JsonUser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -59,14 +63,17 @@ public class UserRest extends RestHelper {
     private final UserPreferencesManager userPreferencesManager;
     private final AdminHelperConfigService configService;
     private final DirectoryManager directoryManager;
+    private final LendingService lendingService;
 
     public UserRest(final UserManager userManager, final UserPreferencesManager userPreferencesManager,
                     final AdminHelperConfigService configService, final PermissionManager permissionManager,
-                    final GroupManager groupManager, final DirectoryManager directoryManager) {
+                    final GroupManager groupManager, final DirectoryManager directoryManager,
+                    final LendingService lendingService) {
         super(permissionManager, configService, userManager, groupManager);
         this.userPreferencesManager = userPreferencesManager;
         this.configService = configService;
         this.directoryManager = directoryManager;
+        this.lendingService = lendingService;
     }
 
     @PUT
@@ -186,6 +193,48 @@ public class UserRest extends RestHelper {
         }
 
         return Response.ok(jsonUserList).build();
+    }
+
+    @GET
+    @Path("/search")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response searchUser(@QueryParam("query") String query, @Context HttpServletRequest request) {
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
+        }
+        if(lendingService == null) {
+            return Response.serverError().entity("Lending Service must not be null").build();
+        }
+
+        if(query == null || query.length() < 1) {
+            return Response.ok(new ArrayList<JsonUser>()).build();
+        }
+
+        com.atlassian.jira.user.util.UserManager jiraUserManager = ComponentAccessor.getUserManager();
+        TreeMap<String, JsonUser> jsonUsers = new TreeMap<String, JsonUser>();
+        for(User user : jiraUserManager.getUsers()) {
+            if(user.getName().toLowerCase().contains(query.toLowerCase()) ||
+                    user.getDisplayName().toLowerCase().contains(query.toLowerCase())) {
+                ApplicationUser applicationUser = ApplicationUsers.from(user);
+                JsonUser jsonUser = new JsonUser();
+                jsonUser.setUserName(applicationUser.getKey());
+                jsonUser.setDisplayName(applicationUser.getDisplayName());
+                jsonUsers.put(user.getName().toLowerCase(), jsonUser);
+            }
+        }
+
+        for(Lending lending : lendingService.all()) {
+            if(lending.getLendingByUserKey().toLowerCase().contains(query.toLowerCase()) &&
+                    !jsonUsers.containsKey(lending.getLendingByUserKey().toLowerCase())) {
+                JsonUser jsonUser = new JsonUser();
+                jsonUser.setUserName(lending.getLendingByUserKey());
+                jsonUser.setDisplayName(lending.getLendingByUserKey());
+                jsonUsers.put(jsonUser.getUserName().toLowerCase(), jsonUser);
+            }
+        }
+
+        return Response.ok(jsonUsers.values()).build();
     }
 
     @PUT

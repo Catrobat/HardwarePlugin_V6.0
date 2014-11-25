@@ -164,7 +164,15 @@ public class DeviceServiceImplTest {
 
     @Test
     public void testAll() {
-        assertEquals(ao.find(Device.class).length, deviceService.all().size());
+        int expectedSize = ao.find(Device.class).length;
+        assertEquals(expectedSize, deviceService.all().size());
+
+        HardwareModel hardwareModel = ao.find(HardwareModel.class)[0];
+        deviceService.add(hardwareModel, "imei1", null, null, "received", new Date(0L), "useful");
+        deviceService.add(hardwareModel, "imei2", null, null, "received", new Date(0L), "useful");
+        deviceService.add(hardwareModel, "imei3", null, null, "received", new Date(0L), "useful");
+
+        assertEquals(expectedSize + 3, deviceService.all().size());
     }
 
     @Test

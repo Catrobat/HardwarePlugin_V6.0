@@ -80,6 +80,40 @@ function populateSortedOutTable(deviceList) {
     var sortedOutList = new List("tabs-sorted-out", {valueNames: ["name", "serial", "imei", "inventory", "date"]});
 }
 
+function populateActiveDevicesTable(deviceList) {
+    var tableBody = "";
+
+    for (var i = 0; i < deviceList.length; i++) {
+        if(typeof deviceList[i].sortedOutDate != 'undefined') {
+            continue;
+        }
+
+        var action = "";
+        if (deviceList[i].currentlyLentOutBy) {
+            action = "<a class=\"device_return\" id=\"" + deviceList[i].id + "\" href=\"#\">Return device</a>";
+        } else {
+            action = "<a class=\"direct_lending_out\" id=\"" + deviceList[i].hardwareModelId + "," +
+                deviceList[i].id + "\" href=\"#\">Lending out</a> / <a class=\"device_sort_out\" id=\"" + deviceList[i].id + "\" href=\"#\">Sort out</a>";
+        }
+
+        tableBody += "<tr>\n" +
+            "<td class=\"name\">" + deviceList[i].hardwareModelName + "</td>\n" +
+            "<td class=\"serial\">" + deviceList[i].serialNumber + "</td>\n" +
+            "<td class=\"imei\">" + deviceList[i].imei + "</td>\n" +
+            "<td class=\"inventory\">" + deviceList[i].inventoryNumber + "</td>\n" +
+            "<td class=\"lent-out-since\">" + getShortDate(deviceList[i].currentlyLentOutSince) + "</td>\n" +
+            "<td class=\"lent-out-by\">" + getShortDate(deviceList[i].currentlyLentOutBy) + "</td>\n" +
+            "<td class=\"action\">" + action + "</td>\n" +
+            "<td><a class=\"device_details\" id=\"" + deviceList[i].id + "\" href=\"#\">Details</a></td>\n" +
+            "</tr>";
+    }
+
+    AJS.$("#table-active-devices").html(tableBody);
+    AJS.$("#table-active-devices").trigger("update");
+
+    var activeDevicesList = new List("tabs-active-devices", {valueNames: ["name", "serial", "imei", "inventory", "lent-out-since", "lent-out-by", "action"]});
+}
+
 function populateAllDevicesTable(deviceList) {
     var tableBody = "";
 
@@ -88,7 +122,8 @@ function populateAllDevicesTable(deviceList) {
         if (deviceList[i].currentlyLentOutBy) {
             action = "<a class=\"device_return\" id=\"" + deviceList[i].id + "\" href=\"#\">Return device</a>";
         } else if (!deviceList[i].sortedOutDate) {
-            action = "<a class=\"device_sort_out\" id=\"" + deviceList[i].id + "\" href=\"#\">Sort out</a>";
+            action = "<a class=\"direct_lending_out\" id=\"" + deviceList[i].hardwareModelId + "," +
+                deviceList[i].id + "\" href=\"#\">Lending out</a> / <a class=\"device_sort_out\" id=\"" + deviceList[i].id + "\" href=\"#\">Sort out</a>";
         }
 
         tableBody += "<tr>\n" +

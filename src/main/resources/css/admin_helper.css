@@ -43,6 +43,11 @@
     padding-right: 10px;
 }
 
+.user-search {
+    margin-top: 30px;
+    width: 400px;
+}
+
 div.change-details {
     float: right;
     margin-top: 5px;

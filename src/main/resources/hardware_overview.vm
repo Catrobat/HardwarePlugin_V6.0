@@ -34,6 +34,9 @@
             <a href="#tabs-lent-out"><strong>Lent Out</strong></a>
         </li>
         <li class="menu-item">
+            <a href="#tabs-active-devices"><strong>Active Devices</strong></a>
+        </li>
+        <li class="menu-item">
             <a href="#tabs-sorted-out"><strong>Sorted Out</strong></a>
         </li>
         <li class="menu-item">
@@ -41,6 +44,9 @@
         </li>
         <li class="menu-item">
             <a href="#tabs-hardware-management"><strong>Hardware Management</strong></a>
+        </li>
+        <li class="menu-item">
+            <a href="#tabs-individual-lending"><strong>Individual-Related Lending</strong></a>
         </li>
     </ul>
     <div class="tabs-pane active-pane" id="tabs-overview">
@@ -96,6 +102,35 @@
             </tr>
             </thead>
             <tbody class="list" id="table-lent-out">
+            #* will be filled out by JavaScript *#
+            </tbody>
+        </table>
+    </div>
+    <div class="tabs-pane" id="tabs-active-devices">
+        <div class="left-from-search-field">
+            <h3>Active Devices</h3>
+        </div>
+        <div class="search-field">
+            <form class="aui" onsubmit="return false;">
+                <label for="search-filter-sorted-out">Search Filter</label>
+                <input class="search text" type="text" id="search-filter-sorted-out" name="search-filter-sorted-out"
+                       title="search-filter-sorted-out" autocomplete="off">
+            </form>
+        </div>
+        <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
+            <thead>
+            <tr>
+                <th class="aui-table-column-issue-key">Name</th>
+                <th>Serialnumber</th>
+                <th>IMEI</th>
+                <th>Inventorynumber</th>
+                <th>Lent out since</th>
+                <th>Lent out by</th>
+                <th>Action</th>
+                <th class="aui-table-column-unsortable">Details</th>
+            </tr>
+            </thead>
+            <tbody class="list" id="table-active-devices">
             #* will be filled out by JavaScript *#
             </tbody>
         </table>
@@ -188,6 +223,43 @@
             <input class="aui-button aui-button-primary" id="new_model" type="button" value="New Hardware Model"/>
             <input class="aui-button" id="new_device" type="button" value="New Device"/>
         </p>
+        <p>Download hardware sheet as <a href="$applicationProperties.getBaseUrl()/plugins/servlet/admin_helper/download">CSV</a>.</p>
+    </div>
+    <div class="tabs-pane" id="tabs-individual-lending">
+        <div class="left-from-search-field">
+            <h3>Individual-Related Lending</h3>
+        </div>
+        <div class="search-field">
+            <form class="aui" onsubmit="return false;">
+                <label for="search-filter-individual">Search Filter</label>
+                <input class="search text" type="text" id="search-filter-individual" name="search-filter-individual"
+                       title="search-filter-individual" autocomplete="off">
+            </form>
+        </div>
+        <div class="user-search">
+            <form  class="aui" onsubmit="return false;">
+                <input autocomplete="off" class="text" type="text" id="individual-lending-search" name="user" title="username">
+            </form>
+        </div>
+        <table id="mySortableTable" class="aui aui-table-interactive aui-table-sortable">
+            <thead>
+            <tr>
+                <th class="aui-table-column-issue-key">Name</th>
+                <th>Serialnumber</th>
+                <th>IMEI</th>
+                <th>Inventorynumber</th>
+                <th>Lending Issuer</th>
+                <th>Begin</th>
+                <th>End</th>
+                <th>Purpose</th>
+                <th>Comment</th>
+                <th class="aui-table-column-unsortable">Details</th>
+            </tr>
+            </thead>
+            <tbody class="list" id="table-individual">
+            #* will be filled out by JavaScript *#
+            </tbody>
+        </table>
     </div>
     <!-- .aui-tabs -->
 </div>
