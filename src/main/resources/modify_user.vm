@@ -39,6 +39,14 @@
     <div class="aui-page-panel">
         <div class="aui-page-panel-inner">
             <section class="aui-page-panel-content">
+                <p>
+                    Changes on the GitHub username can be taken by clicking on the username if the user is active.
+                    Inactivate will remove the user from all user directory groups and add the user to the "Deactivated"
+                    group. Also if the GitHub username is given it will remove the user from all GitHub teams within the
+                    organization. Activate will ask to add the user to specific teams. Again the user will be removed
+                    from every group and added to configured groups plus to the corresponding GitHub teams if the GitHub
+                    username is given.
+                </p>
                 <table id="user-table" class="aui aui-table-interactive aui-table-sortable">
                     <thead>
                     <tr>

@@ -28,7 +28,9 @@ import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
 import org.catrobat.jira.adminhelper.activeobject.Team;
 import org.catrobat.jira.adminhelper.rest.json.JsonConfig;
 import org.catrobat.jira.adminhelper.rest.json.JsonTeam;
-import org.eclipse.egit.github.core.service.TeamService;
+import org.kohsuke.github.GHOrganization;
+import org.kohsuke.github.GHTeam;
+import org.kohsuke.github.GitHub;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -37,6 +39,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Path("/config")
@@ -74,7 +77,7 @@ public class ConfigResourceRest extends RestHelper {
 
         List<Directory> directoryList = directoryManager.findAllDirectories();
         List<JsonConfig> jsonDirectoryList = new ArrayList<JsonConfig>();
-        for(Directory directory : directoryList) {
+        for (Directory directory : directoryList) {
             JsonConfig config = new JsonConfig();
             config.setUserDirectoryId(directory.getId());
             config.setUserDirectoryName(directory.getName());
@@ -137,20 +140,21 @@ public class ConfigResourceRest extends RestHelper {
 
         if (jsonConfig.getTeams() != null) {
             String token = configService.getConfiguration().getGithubApiToken();
-            String organisation = configService.getConfiguration().getGithubOrganisation();
-            TeamService teamService = new TeamService();
-            teamService.getClient().setOAuth2Token(token);
+            String organizationName = configService.getConfiguration().getGithubOrganisation();
+
             try {
-                List<org.eclipse.egit.github.core.Team> githubTeamList = teamService.getTeams(organisation);
+                GitHub gitHub = GitHub.connectUsingOAuth(token);
+                GHOrganization organization = gitHub.getOrganization(organizationName);
+                Collection<GHTeam> teamList = organization.getTeams().values();
 
                 for (JsonTeam jsonTeam : jsonConfig.getTeams()) {
                     configService.removeTeam(jsonTeam.getName());
 
                     List<Integer> githubIdList = new ArrayList<Integer>();
                     for (String teamName : jsonTeam.getGithubTeams()) {
-                        for (org.eclipse.egit.github.core.Team githubTeam : githubTeamList) {
-                            if (teamName.toLowerCase().equals(githubTeam.getName().toLowerCase())) {
-                                githubIdList.add(githubTeam.getId());
+                        for (GHTeam team : teamList) {
+                            if (teamName.toLowerCase().equals(team.getName().toLowerCase())) {
+                                githubIdList.add(team.getId());
                                 break;
                             }
                         }

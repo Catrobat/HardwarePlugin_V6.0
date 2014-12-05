@@ -16,6 +16,7 @@
 
 package org.catrobat.jira.adminhelper.helper;
 
+import org.apache.commons.io.IOUtils;
 import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHTeam;
@@ -31,17 +32,19 @@ import java.util.TreeMap;
 public class GithubHelper {
 
     private final AdminHelperConfigService configService;
+    private final String token;
+    private final String organizationName;
 
     public GithubHelper(AdminHelperConfigService configService) {
         this.configService = configService;
+        this.token = configService.getConfiguration().getGithubApiToken();
+        this.organizationName = configService.getConfiguration().getGithubOrganisation();
     }
 
     public boolean doesUserExist(final String userName) {
         if (userName == null || userName.equals("")) {
             return false;
         }
-
-        String token = configService.getConfiguration().getGithubApiToken();
 
         try {
             GitHub gitHub = GitHub.connectUsingOAuth(token);
@@ -62,14 +65,14 @@ public class GithubHelper {
             return "User does not exist on GitHub";
         }
 
-        String token = configService.getConfiguration().getGithubApiToken();
-        String organizationName = configService.getConfiguration().getGithubOrganisation();
-
         try {
             GitHub gitHub = GitHub.connectUsingOAuth(token);
             GHOrganization organization = gitHub.getOrganization(organizationName);
             GHUser user = gitHub.getUser(userName);
-            organization.remove(user);
+
+            if (organization.hasMember(user)) {
+                organization.remove(user);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return e.getMessage();
@@ -82,9 +85,6 @@ public class GithubHelper {
         if (userName == null || !doesUserExist(userName)) {
             return "User does not exist on GitHub";
         }
-
-        String token = configService.getConfiguration().getGithubApiToken();
-        String organizationName = configService.getConfiguration().getGithubOrganisation();
 
         try {
             GitHub gitHub = GitHub.connectUsingOAuth(token);
@@ -102,8 +102,6 @@ public class GithubHelper {
     }
 
     public List<String> getAvailableTeams() {
-        String token = configService.getConfiguration().getGithubApiToken();
-        String organizationName = configService.getConfiguration().getGithubOrganisation();
         if (organizationName == null || organizationName.length() == 0) {
             return null;
         }
@@ -118,5 +116,21 @@ public class GithubHelper {
         }
 
         return new ArrayList<String>(teams.keySet());
+    }
+
+    public String getTeamName(int githubTeamId) {
+        try {
+            GitHub gitHub = GitHub.connectUsingOAuth(token);
+            GHOrganization organization = gitHub.getOrganization(organizationName);
+            for(GHTeam team : organization.listTeams()) {
+                if(team.getId() == githubTeamId) {
+                    return team.getName();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;    // team with given id not found
     }
 }

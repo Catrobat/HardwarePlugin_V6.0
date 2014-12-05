@@ -74,7 +74,9 @@ AJS.toInit(function () {
                     var username = obj['active'] ? obj['userName'] : "<del>" + obj['userName'] + "</del>";
                     var actionClass = obj['active'] ? "inactivate" : "activate";
                     var githubColumnText = obj['githubName'] ? obj['githubName'] : "add GitHub name";
-                    var githubColumn = "<a id=\"" + obj['userName'] + "\" class=\"change-github\" href=\"#\">" + githubColumnText + "</a>";
+                    var githubColumn = obj['active'] ?
+                        "<a id=\"" + obj['userName'] + "\" class=\"change-github\" href=\"#\">" + githubColumnText + "</a>" :
+                        githubColumnText;
                     AJS.$("#user-body").append("<tr><td headers=\"basic-username\" class=\"username\">" + username + "</td>" +
                         "<td headers=\"basic-first-name\" class=\"first-name\">" + obj['firstName'] + "</td>" +
                         "<td headers=\"basic-last-name\" class=\"last-name\">" + obj['lastName'] + "</td>" +

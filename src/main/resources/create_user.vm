@@ -56,10 +56,25 @@
                     <div class="field-group">
                         <label for="github">GitHub username</label>
                         <input class="text" type="text" id="github" name="github" title="github name">
+
+                        <div class="description">
+                            If unknown the GitHub username can be edited later on at 'Modify User'.
+                        </div>
                     </div>
                 </fieldset>
 
                 <h3>Teams</h3>
+                <p>
+                    According to which role is chosen the user will be added to each team's configured groups in the
+                    user directory. Independendly the user will be added to configured GitHub teams if the GitHub
+                    username is given and the user is in any role of the teams below. Changes on the GitHub username
+                    can be taken at 'Modify User'.
+                </p>
+                <p>
+                    The team membership of users won't be saved. This interface is just to fasten up assigning users to
+                    user directory groups and to invite them to the GitHub organization and the according GitHub
+                    organization's teams.
+                </p>
                 <table class="aui">
                     <thead>
                     <tr>

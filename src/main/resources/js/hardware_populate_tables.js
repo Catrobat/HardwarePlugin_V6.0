@@ -25,7 +25,7 @@ function populateOverviewTable(hardwareList) {
             "<td class=\"version\">" + hardwareList[i].version + "</td>\n" +
             "<td class=\"type\">" + hardwareList[i].typeOfDevice + "</td>\n" +
             "<td class=\"os\">" + hardwareList[i].operatingSystem + "</td>\n" +
-            "<td>" + hardwareList[i].available + "/" + hardwareList[i].sumOfDevices + "</td>\n" +
+            "<td class=\"available\">" + hardwareList[i].available + "/" + hardwareList[i].sumOfDevices + "</td>\n" +
             "<td><a class=\"lending_out\" id=\"" + hardwareList[i].id + "\" href=\"#\">Lending out</a></td>\n" +
             "</tr>";
     }

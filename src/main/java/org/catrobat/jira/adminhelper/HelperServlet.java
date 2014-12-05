@@ -51,6 +51,15 @@ public abstract class HelperServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        checkPermission(request, response);
+    }
+
+    @Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        checkPermission(request, response);
+    }
+
+    private void checkPermission(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         PermissionCondition permissionCondition = new PermissionCondition(null, configurationService, userManager, groupManager);
         String username = userManager.getRemoteUsername(request);
         if (username == null) {

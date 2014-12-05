@@ -20,13 +20,12 @@ import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
 import org.catrobat.jira.adminhelper.activeobject.GithubTeam;
 import org.catrobat.jira.adminhelper.activeobject.Team;
 import org.catrobat.jira.adminhelper.activeobject.TeamToGroup;
-import org.eclipse.egit.github.core.service.TeamService;
+import org.catrobat.jira.adminhelper.helper.GithubHelper;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,21 +58,12 @@ public final class JsonTeam {
 
     public JsonTeam(Team toCopy, AdminHelperConfigService configService) {
         this.name = toCopy.getTeamName();
-
-        String token = configService.getConfiguration().getGithubApiToken();
-
-        TeamService teamService = new TeamService();
-        teamService.getClient().setOAuth2Token(token);
+        GithubHelper githubHelper = new GithubHelper(configService);
 
         this.githubTeams = new ArrayList<String>();
         for (GithubTeam githubTeam : toCopy.getGithubTeams()) {
-            try {
-                githubTeams.add(teamService.getTeam(githubTeam.getGithubId()).getName());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            githubTeams.add(githubHelper.getTeamName(githubTeam.getGithubId()));
         }
-
 
         this.coordinatorGroups = configService.getGroupsForRole(this.name, TeamToGroup.Role.COORDINATOR);
         this.seniorGroups = configService.getGroupsForRole(this.name, TeamToGroup.Role.SENIOR);
