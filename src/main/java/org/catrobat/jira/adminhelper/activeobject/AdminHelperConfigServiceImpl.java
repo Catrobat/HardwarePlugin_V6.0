@@ -74,13 +74,45 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
     }
 
     @Override
+    public AdminHelperConfig setRoomCalendarGroup(String roomCalendarGroup) {
+        AdminHelperConfig config = getConfiguration();
+        config.setRoomCalendarGroup(roomCalendarGroup);
+        config.save();
+        return config;
+    }
+
+    @Override
+    public AdminHelperConfig setMeetingCalendarGroup(String meetingCalendarGroup) {
+        AdminHelperConfig config = getConfiguration();
+        config.setMeetingCalendarGroup(meetingCalendarGroup);
+        config.save();
+        return config;
+    }
+
+    @Override
+    public AdminHelperConfig setMasterStudentGroup(String masterStudentGroup) {
+        AdminHelperConfig config = getConfiguration();
+        config.setMasterStudentGroup(masterStudentGroup);
+        config.save();
+        return config;
+    }
+
+    @Override
+    public AdminHelperConfig setPhdStudentGroup(String phdStudentGroup) {
+        AdminHelperConfig config = getConfiguration();
+        config.setPhdStudentGroup(phdStudentGroup);
+        config.save();
+        return config;
+    }
+
+    @Override
     public Team addTeam(String teamName, List<Integer> githubTeamIdList, List<String> coordinatorGroups, List<String> seniorGroups, List<String> developerGroups) {
         if (teamName == null || teamName.trim().length() == 0) {
             return null;
         }
         teamName = teamName.trim();
 
-        Team[] teamArray = ao.find(Team.class, Query.select().where("upper(TEAM_NAME) = upper(?)", teamName));
+        Team[] teamArray = ao.find(Team.class, Query.select().where("upper(\"TEAM_NAME\") = upper(?)", teamName));
         if (teamArray.length != 0) {
             return null;
         }
@@ -91,7 +123,7 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
         team.setTeamName(teamName);
         if (githubTeamIdList != null) {
             for (int githubId : githubTeamIdList) {
-                GithubTeam[] githubTeamArray = ao.find(GithubTeam.class, Query.select().where("GITHUB_ID = ?", githubId));
+                GithubTeam[] githubTeamArray = ao.find(GithubTeam.class, Query.select().where("\"GITHUB_ID\" = ?", githubId));
                 GithubTeam githubTeam;
                 if (githubTeamArray.length == 0) {
                     githubTeam = ao.create(GithubTeam.class);
@@ -123,7 +155,7 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
         }
 
         for (String groupName : teamList) {
-            Group[] groupArray = ao.find(Group.class, Query.select().where("upper(GROUP_NAME) = upper(?)", groupName));
+            Group[] groupArray = ao.find(Group.class, Query.select().where("upper(\"GROUP_NAME\") = upper(?)", groupName));
             Group group;
             if (groupArray.length == 0) {
                 group = ao.create(Group.class);
@@ -158,18 +190,18 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
 
     @Override
     public AdminHelperConfig removeTeam(String teamName) {
-        Team[] teamArray = ao.find(Team.class, Query.select().where("upper(TEAM_NAME) = upper(?)", teamName));
+        Team[] teamArray = ao.find(Team.class, Query.select().where("upper(\"TEAM_NAME\") = upper(?)", teamName));
         if (teamArray.length == 0) {
             return null;
         }
         Team team = teamArray[0];
         Group[] groupArray = team.getGroups();
-        TeamToGroup[] teamToGroupArray = ao.find(TeamToGroup.class, Query.select().where("TEAM_ID = ?", team.getID()));
+        TeamToGroup[] teamToGroupArray = ao.find(TeamToGroup.class, Query.select().where("\"TEAM_ID\" = ?", team.getID()));
         for (TeamToGroup teamToGroup : teamToGroupArray) {
             ao.delete(teamToGroup);
         }
 
-        TeamToGithubTeam[] teamToGithubTeamArray = ao.find(TeamToGithubTeam.class, Query.select().where("TEAM_ID = ?", team.getID()));
+        TeamToGithubTeam[] teamToGithubTeamArray = ao.find(TeamToGithubTeam.class, Query.select().where("\"TEAM_ID\" = ?", team.getID()));
         for (TeamToGithubTeam teamToGithubTeam : teamToGithubTeamArray) {
             ao.delete(teamToGithubTeam);
         }
@@ -188,18 +220,29 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
     @Override
     public List<String> getGroupsForRole(String teamName, TeamToGroup.Role role) {
         List<String> groupList = new ArrayList<String>();
-        Group[] groupArray = ao.find(Group.class, Query.select()
-                        .alias(Group.class, "jiragroup")
-                        .alias(TeamToGroup.class, "mapper")
-                        .alias(Team.class, "team")
-                        .join(TeamToGroup.class, "jiragroup.ID = mapper.GROUP_ID")
-                        .join(Team.class, "mapper.TEAM_ID = team.ID")
-                        .where("upper(team.TEAM_NAME) = upper(?) and mapper.ROLE = ?", teamName, role)
+        TeamToGroup[] teamToGroupArray = ao.find(TeamToGroup.class, Query.select()
+                        .where("\"ROLE\" = ?", role)
         );
 
-        for (Group group : groupArray) {
-            groupList.add(group.getGroupName());
+        for(TeamToGroup teamToGroup : teamToGroupArray) {
+            if(teamToGroup.getTeam().getTeamName().toLowerCase().equals(teamName.toLowerCase())) {
+                groupList.add(teamToGroup.getGroup().getGroupName());
+            }
         }
+
+        // TODO issues with postgresql
+//        Group[] groupArray = ao.find(Group.class, Query.select()
+//                        .alias(Group.class, "jiragroup")
+//                        .alias(TeamToGroup.class, "mapper")
+//                        .alias(Team.class, "team")
+//                        .join(TeamToGroup.class, "jiragroup.ID = mapper.GROUP_ID")
+//                        .join(Team.class, "mapper.TEAM_ID = team.ID")
+//                        .where("upper( team.TEAM_NAME ) = upper(?) and mapper.ROLE = ?", teamName, role)
+//        );
+//
+//        for (Group group : groupArray) {
+//            groupList.add(group.getGroupName());
+//        }
 
         return groupList;
     }
@@ -212,7 +255,7 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
         approvedGroupName = approvedGroupName.trim();
 
         ApprovedGroup[] approvedGroupArray = ao.find(ApprovedGroup.class, Query.select()
-                .where("upper(GROUP_NAME) = upper(?)", approvedGroupName));
+                .where("upper(\"GROUP_NAME\") = upper(?)", approvedGroupName));
         if (approvedGroupArray.length == 0) {
             ApprovedGroup approvedGroup = ao.create(ApprovedGroup.class);
             approvedGroup.setGroupName(approvedGroupName);
@@ -233,7 +276,7 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
         approvedUserKey = approvedUserKey.trim();
 
         ApprovedUser[] approvedUserArray = ao.find(ApprovedUser.class, Query.select()
-                .where("upper(USER_KEY) = upper(?)", approvedUserKey));
+                .where("upper(\"USER_KEY\") = upper(?)", approvedUserKey));
         if (approvedUserArray.length == 0) {
             ApprovedUser approvedUser = ao.create(ApprovedUser.class);
             approvedUser.setUserKey(approvedUserKey);
@@ -254,7 +297,7 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
 
         return (ao.find(ApprovedGroup.class).length == 0 && ao.find(ApprovedUser.class).length == 0) ||
                 ao.find(ApprovedGroup.class, Query.select()
-                        .where("upper(GROUP_NAME) = upper(?)", groupName)).length != 0;
+                        .where("upper(\"GROUP_NAME\") = upper(?)", groupName)).length != 0;
     }
 
     @Override
@@ -263,7 +306,7 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
             userKey = userKey.trim();
         }
 
-        return ao.find(ApprovedUser.class, Query.select().where("upper(USER_KEY) = upper(?)", userKey)).length != 0;
+        return ao.find(ApprovedUser.class, Query.select().where("upper(\"USER_KEY\") = upper(?)", userKey)).length != 0;
     }
 
     @Override
@@ -273,7 +316,7 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
         }
 
         ApprovedGroup[] approvedGroupArray = ao.find(ApprovedGroup.class, Query.select()
-                .where("upper(GROUP_NAME) = upper(?)", approvedGroupName));
+                .where("upper(\"GROUP_NAME\") = upper(?)", approvedGroupName));
         if (approvedGroupArray.length == 0) {
             return null;
         }
@@ -289,7 +332,7 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
         }
 
         ApprovedUser[] approvedUserArray = ao.find(ApprovedUser.class, Query.select()
-                .where("upper(USER_KEY) = upper(?)", approvedUserKey));
+                .where("upper(\"USER_KEY\") = upper(?)", approvedUserKey));
         if (approvedUserArray.length == 0) {
             return null;
         }

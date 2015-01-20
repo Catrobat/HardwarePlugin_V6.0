@@ -75,6 +75,25 @@ AJS.toInit(function () {
 
                 });
 
+                AJS.$(".single-jira-group").auiSelect2({
+                    placeholder: "Search for group",
+                    minimumInputLength: 0,
+                    ajax: {
+                        url: baseUrl + "/rest/api/2/groups/picker",
+                        dataType: "json",
+                        data: function (term, page) {
+                            return {query: term};
+                        },
+                        results: function (data, page) {
+                            var select2data = [];
+                            for (var i = 0; i < data.groups.length; i++) {
+                                select2data.push({id: data.groups[i].name, text: data.groups[i].name});
+                            }
+                            return {results: select2data};
+                        }
+                    }
+                });
+
                 AJS.$("#plugin-permission").auiSelect2({
                     placeholder: "Search for users and groups",
                     minimumInputLength: 0,
@@ -151,6 +170,10 @@ AJS.toInit(function () {
 
                 AJS.$("#plugin-permission").auiSelect2("data", approved);
                 AJS.$("#userdirectory").auiSelect2("data", {id: config.userDirectoryId, text: config.userDirectoryName});
+                AJS.$("#room-calendar").auiSelect2("data", {id: config.roomCalendarGroup, text: config.roomCalendarGroup});
+                AJS.$("#meeting-calendar").auiSelect2("data", {id: config.meetingCalendarGroup, text: config.meetingCalendarGroup});
+                AJS.$("#master-student").auiSelect2("data", {id: config.masterStudentGroup, text: config.masterStudentGroup});
+                AJS.$("#phd-student").auiSelect2("data", {id: config.phdStudentGroup, text: config.phdStudentGroup});
             },
             error: function (error) {
                 AJS.messages.error({
@@ -176,6 +199,10 @@ AJS.toInit(function () {
         config.githubTokenPublic = AJS.$("#github_token_public").val();
         config.githubOrganization = AJS.$("#github_organization").val();
         config.userDirectoryId = AJS.$("#userdirectory").auiSelect2("val");
+        config.meetingCalendarGroup = AJS.$("#meeting-calendar").auiSelect2("val");
+        config.roomCalendarGroup = AJS.$("#room-calendar").auiSelect2("val");
+        config.masterStudentGroup = AJS.$("#master-student").auiSelect2("val");
+        config.phdStudentGroup = AJS.$("#phd-student").auiSelect2("val");
 
         var usersAndGroups = AJS.$("#plugin-permission").auiSelect2("val");
         var approvedUsers = [];

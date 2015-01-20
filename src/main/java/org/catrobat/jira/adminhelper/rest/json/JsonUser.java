@@ -39,6 +39,14 @@ public final class JsonUser {
     @XmlElement
     private String displayName;
     @XmlElement
+    private boolean roomCalendar;
+    @XmlElement
+    private boolean meetingCalendar;
+    @XmlElement
+    private boolean masterStudent;
+    @XmlElement
+    private boolean phdStudent;
+    @XmlElement
     private List<String> coordinatorList;
     @XmlElement
     private List<String> seniorList;
@@ -125,5 +133,37 @@ public final class JsonUser {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public boolean isRoomCalendar() {
+        return roomCalendar;
+    }
+
+    public void setRoomCalendar(boolean roomCalendar) {
+        this.roomCalendar = roomCalendar;
+    }
+
+    public boolean isMeetingCalendar() {
+        return meetingCalendar;
+    }
+
+    public void setMeetingCalendar(boolean meetingCalendar) {
+        this.meetingCalendar = meetingCalendar;
+    }
+
+    public boolean isMasterStudent() {
+        return masterStudent;
+    }
+
+    public void setMasterStudent(boolean masterStudent) {
+        this.masterStudent = masterStudent;
+    }
+
+    public boolean isPhdStudent() {
+        return phdStudent;
+    }
+
+    public void setPhdStudent(boolean phdStudent) {
+        this.phdStudent = phdStudent;
     }
 }

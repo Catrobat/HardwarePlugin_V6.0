@@ -57,7 +57,10 @@ public class UploadCsvServlet extends HelperServlet {
         super.doGet(request, response);
 
         // Dangerous servlet - should be forbidden in production use
-//        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        if (deviceService.all().size() != 0) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
         PrintWriter writer = response.getWriter();
         writer.print("<html>" +
@@ -85,7 +88,10 @@ public class UploadCsvServlet extends HelperServlet {
         super.doPost(request, response);
 
         // Dangerous servlet - should be forbidden in production use
-//        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        if (deviceService.all().size() != 0) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
         String csvString = request.getParameter("csv");
 

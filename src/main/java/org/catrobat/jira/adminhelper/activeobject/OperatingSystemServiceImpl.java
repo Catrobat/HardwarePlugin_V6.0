@@ -42,7 +42,7 @@ public class OperatingSystemServiceImpl implements OperatingSystemService {
         operatingSystemName = escapeHtml4(operatingSystemName.trim());
 
         OperatingSystem[] operatingSystems = ao.find(OperatingSystem.class, Query.select()
-                .where("upper(OPERATING_SYSTEM_NAME) = upper(?)", operatingSystemName));
+                .where("upper(\"OPERATING_SYSTEM_NAME\") = upper(?)", operatingSystemName));
         if (operatingSystems.length == 1) {
             return operatingSystems[0];
         } else if (operatingSystems.length > 1) {
@@ -58,7 +58,7 @@ public class OperatingSystemServiceImpl implements OperatingSystemService {
     @Override
     public List<OperatingSystem> searchOperatingSystems(String query) {
         return Arrays.asList(ao.find(OperatingSystem.class, Query.select()
-                .where("upper(OPERATING_SYSTEM_NAME) LIKE upper(?)", "%" + query + "%")));
+                .where("upper(\"OPERATING_SYSTEM_NAME\") LIKE upper(?)", "%" + query + "%")));
     }
 
     @Override

@@ -43,7 +43,7 @@ public class LendingServiceImpl implements LendingService {
             return null;
         }
 
-        if (ao.find(Lending.class, Query.select().where("DEVICE_ID = ? AND END IS NULL", device.getID())).length != 0) {
+        if (ao.find(Lending.class, Query.select().where("\"DEVICE_ID\" = ? AND \"END\" IS NULL", device.getID())).length != 0) {
             return null;
         }
 
@@ -99,11 +99,23 @@ public class LendingServiceImpl implements LendingService {
         if (hardwareModel == null)
             return new ArrayList<Lending>();
 
-        return Arrays.asList(ao.find(Lending.class, Query.select()
-                .alias(Lending.class, "lending")
-                .alias(Device.class, "device")
-                .join(Device.class, "lending.DEVICE_ID = device.ID")
-                .where("lending.END IS NULL AND device.HARDWARE_MODEL_ID = ?", hardwareModel.getID())));
+        // TODO issues with postgresql
+//        return Arrays.asList(ao.find(Lending.class, Query.select()
+//                .alias(Lending.class, "lending")
+//                .alias(Device.class, "device")
+//                .join(Device.class, "lending.DEVICE_ID = device.ID")
+//                .where("lending.END IS NULL AND device.HARDWARE_MODEL_ID = ?", hardwareModel.getID())));
+
+        List<Lending> lendingList = new ArrayList<Lending>();
+        for(Device device : hardwareModel.getDevices()) {
+            for(Lending lending : device.getLendings()) {
+                if(lending.getEnd() == null) {
+                    lendingList.add(lending);
+                }
+            }
+        }
+
+        return lendingList;
     }
 
     @Override
@@ -118,7 +130,7 @@ public class LendingServiceImpl implements LendingService {
         }
 
         return Arrays.asList(ao.find(Lending.class, Query.select()
-                .where("upper(LENDING_BY_USER_KEY) = upper(?)", lendingByUserKey.trim())
+                .where("upper(\"LENDING_BY_USER_KEY\") = upper(?)", lendingByUserKey.trim())
                 .order("BEGIN ASC")));
     }
 }

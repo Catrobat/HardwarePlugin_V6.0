@@ -69,9 +69,18 @@ public class CsvExporter {
             HardwareModel hardwareModel = device.getHardwareModel();
             sb.append(unescape(hardwareModel.getName())).append(DELIMITER);
             sb.append(unescape(hardwareModel.getVersion())).append(DELIMITER);
-            sb.append(unescape(hardwareModel.getTypeOfDevice().getTypeOfDeviceName())).append(DELIMITER);
-            sb.append(unescape(hardwareModel.getOperatingSystem().getOperatingSystemName())).append(DELIMITER);
-            sb.append(unescape(hardwareModel.getProducer().getProducerName())).append(DELIMITER);
+            if (hardwareModel.getTypeOfDevice() != null)
+                sb.append(unescape(hardwareModel.getTypeOfDevice().getTypeOfDeviceName())).append(DELIMITER);
+            else
+                sb.append(DELIMITER);
+            if (hardwareModel.getOperatingSystem() != null)
+                sb.append(unescape(hardwareModel.getOperatingSystem().getOperatingSystemName())).append(DELIMITER);
+            else
+                sb.append(DELIMITER);
+            if (hardwareModel.getProducer() != null)
+                sb.append(unescape(hardwareModel.getProducer().getProducerName())).append(DELIMITER);
+            else
+                sb.append(DELIMITER);
             sb.append(unescape(hardwareModel.getArticleNumber())).append(DELIMITER);
             sb.append(unescape(hardwareModel.getPrice())).append(DELIMITER);
             sb.append(unescape(device.getImei())).append(DELIMITER);
@@ -145,7 +154,7 @@ public class CsvExporter {
     }
 
     private String unescape(String escapedHtml4String) {
-        if(escapedHtml4String == null || escapedHtml4String.trim().length() == 0) {
+        if (escapedHtml4String == null || escapedHtml4String.trim().length() == 0) {
             return "";
         } else {
             return unescapeHtml4(escapedHtml4String);

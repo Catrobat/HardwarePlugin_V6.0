@@ -74,7 +74,7 @@ public class HardwareModelServiceImpl implements HardwareModelService {
             articleNumber = null;
         }
 
-        HardwareModel[] hardwareModels = ao.find(HardwareModel.class, Query.select().where("upper(NAME) = upper(?)", name));
+        HardwareModel[] hardwareModels = ao.find(HardwareModel.class, Query.select().where("upper(\"NAME\") = upper(?)", name));
         for (HardwareModel hardwareModel : hardwareModels) {
             if ((hardwareModel.getVersion() != null && version != null &&
                     hardwareModel.getVersion().toUpperCase().equals(version.toUpperCase())) ||
@@ -101,7 +101,7 @@ public class HardwareModelServiceImpl implements HardwareModelService {
 
     @Override
     public HardwareModel get(int id) {
-        HardwareModel[] hardwareModels = ao.find(HardwareModel.class, Query.select().where("ID = ?", id));
+        HardwareModel[] hardwareModels = ao.find(HardwareModel.class, Query.select().where("\"ID\" = ?", id));
         if (hardwareModels.length == 1)
             return hardwareModels[0];
         else
@@ -138,7 +138,7 @@ public class HardwareModelServiceImpl implements HardwareModelService {
             articleNumber = null;
         }
 
-        HardwareModel[] hardwareModels = ao.find(HardwareModel.class, Query.select().where("upper(NAME) = upper(?)", name));
+        HardwareModel[] hardwareModels = ao.find(HardwareModel.class, Query.select().where("upper(\"NAME\") = upper(?)", name));
         for (HardwareModel hardwareModelToCheck : hardwareModels) {
             if (hardwareModelToCheck.getVersion() == null && version == null) {
                 return null;
@@ -167,7 +167,7 @@ public class HardwareModelServiceImpl implements HardwareModelService {
 
     @Override
     public List<HardwareModel> all() {
-        return Arrays.asList(ao.find(HardwareModel.class, Query.select().order("upper(NAME), upper(VERSION)")));
+        return Arrays.asList(ao.find(HardwareModel.class, Query.select().order("upper(\"NAME\"), upper(\"VERSION\")")));
     }
 
     @Override

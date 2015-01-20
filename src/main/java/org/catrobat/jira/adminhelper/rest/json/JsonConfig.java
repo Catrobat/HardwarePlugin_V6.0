@@ -30,6 +30,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @SuppressWarnings("unused")
 @XmlRootElement
@@ -54,6 +56,14 @@ public final class JsonConfig {
     private long userDirectoryId;
     @XmlElement
     private String userDirectoryName;
+    @XmlElement
+    private String roomCalendarGroup;
+    @XmlElement
+    private String meetingCalendarGroup;
+    @XmlElement
+    private String masterStudentGroup;
+    @XmlElement
+    private String phdStudentGroup;
 
     public JsonConfig() {
 
@@ -68,10 +78,18 @@ public final class JsonConfig {
         this.githubTokenPublic = toCopy.getPublicGithubApiToken();
         this.githubOrganization = toCopy.getGithubOrganisation();
 
-        this.teams = new ArrayList<JsonTeam>();
+        this.roomCalendarGroup = toCopy.getRoomCalendarGroup();
+        this.meetingCalendarGroup = toCopy.getMeetingCalendarGroup();
+        this.masterStudentGroup = toCopy.getMasterStudentGroup();
+        this.phdStudentGroup = toCopy.getPhdStudentGroup();
+
+        Map<String, JsonTeam> teamMap = new TreeMap<String, JsonTeam>();
         for (Team team : toCopy.getTeams()) {
-            teams.add(new JsonTeam(team, configService));
+            teamMap.put(team.getTeamName(), new JsonTeam(team, configService));
         }
+
+        this.teams = new ArrayList<JsonTeam>();
+        this.teams.addAll(teamMap.values());
 
         this.approvedUsers = new ArrayList<String>();
         UserManager userManager = ComponentAccessor.getUserManager();
@@ -173,5 +191,37 @@ public final class JsonConfig {
 
     public void setUserDirectoryName(String userDirectoryName) {
         this.userDirectoryName = userDirectoryName;
+    }
+
+    public String getRoomCalendarGroup() {
+        return roomCalendarGroup;
+    }
+
+    public void setRoomCalendarGroup(String roomCalendarGroup) {
+        this.roomCalendarGroup = roomCalendarGroup;
+    }
+
+    public String getMeetingCalendarGroup() {
+        return meetingCalendarGroup;
+    }
+
+    public void setMeetingCalendarGroup(String meetingCalendarGroup) {
+        this.meetingCalendarGroup = meetingCalendarGroup;
+    }
+
+    public String getMasterStudentGroup() {
+        return masterStudentGroup;
+    }
+
+    public void setMasterStudentGroup(String masterStudentGroup) {
+        this.masterStudentGroup = masterStudentGroup;
+    }
+
+    public String getPhdStudentGroup() {
+        return phdStudentGroup;
+    }
+
+    public void setPhdStudentGroup(String phdStudentGroup) {
+        this.phdStudentGroup = phdStudentGroup;
     }
 }

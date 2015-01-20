@@ -23,6 +23,7 @@ import com.atlassian.jira.security.PermissionManager;
 import com.atlassian.jira.security.groups.GroupManager;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.sal.api.user.UserManager;
+import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfig;
 import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
 
 import java.util.Collection;
@@ -56,6 +57,12 @@ public class PermissionCondition extends AbstractPermissionCondition {
     public boolean isApproved(ApplicationUser applicationUser) {
         if (applicationUser == null || !userManager.isSystemAdmin(applicationUser.getUsername())) {
             return false;
+        }
+
+        // check if permissions are set
+        AdminHelperConfig config = configurationService.getConfiguration();
+        if(config.getApprovedGroups().length == 0 && config.getApprovedUsers().length == 0){
+            return true;
         }
 
         if (configurationService.isUserApproved(applicationUser.getKey())) {

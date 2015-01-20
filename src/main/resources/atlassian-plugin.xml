@@ -114,7 +114,9 @@
                       interface="com.atlassian.sal.api.pluginsettings.PluginSettingsFactory"/>
     <component-import key="transactionTemplate" interface="com.atlassian.sal.api.transaction.TransactionTemplate"/>
     <component-import key="webSudoManager" interface="com.atlassian.sal.api.websudo.WebSudoManager"/>
-    <component-import key="ao" name="Active Objects service"
+    <component-import key="ao"
+                      name="Active Objects service"
+                      namespace="CATROBAT_ADMIN_HELPER"
                       interface="com.atlassian.activeobjects.external.ActiveObjects">
         <description>Component to access Active Objects functionality from the plugin</description>
     </component-import>

@@ -53,6 +53,10 @@ AJS.toInit(function () {
         AJS.$("#lastname").attr("value", "");
         AJS.$("#email").attr("value", "");
         AJS.$("#github").auiSelect2("data", null);
+        AJS.$("#room-calendar").prop("checked", false);
+        AJS.$("#meeting-calendar").prop("checked", false);
+        AJS.$("#master-student").prop("checked", false);
+        AJS.$("#phd-student").prop("checked", false);
 
         for (var i = 0; i < teamList.length; i++) {
             AJS.$("#" + teamList[i] + "-none").prop("checked", true);
@@ -66,6 +70,10 @@ AJS.toInit(function () {
         userToCreate.lastName = AJS.$("#lastname").attr("value");
         userToCreate.email = AJS.$("#email").attr("value");
         userToCreate.githubName = AJS.$("#github").auiSelect2("val");
+        userToCreate.roomCalendar = AJS.$("#room-calendar").prop("checked");
+        userToCreate.meetingCalendar = AJS.$("#meeting-calendar").prop("checked");
+        userToCreate.masterStudent = AJS.$("#master-student").prop("checked");
+        userToCreate.phdStudent = AJS.$("#phd-student").prop("checked");
         userToCreate.coordinatorList = [];
         userToCreate.seniorList = [];
         userToCreate.developerList = [];

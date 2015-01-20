@@ -38,6 +38,22 @@ public interface AdminHelperConfig extends Entity {
 
     void setUserDirectoryId(long userDirectoryId);
 
+    String getRoomCalendarGroup();
+
+    void setRoomCalendarGroup(String roomCalendarGroup);
+
+    String getMeetingCalendarGroup();
+
+    void setMeetingCalendarGroup(String meetingCalendarGroup);
+
+    String getMasterStudentGroup();
+
+    void setMasterStudentGroup(String masterStudentGroup);
+
+    String getPhdStudentGroup();
+
+    void setPhdStudentGroup(String phdStudentGroup);
+
     @OneToMany(reverse = "getConfiguration")
     ApprovedGroup[] getApprovedGroups();
 

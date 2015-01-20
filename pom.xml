@@ -21,7 +21,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.catrobat.jira</groupId>
     <artifactId>AdminHelper</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <organization>
         <name>Catrobat</name>
         <url>https://github.com/felly/jiraadminhelper</url>
@@ -216,9 +216,6 @@
                             <artifactId>activeobjects-jira-spi</artifactId>
                             <version>${ao.version}</version>
                         </pluginArtifact>
-
-                        <!-- Uncomment to install TestKit backdoor in JIRA. -->
-                        <!-- FIXME never install this on productive systems - check if this will be installed on them -->
                         <pluginArtifact>
                             <groupId>com.atlassian.jira.tests</groupId>
                             <artifactId>jira-testkit-plugin</artifactId>

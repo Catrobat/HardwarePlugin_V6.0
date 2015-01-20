@@ -63,6 +63,27 @@
                     </div>
                 </fieldset>
 
+                <h3>Individual Resources</h3>
+                <fieldset class="group">
+                    <legend><span>Resources</span></legend>
+                    <div class="checkbox">
+                        <input class="checkbox" type="checkbox" name="room-calendar" id="room-calendar">
+                        <label for="room-calendar">Room calendar</label>
+                    </div>
+                    <div class="checkbox">
+                        <input class="checkbox" type="checkbox" name="meeting-calendar" id="meeting-calendar">
+                        <label for="meeting-calendar">Meeting calendar</label>
+                    </div>
+                    <div class="checkbox">
+                        <input class="checkbox" type="checkbox" name="master-student" id="master-student">
+                        <label for="master-student">Master student</label>
+                    </div>
+                    <div class="checkbox">
+                        <input class="checkbox" type="checkbox" name="phd-student" id="phd-student">
+                        <label for="phd-student">PhD student</label>
+                    </div>
+                </fieldset>
+
                 <h3>Teams</h3>
                 <p>
                     According to which role is chosen the user will be added to each team's configured groups in the

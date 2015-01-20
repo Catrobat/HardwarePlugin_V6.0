@@ -119,6 +119,10 @@ public class ConfigResourceRest extends RestHelper {
         configService.setPublicApiToken(jsonConfig.getGithubTokenPublic());
         configService.setOrganisation(jsonConfig.getGithubOrganization());
         configService.setUserDirectoryId(jsonConfig.getUserDirectoryId());
+        configService.setRoomCalendarGroup(jsonConfig.getRoomCalendarGroup());
+        configService.setMeetingCalendarGroup(jsonConfig.getMeetingCalendarGroup());
+        configService.setMasterStudentGroup(jsonConfig.getMasterStudentGroup());
+        configService.setPhdStudentGroup(jsonConfig.getPhdStudentGroup());
 
         if (jsonConfig.getApprovedGroups() != null) {
             configService.clearApprovedGroups();

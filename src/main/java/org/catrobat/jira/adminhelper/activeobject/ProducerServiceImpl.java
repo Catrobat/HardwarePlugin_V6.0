@@ -42,7 +42,7 @@ public class ProducerServiceImpl implements ProducerService {
         producerName = escapeHtml4(producerName.trim());
 
         Producer[] producers = ao.find(Producer.class, Query.select()
-                .where("upper(PRODUCER_NAME) = upper(?)", producerName));
+                .where("upper(\"PRODUCER_NAME\") = upper(?)", producerName));
         if (producers.length == 1) {
             return producers[0];
         } else if (producers.length > 1) {
@@ -57,7 +57,7 @@ public class ProducerServiceImpl implements ProducerService {
 
     @Override
     public List<Producer> searchProducers(String query) {
-        return Arrays.asList(ao.find(Producer.class, Query.select().where("upper(PRODUCER_NAME) LIKE upper(?)", "%" + query + "%")));
+        return Arrays.asList(ao.find(Producer.class, Query.select().where("upper(\"PRODUCER_NAME\") LIKE upper(?)", "%" + query + "%")));
     }
 
     @Override

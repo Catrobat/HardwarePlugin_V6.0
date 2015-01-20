@@ -20,18 +20,16 @@ import com.atlassian.activeobjects.external.ActiveObjects;
 import net.java.ao.Query;
 import org.catrobat.jira.adminhelper.helper.HelperUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
 
 public class DeviceServiceImpl implements DeviceService {
 
-    private static final String DEFAULT_ORDER = "upper(hardware.NAME), upper(hardware.VERSION), " +
-            "upper(device.SERIAL_NUMBER), upper(device.IMEI), upper(device.INVENTORY_NUMBER)";
+    // TODO issues with postgresql
+//    private static final String DEFAULT_ORDER = "upper(hardware.NAME), upper(hardware.VERSION), " +
+//            "upper(device.SERIAL_NUMBER), upper(device.IMEI), upper(device.INVENTORY_NUMBER)";
     private final ActiveObjects ao;
 
     public DeviceServiceImpl(ActiveObjects ao) {
@@ -142,16 +140,31 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public List<Device> all() {
-        return Arrays.asList(ao.find(Device.class, Query.select()
-                .alias(Device.class, "device")
-                .alias(HardwareModel.class, "hardware")
-                .join(HardwareModel.class, "device.HARDWARE_MODEL_ID = hardware.ID")
-                .order(DEFAULT_ORDER)));
+        // TODO issues with postgresql
+//        return Arrays.asList(ao.find(Device.class, Query.select()
+//                .alias(Device.class, "device")
+//                .alias(HardwareModel.class, "hardware")
+//                .join(HardwareModel.class, "device.HARDWARE_MODEL_ID = hardware.ID")
+//                .order(DEFAULT_ORDER)));
+
+        Map<String, Device> deviceMap = new TreeMap<String, Device>();
+        Device[] deviceArray = ao.find(Device.class);
+        for (Device device : deviceArray) {
+            HardwareModel model = device.getHardwareModel();
+            String name = model.getName() != null ? model.getName().toLowerCase() : "";
+            String version = model.getVersion() != null ? model.getVersion().toLowerCase() : "";
+            String serial = device.getSerialNumber() != null ? device.getSerialNumber().toLowerCase() : "";
+            String imei = device.getImei() != null ? device.getImei().toLowerCase() : "";
+            String inventory = device.getInventoryNumber() != null ? device.getInventoryNumber().toLowerCase() : "";
+            deviceMap.put(name + ";" + version + ";" + serial + ";" + imei + ";" + inventory, device);
+        }
+
+        return new ArrayList<Device>(deviceMap.values());
     }
 
     @Override
     public Device sortOutDevice(int id, Date sortedOutDate, String sortedOutComment) {
-        Device[] toSortOut = ao.find(Device.class, Query.select().where("ID = ?", id));
+        Device[] toSortOut = ao.find(Device.class, Query.select().where("\"ID\" = ?", id));
         if (toSortOut.length != 1)
             return null;
 
@@ -177,57 +190,95 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public List<Device> getCurrentlyAvailableDevices(int hardwareId) {
         List<Device> deviceList = new ArrayList<Device>();
-        deviceList.addAll(Arrays.asList(ao.find(Device.class, Query.select()
-                .alias(Device.class, "device")
-                .alias(HardwareModel.class, "hardware")
-                .join(HardwareModel.class, "device.HARDWARE_MODEL_ID = hardware.ID")
-                .order(DEFAULT_ORDER)
-                .where("device.HARDWARE_MODEL_ID = ? AND device.SORTED_OUT_DATE IS NULL", hardwareId))));
 
-        deviceList.removeAll(Arrays.asList(ao.find(Device.class, Query.select()
-                .alias(Lending.class, "lending")
-                .alias(Device.class, "device")
-                .join(Lending.class, "lending.DEVICE_ID = device.ID")
-                .where("lending.END IS NULL"))));
+        // TODO issues with postgresql
+//        deviceList.addAll(Arrays.asList(ao.find(Device.class, Query.select()
+//                .alias(Device.class, "device")
+//                .alias(HardwareModel.class, "hardware")
+//                .join(HardwareModel.class, "device.HARDWARE_MODEL_ID = hardware.ID")
+//                .order(DEFAULT_ORDER)
+//                .where("device.HARDWARE_MODEL_ID = ? AND device.SORTED_OUT_DATE IS NULL", hardwareId))));
+//
+//        deviceList.removeAll(Arrays.asList(ao.find(Device.class, Query.select()
+//                .alias(Lending.class, "lending")
+//                .alias(Device.class, "device")
+//                .join(Lending.class, "lending.DEVICE_ID = device.ID")
+//                .where("lending.END IS NULL"))));
+
+        for(Device device : all()) {
+            if(device.getHardwareModel().getID() != hardwareId) {
+                continue;
+            }
+            if(device.getSortedOutDate() == null) {
+                boolean available = true;
+                for(Lending lending : device.getLendings()) {
+                    if(lending.getEnd() == null) {
+                        available = false;
+                        break;
+                    }
+                }
+                if(available) {
+                    deviceList.add(device);
+                }
+            }
+        }
 
         return deviceList;
     }
 
     @Override
     public List<Device> getSortedOutDevices() {
-        return Arrays.asList(ao.find(Device.class, Query.select()
-                .alias(Device.class, "device")
-                .alias(HardwareModel.class, "hardware")
-                .join(HardwareModel.class, "device.HARDWARE_MODEL_ID = hardware.ID")
-                .order(DEFAULT_ORDER)
-                .where("device.SORTED_OUT_DATE IS NOT NULL")));
+        // TODO issues with postgresql
+//        return Arrays.asList(ao.find(Device.class, Query.select()
+//                .alias(Device.class, "device")
+//                .alias(HardwareModel.class, "hardware")
+//                .join(HardwareModel.class, "device.HARDWARE_MODEL_ID = hardware.ID")
+//                .order(DEFAULT_ORDER)
+//                .where("device.SORTED_OUT_DATE IS NOT NULL")));
+
+        List<Device> deviceList = new ArrayList<Device>();
+        for(Device device : all()) {
+            if (device.getSortedOutDate() != null) {
+                deviceList.add(device);
+            }
+        }
+        return deviceList;
     }
 
     @Override
     public List<Device> getSortedOutDevicesForHardware(int hardwareId) {
-        return Arrays.asList(ao.find(Device.class, Query.select()
-                .alias(Device.class, "device")
-                .alias(HardwareModel.class, "hardware")
-                .join(HardwareModel.class, "device.HARDWARE_MODEL_ID = hardware.ID")
-                .order(DEFAULT_ORDER)
-                .where("device.SORTED_OUT_DATE IS NOT NULL AND device.HARDWARE_MODEL_ID = ?", hardwareId)));
+        // TODO issues with postgresql
+//        return Arrays.asList(ao.find(Device.class, Query.select()
+//                .alias(Device.class, "device")
+//                .alias(HardwareModel.class, "hardware")
+//                .join(HardwareModel.class, "device.HARDWARE_MODEL_ID = hardware.ID")
+//                .order(DEFAULT_ORDER)
+//                .where("device.SORTED_OUT_DATE IS NOT NULL AND device.HARDWARE_MODEL_ID = ?", hardwareId)));
+
+        List<Device> deviceList = new ArrayList<Device>();
+        for(Device device : all()) {
+            if (device.getSortedOutDate() != null && device.getHardwareModel().getID() == hardwareId) {
+                deviceList.add(device);
+            }
+        }
+        return deviceList;
     }
 
     private boolean isSerialNumberUnique(String serialNumber, int exceptId) {
         return serialNumber == null || serialNumber.equals("") ||
-                ao.find(Device.class, Query.select().where("SERIAL_NUMBER = ? AND ID <> ?", serialNumber, exceptId)).length == 0;
+                ao.find(Device.class, Query.select().where("\"SERIAL_NUMBER\" = ? AND \"ID\" <> ?", serialNumber, exceptId)).length == 0;
 
     }
 
     private boolean isImeiUnique(String imei, int exceptId) {
         return imei == null || imei.equals("") ||
-                ao.find(Device.class, Query.select().where("IMEI = ? AND ID <> ?", imei, exceptId)).length == 0;
+                ao.find(Device.class, Query.select().where("\"IMEI\" = ? AND \"ID\" <> ?", imei, exceptId)).length == 0;
 
     }
 
     private boolean isInventoryNumberUnique(String inventoryNumber, int exceptId) {
         return inventoryNumber == null || inventoryNumber.equals("") ||
-                ao.find(Device.class, Query.select().where("INVENTORY_NUMBER = ? AND ID <> ?", inventoryNumber, exceptId)).length == 0;
+                ao.find(Device.class, Query.select().where("\"INVENTORY_NUMBER\" = ? AND \"ID\" <> ?", inventoryNumber, exceptId)).length == 0;
 
     }
 }

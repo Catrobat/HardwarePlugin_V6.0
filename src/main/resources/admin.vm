@@ -39,18 +39,6 @@
             <!-- fake fields are a workaround for chrome autofill getting the wrong fields -->
             <input style="display:none" type="text" name="fakeusernameremembered"/>
             <input style="display:none" type="password" name="fakepasswordremembered"/>
-            <h2>General</h2>
-            <fieldset>
-                <div class="field-group">
-                    <label for="plugin-permission">Userdirectory</label>
-                    <input class="text" type="text" id="userdirectory" name="userdirectory"
-                           title="userdirectory">
-
-                    <div class="description">
-                        Adds user to given user directory.
-                    </div>
-                </div>
-            </fieldset>
             <h2>Permission</h2>
             <fieldset>
                 <div class="field-group">
@@ -61,6 +49,38 @@
                     <div class="description">All jira administrators in these groups may see and manipulate this
                         plugin
                     </div>
+                </div>
+            </fieldset>
+            <h2>General</h2>
+            <fieldset>
+                <div class="field-group">
+                    <label for="userdirectory">Userdirectory</label>
+                    <input class="text" type="text" id="userdirectory" name="userdirectory"
+                           title="userdirectory">
+
+                    <div class="description">
+                        Adds user to given user directory.
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label for="room-calendar">Room Calendar Group</label>
+                    <input class="text single-jira-group" type="text" id="room-calendar" name="room-calendar"
+                           title="room-calendar">
+                </div>
+                <div class="field-group">
+                    <label for="room-calendar">Meeting Calendar Group</label>
+                    <input class="text single-jira-group" type="text" id="meeting-calendar" name="meeting-calendar"
+                           title="meeting-calendar">
+                </div>
+                <div class="field-group">
+                    <label for="master-student">Master Student Group</label>
+                    <input class="text single-jira-group" type="text" id="master-student" name="master-student"
+                           title="master-student">
+                </div>
+                <div class="field-group">
+                    <label for="phd-student">PhD Student Group</label>
+                    <input class="text single-jira-group" type="text" id="phd-student" name="phd-student"
+                           title="phd-student">
                 </div>
             </fieldset>
             <h2>GitHub</h2>

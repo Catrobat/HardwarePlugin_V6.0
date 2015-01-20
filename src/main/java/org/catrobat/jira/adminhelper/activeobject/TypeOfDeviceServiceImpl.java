@@ -41,7 +41,7 @@ public class TypeOfDeviceServiceImpl implements TypeOfDeviceService {
         name = escapeHtml4(name.trim());
 
         TypeOfDevice[] typeOfDevices = ao.find(TypeOfDevice.class, Query.select()
-                .where("upper(TYPE_OF_DEVICE_NAME) = upper(?)", name));
+                .where("upper(\"TYPE_OF_DEVICE_NAME\") = upper(?)", name));
         if (typeOfDevices.length == 1) {
             return typeOfDevices[0];
         } else if (typeOfDevices.length > 1) {
@@ -57,7 +57,7 @@ public class TypeOfDeviceServiceImpl implements TypeOfDeviceService {
     @Override
     public List<TypeOfDevice> searchTypeOfDevice(String query) {
         return Arrays.asList(ao.find(TypeOfDevice.class, Query.select()
-                .where("upper(TYPE_OF_DEVICE_NAME) LIKE upper(?)", "%" + query + "%")));
+                .where("upper(\"TYPE_OF_DEVICE_NAME\") LIKE upper(?)", "%" + query + "%")));
     }
 
     @Override

@@ -32,6 +32,14 @@ public interface AdminHelperConfigService {
 
     AdminHelperConfig setUserDirectoryId(long userDirectoryId);
 
+    AdminHelperConfig setRoomCalendarGroup(String roomCalendarGroup);
+
+    AdminHelperConfig setMeetingCalendarGroup(String meetingCalendarGroup);
+
+    AdminHelperConfig setMasterStudentGroup(String masterStudentGroup);
+
+    AdminHelperConfig setPhdStudentGroup(String phdStudentGroup);
+
     Team addTeam(String teamName, List<Integer> githubTeamIdList, List<String> coordinatorGroups,
                  List<String> seniorGroups, List<String> developerGroups);
 

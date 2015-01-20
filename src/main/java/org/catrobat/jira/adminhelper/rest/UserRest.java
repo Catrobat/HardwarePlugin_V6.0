@@ -40,7 +40,6 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
 import org.catrobat.jira.adminhelper.activeobject.Lending;
 import org.catrobat.jira.adminhelper.activeobject.LendingService;
-import org.catrobat.jira.adminhelper.activeobject.LendingServiceImpl;
 import org.catrobat.jira.adminhelper.helper.GithubHelper;
 import org.catrobat.jira.adminhelper.rest.json.JsonConfig;
 import org.catrobat.jira.adminhelper.rest.json.JsonTeam;
@@ -48,7 +47,6 @@ import org.catrobat.jira.adminhelper.rest.json.JsonUser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -138,7 +136,31 @@ public class UserRest extends RestHelper {
             e.printStackTrace();
         }
 
-        Response errorResponse = addUserToGithubAndJiraGroups(jsonUser, ApplicationUsers.toDirectoryUser(jiraUser), config);
+        Response response = addUserToGithubAndJiraGroups(jsonUser, ApplicationUsers.toDirectoryUser(jiraUser), config);
+        if (response != null && response.getStatus() == Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
+            return response;
+        }
+
+        Response errorResponse;
+        try {
+            List<String> groups = new ArrayList<String>();
+            if (jsonUser.isRoomCalendar()) {
+                groups.add(config.getRoomCalendarGroup());
+            }
+            if (jsonUser.isMeetingCalendar()) {
+                groups.add(config.getMeetingCalendarGroup());
+            }
+            if (jsonUser.isMasterStudent()) {
+                groups.add(config.getMasterStudentGroup());
+            }
+            if (jsonUser.isPhdStudent()) {
+                groups.add(config.getPhdStudentGroup());
+            }
+            errorResponse = addToGroups(ApplicationUsers.toDirectoryUser(jiraUser), groups);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity("Could not add to Calendar/Student groups.").build();
+        }
         if (errorResponse != null) {
             return errorResponse;
         }
@@ -203,18 +225,18 @@ public class UserRest extends RestHelper {
         if (unauthorized != null) {
             return unauthorized;
         }
-        if(lendingService == null) {
+        if (lendingService == null) {
             return Response.serverError().entity("Lending Service must not be null").build();
         }
 
-        if(query == null || query.length() < 1) {
+        if (query == null || query.length() < 1) {
             return Response.ok(new ArrayList<JsonUser>()).build();
         }
 
         com.atlassian.jira.user.util.UserManager jiraUserManager = ComponentAccessor.getUserManager();
         TreeMap<String, JsonUser> jsonUsers = new TreeMap<String, JsonUser>();
-        for(User user : jiraUserManager.getUsers()) {
-            if(user.getName().toLowerCase().contains(query.toLowerCase()) ||
+        for (User user : jiraUserManager.getUsers()) {
+            if (user.getName().toLowerCase().contains(query.toLowerCase()) ||
                     user.getDisplayName().toLowerCase().contains(query.toLowerCase())) {
                 ApplicationUser applicationUser = ApplicationUsers.from(user);
                 JsonUser jsonUser = new JsonUser();
@@ -224,8 +246,8 @@ public class UserRest extends RestHelper {
             }
         }
 
-        for(Lending lending : lendingService.all()) {
-            if(lending.getLendingByUserKey().toLowerCase().contains(query.toLowerCase()) &&
+        for (Lending lending : lendingService.all()) {
+            if (lending.getLendingByUserKey().toLowerCase().contains(query.toLowerCase()) &&
                     !jsonUsers.containsKey(lending.getLendingByUserKey().toLowerCase())) {
                 JsonUser jsonUser = new JsonUser();
                 jsonUser.setUserName(lending.getLendingByUserKey());
