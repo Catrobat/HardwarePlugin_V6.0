@@ -144,16 +144,16 @@ function initIndividualRelatedLendingTab(baseUrl) {
                     } else {
                         var tableHtml = "";
                         for(var i = 0; i < lendingList.length; i++) {
-                            tableHtml += '<tr><td class="name">' + lendingList[i].device.hardwareModelName + '</td>' +
-                                '<td class="serial">' + lendingList[i].device.serialNumber + '</td>' +
-                                '<td class="imei">' + lendingList[i].device.imei + '</td>' +
-                                '<td class="inventory">' + lendingList[i].device.inventoryNumber + '</td>' +
-                                '<td class="issuer">' + lendingList[i].lentOutIssuer + '</td>' +
+                            tableHtml += '<tr><td class="name">' + formatString(lendingList[i].device.hardwareModelName) + '</td>' +
+                                '<td class="serial">' + formatString(lendingList[i].device.serialNumber) + '</td>' +
+                                '<td class="imei">' + formatString(lendingList[i].device.imei) + '</td>' +
+                                '<td class="inventory">' + formatString(lendingList[i].device.inventoryNumber) + '</td>' +
+                                '<td class="issuer">' + formatString(lendingList[i].lentOutIssuer) + '</td>' +
                                 '<td class="begin">' + getShortDate(lendingList[i].begin) + '</td>' +
                                 '<td class="end">' + getShortDate(lendingList[i].end) + '</td>' +
-                                '<td class="purpose">' + lendingList[i].purpose + '</td>' +
-                                '<td class="comment">' + lendingList[i].comment + '</td>' +
-                                '<td><a class="device_details" id="' + lendingList[i].id + '" href="#">Details</a></td></tr>';
+                                '<td class="purpose">' + formatString(lendingList[i].purpose) + '</td>' +
+                                '<td class="comment">' + formatString(lendingList[i].comment) + '</td>' +
+                                '<td><a class="device_details" id="' + lendingList[i].device.id + '" href="#">Details</a></td></tr>';
                         }
                         AJS.$("#table-individual").html(tableHtml);
                     }
@@ -233,8 +233,18 @@ function getShortDate(dateString) {
 }
 
 function formatDateForForm(dateString) {
+    if(typeof dateString === 'undefined') {
+        return '';
+    }
     var date = new Date(dateString);
     var day = ("0" + date.getDate()).slice(-2);
     var month = ("0" + (date.getMonth() + 1)).slice(-2);
     return date.getFullYear() + "-" + (month) + "-" + (day);
+}
+
+function formatString(string) {
+    if(typeof string === 'undefined') {
+        return '';
+    }
+    return string;
 }

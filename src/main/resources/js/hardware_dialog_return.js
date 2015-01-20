@@ -45,7 +45,7 @@ function showReturnDialogAjax(baseUrl, deviceId, lendingDetails) {
     returnDialog = new AJS.Dialog({
         width: 600,
         height: 400,
-        id: "example-dialog",
+        id: "returning-device-dialog",
         closeOnOutsideClick: true
     });
 

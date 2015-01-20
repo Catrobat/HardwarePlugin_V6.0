@@ -66,11 +66,11 @@ public class UploadCsvServlet extends HelperServlet {
                 "Just upload files when you know what you're doing - this upload will manipulate the database!<br />" +
                 "<form action=\"upload\" method=\"post\"><br />" +
                 "<textarea name=\"csv\" rows=\"20\" cols=\"200\" wrap=\"off\">" +
-                "# lines beginning with '#' are comments and will be ignored,,,,,,,,,,,,,,,,,,,,,,,\n" +
-                "# Name,Version,Type of Device,Operating System,Producer,Article Number,Price,IMEI,Serial Number,Inventory Number,Received Date,Received From,Useful Life Of Asset,Sorted Out Comment,Sorted Out Date,Lending Begin,Lending End,Lending Purpose,Lending Comment,Lending Issuer,Lent By,Device Comment,Device Comment Author,Device Comment Date\n" +
-                "Nexus 6,32 GB,Smartphone,Android Lollipop,Motorola,1337,600,123123,123123,123123,14/10/14,Google Inc.,3 Years,Sorted Out Comment,24/10/14,15/10/14,16/10/14,testing,just lending,issuer,lent by,Device Comment,comment author,14/10/14\n" +
-                "Nexus 6,32 GB,Smartphone,Android Lollipop,Motorola,1337,600,234234,234234,234234,14/10/14,Google Inc.,3 Years,,,,,,,,,,,\n" +
-                "Nexus 6,32 GB,Smartphone,Android Lollipop,Motorola,1337,600,345345,345345,345345,14/10/14,Google Inc.,3 Years,,,15/10/14,,testing 3,just lending 3,issuer 3,lent by 3,Device Comment 3,comment author 3,14/10/14\n" +
+                "# lines beginning with '#' are comments and will be ignored;;;;;;;;;;;;;;;;;;;;;;;\n" +
+                "# Name;Version;Type of Device;Operating System;Producer;Article Number;Price;IMEI;Serial Number;Inventory Number;Received Date;Received From;Useful Life Of Asset;Sorted Out Comment;Sorted Out Date;Lending Begin;Lending End;Lending Purpose;Lending Comment;Lending Issuer;Lent By;Device Comment;Device Comment Author;Device Comment Date\n" +
+                "Nexus 6;32 GB;Smartphone;Android Lollipop;Motorola;1337;600;123123;123123;123123;10/14/2014;Google Inc.;3 Years;Sorted Out Comment;10/14/2014;10/14/2014;10/14/2014;testing;just lending;issuer;lent by;Device Comment;comment author;10/14/2014\n" +
+                "Nexus 6;32 GB;Smartphone;Android Lollipop;Motorola;1337;600;234234;234234;234234;10/14/2014;Google Inc.;3 Years;;;;;;;;;;;\n" +
+                "Nexus 6;32 GB;Smartphone;Android Lollipop;Motorola;1337;600;345345;345345;345345;10/14/2014;Google Inc.;3 Years;;;10/14/2014;;testing 3;just lending 3;issuer 3;lent by 3;Device Comment 3;comment author 3;10/14/2014\n" +
                 "</textarea><br />\n" +
                 "<input type=\"checkbox\" name=\"drop\" value=\"drop\">Drop hardware related entries<br /><br />\n" +
                 "<input type=\"submit\" />" +

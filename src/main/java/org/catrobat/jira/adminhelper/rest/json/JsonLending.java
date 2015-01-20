@@ -63,7 +63,7 @@ public class JsonLending {
         id = toCopy.getID();
         device = new JsonDevice(toCopy.getDevice());
         ApplicationUser lentOutByUser = userManager.getUserByKey(toCopy.getLendingByUserKey());
-        lentOutBy = lentOutByUser == null ? toCopy.getLendingIssuerUserKey() : lentOutByUser.getUsername();
+        lentOutBy = lentOutByUser == null ? toCopy.getLendingByUserKey() : lentOutByUser.getUsername();
         ApplicationUser lentOutIssuerUser = userManager.getUserByKey(toCopy.getLendingIssuerUserKey());
         lentOutIssuer = lentOutIssuerUser == null ? toCopy.getLendingIssuerUserKey() : lentOutIssuerUser.getUsername();
         begin = toCopy.getBegin();

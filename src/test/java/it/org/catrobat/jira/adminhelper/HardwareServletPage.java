@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Stephan Fellhofer
+ * Copyright 2015 Stephan Fellhofer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,20 +36,9 @@ public class HardwareServletPage extends AbstractJiraPage {
 
     @Inject
     private ExtendedElementFinder extendedElementFinder;
-    @ElementBy(id = "hardware_management_link")
-    private PageElement hardwareManagementLink;
+
     @ElementBy(id = "tabs-overview")
     private PageElement tabOverview;
-    @ElementBy(id = "table-overview")
-    private PageElement tableOverview;
-    @ElementBy(id = "tabs-lent-out")
-    private PageElement tabLentOut;
-    @ElementBy(id = "search-filter-overview")
-    private PageElement searchField;
-    @ElementBy(className = "lending_out")
-    private Iterable<PageElement> lendOutButtons;
-    @ElementBy(className = "serial")
-    private PageElement serial;
 
     @Override
     public TimedCondition isAt() {
@@ -61,42 +50,4 @@ public class HardwareServletPage extends AbstractJiraPage {
         return "/plugins/servlet/admin_helper/hardware";
     }
 
-    public TimedCondition linkVisible() {
-        return hardwareManagementLink.timed().isVisible();
-    }
-
-    public LendingOutDialogPage lendOutDevice(int index) {
-        int i = 0;
-        PageElement button = null;
-        for (PageElement temp : lendOutButtons) {
-            if (i == index) {
-                button = temp;
-                break;
-            }
-            i++;
-        }
-
-        if (button == null) {
-            return null;
-        }
-
-        Poller.waitUntilTrue(button.timed().isEnabled());
-        button.click();
-        return pageBinder.bind(LendingOutDialogPage.class);
-    }
-
-    public TimedQuery<Iterable<PageElement>> getAvailables() {
-        return Queries.forSupplier(timeouts,
-                extendedElementFinder.within(tableOverview).
-                        newQuery(By.className("available")).
-                        supplier());
-    }
-
-    public TimedQuery<String> getSerial() {
-        return serial.timed().getValue();
-    }
-
-    public PageElement getTableOverview() {
-        return tableOverview;
-    }
 }

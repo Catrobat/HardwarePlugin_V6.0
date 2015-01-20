@@ -41,7 +41,9 @@ function showNewDeviceDialogAjax(baseUrl, hardwareList, editableDevice) {
     });
 
     var device;
+    var header = "Create New Device";
     if (editableDevice) {
+        header = "Edit Device";
         device = editableDevice;
         device.receivedDate = new Date(device.receivedDate);
     } else {
@@ -76,17 +78,17 @@ function showNewDeviceDialogAjax(baseUrl, hardwareList, editableDevice) {
         "\n" +
         "<div class=\"field-group\">\n" +
         "<label for=\"serial\">Serial number</label>\n" +
-        "<input class=\"text device_id\" type=\"text\" id=\"serial\" name=\"serial\" title=\"serial number\" value=\"" + device.serialNumber + "\">\n" +
+        "<input class=\"text device_id\" type=\"text\" id=\"serial\" name=\"serial\" title=\"serial number\" value=\"" + formatString(device.serialNumber) + "\">\n" +
         "</div>\n" +
         "\n" +
         "<div class=\"field-group\">\n" +
         "<label for=\"imei\">IMEI</label>\n" +
-        "<input class=\"text device_id\" type=\"text\" id=\"imei\" name=\"imei\" title=\"imei\" value=\"" + device.imei + "\">\n" +
+        "<input class=\"text device_id\" type=\"text\" id=\"imei\" name=\"imei\" title=\"imei\" value=\"" + formatString(device.imei) + "\">\n" +
         "</div>\n" +
         "\n" +
         "<div class=\"field-group\">\n" +
         "<label for=\"inventory\">Inventory number</label>\n" +
-        "<input class=\"text device_id\" type=\"text\" id=\"inventory\" name=\"inventory\" title=\"inventory number\" value=\"" + device.inventoryNumber + "\">\n" +
+        "<input class=\"text device_id\" type=\"text\" id=\"inventory\" name=\"inventory\" title=\"inventory number\" value=\"" + formatString(device.inventoryNumber) + "\">\n" +
         "<div class=\"error\" id=\"unique_id\">At least one unique identifier must be filled out (Serial/IMEI/Inventory)</div>\n" +
         "</div>\n" +
         "\n" +
@@ -97,18 +99,18 @@ function showNewDeviceDialogAjax(baseUrl, hardwareList, editableDevice) {
         "\n" +
         "<div class=\"field-group\">\n" +
         "<label for=\"received_from\">Received from</label>\n" +
-        "<input class=\"text\" type=\"text\" id=\"received_from\" name=\"received_from\" title=\"received from\" value=\"" + device.receivedFrom + "\">\n" +
+        "<input class=\"text\" type=\"text\" id=\"received_from\" name=\"received_from\" title=\"received from\" value=\"" + formatString(device.receivedFrom) + "\">\n" +
         "</div>\n" +
         "\n" +
         "<div class=\"field-group\">\n" +
         "<label for=\"life_of_asset\">Useful life of asset</label>\n" +
-        "<input class=\"text medium-field\" type=\"text\" id=\"life_of_asset\" name=\"life_of_asset\" title=\"life of asset\" value=\"" + device.usefulLiveOfAsset + "\"> months\n" +
+        "<input class=\"text medium-field\" type=\"text\" id=\"life_of_asset\" name=\"life_of_asset\" title=\"life of asset\" value=\"" + formatString(device.usefulLiveOfAsset) + "\"> months\n" +
         "<div class=\"description\">Amount of months when this device is obsolete</div>\n" +
         "</div>\n";
     if (device.id != 0) {
         content += "<div class=\"field-group\">\n" +
             "<label for=\"sort-out-comment\">Sort out Comment</label>\n" +
-            "<textarea class=\"textarea\" name=\"sort-out-comment\" id=\"sort-out-comment\" placeholder=\"Your comment here...\">" + device.sortedOutComment + "</textarea>\n" +
+            "<textarea class=\"textarea\" name=\"sort-out-comment\" id=\"sort-out-comment\" placeholder=\"Your comment here...\">" + formatString(device.sortedOutComment) + "</textarea>\n" +
             "</div>\n" +
             "<div class=\"field-group\">\n" +
             "<label for=\"sort-out-date\">Sort out date</label>\n" +
@@ -118,7 +120,7 @@ function showNewDeviceDialogAjax(baseUrl, hardwareList, editableDevice) {
     content += "</fieldset>\n" +
         "</form>";
 
-    dialog.addHeader("Create New Device");
+    dialog.addHeader(header);
     dialog.addPanel("Panel 1", content, "panel-body");
 
     dialog.addButton("Save", function (dialog) {
@@ -129,8 +131,10 @@ function showNewDeviceDialogAjax(baseUrl, hardwareList, editableDevice) {
             device.receivedDate = new Date(AJS.$("#received_date").val());
             device.receivedFrom = AJS.$("#received_from").auiSelect2("val");
             device.usefulLiveOfAsset = AJS.$("#life_of_asset").val();
-            device.sortedOutComment = AJS.$("#sort-out-comment").val();
-            device.sortedOutDate = new Date(AJS.$("#sort-out-date").val());
+            if (device.id != 0) {
+                device.sortedOutComment = AJS.$("#sort-out-comment").val();
+                device.sortedOutDate = new Date(AJS.$("#sort-out-date").val());
+            }
 
             AJS.$.ajax({
                 url: baseUrl + urlSuffixSingleHardwareModelDevices.replace("{0}", AJS.$("#hardware_selection").val()),
@@ -169,9 +173,7 @@ function showNewDeviceDialogAjax(baseUrl, hardwareList, editableDevice) {
     dialog.show();
 
     AJS.$("#received_date").attr("value", formatDateForForm(device.receivedDate));
-    if (AJS.$("#sort-out-date")) {
-        AJS.$("#sort-out-date").attr("value", formatDateForForm(device.sortedOutDate));
-    }
+    AJS.$("#sort-out-date").attr("value", formatDateForForm(device.sortedOutDate));
 
     if (device.hardwareModel.id) {
         AJS.$("#hardware_selection").val(device.hardwareModel.id);

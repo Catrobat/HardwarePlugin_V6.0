@@ -29,7 +29,6 @@ public class DataRestorer {
     }
 
     public void doRestore() {
-        //restoreData.restoreBlank();
         doRestore("selenium.zip");
     }
 

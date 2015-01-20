@@ -21,13 +21,18 @@ function populateOverviewTable(hardwareList) {
 
     for (var i = 0; i < hardwareList.length; i++) {
         tableBody += "<tr>\n" +
-            "<td class=\"name\">" + hardwareList[i].name + "</td>\n" +
-            "<td class=\"version\">" + hardwareList[i].version + "</td>\n" +
-            "<td class=\"type\">" + hardwareList[i].typeOfDevice + "</td>\n" +
-            "<td class=\"os\">" + hardwareList[i].operatingSystem + "</td>\n" +
-            "<td class=\"available\">" + hardwareList[i].available + "/" + hardwareList[i].sumOfDevices + "</td>\n" +
-            "<td><a class=\"lending_out\" id=\"" + hardwareList[i].id + "\" href=\"#\">Lending out</a></td>\n" +
-            "</tr>";
+            "<td class=\"name\">" + formatString(hardwareList[i].name) + "</td>\n" +
+            "<td class=\"version\">" + formatString(hardwareList[i].version) + "</td>\n" +
+            "<td class=\"type\">" + formatString(hardwareList[i].typeOfDevice) + "</td>\n" +
+            "<td class=\"os\">" + formatString(hardwareList[i].operatingSystem) + "</td>\n" +
+            "<td class=\"available\">" + hardwareList[i].available + "/" + hardwareList[i].sumOfDevices + "</td>\n";
+        if(hardwareList[i].available === 0) {
+            tableBody += "<td></td>";
+        } else {
+            tableBody += "<td><a class=\"lending_out\" id=\"" + hardwareList[i].id + "\" href=\"#\">Lending out</a></td>\n";
+        }
+        tableBody += "</tr>";
+
     }
 
     AJS.$("#table-overview-body").html(tableBody);
@@ -42,11 +47,11 @@ function populateLentOutTable(hardwareList) {
     for (var i = 0; i < hardwareList.length; i++) {
         var currentlyLentOutSince = new Date(hardwareList[i].currentlyLentOutSince);
         tableBody += "<tr>\n" +
-            "<td class=\"name\">" + hardwareList[i].hardwareModelName + "</td>\n" +
-            "<td class=\"serial\">" + hardwareList[i].serialNumber + "</td>\n" +
-            "<td class=\"imei\">" + hardwareList[i].imei + "</td>\n" +
-            "<td class=\"inventory\">" + hardwareList[i].inventoryNumber + "</td>\n" +
-            "<td class=\"lent-out-by\">" + hardwareList[i].currentlyLentOutBy + "</td>\n" +
+            "<td class=\"name\">" + formatString(hardwareList[i].hardwareModelName) + "</td>\n" +
+            "<td class=\"serial\">" + formatString(hardwareList[i].serialNumber) + "</td>\n" +
+            "<td class=\"imei\">" + formatString(hardwareList[i].imei) + "</td>\n" +
+            "<td class=\"inventory\">" + formatString(hardwareList[i].inventoryNumber) + "</td>\n" +
+            "<td class=\"lent-out-by\">" + formatString(hardwareList[i].currentlyLentOutBy) + "</td>\n" +
             "<td class=\"lent-out-since\">" + currentlyLentOutSince.toISOString().split("T")[0] + "</td>\n" +
             "<td><a class=\"device_details\" id=\"" + hardwareList[i].id + "\" href=\"#\">Details</a></td>\n" +
             "<td><a class=\"device_return\" id=\"" + hardwareList[i].id + "\" href=\"#\">Return</a></td>\n" +
@@ -65,10 +70,10 @@ function populateSortedOutTable(deviceList) {
     for (var i = 0; i < deviceList.length; i++) {
         var sortedOut = new Date(deviceList[i].sortedOutDate);
         tableBody += "<tr>\n" +
-            "<td class=\"name\">" + deviceList[i].hardwareModelName + "</td>\n" +
-            "<td class=\"serial\">" + deviceList[i].serialNumber + "</td>\n" +
-            "<td class=\"imei\">" + deviceList[i].imei + "</td>\n" +
-            "<td class=\"inventory\">" + deviceList[i].inventoryNumber + "</td>\n" +
+            "<td class=\"name\">" + formatString(deviceList[i].hardwareModelName) + "</td>\n" +
+            "<td class=\"serial\">" + formatString(deviceList[i].serialNumber) + "</td>\n" +
+            "<td class=\"imei\">" + formatString(deviceList[i].imei) + "</td>\n" +
+            "<td class=\"inventory\">" + formatString(deviceList[i].inventoryNumber) + "</td>\n" +
             "<td class=\"date\">" + sortedOut.toISOString().split("T")[0] + "</td>\n" +
             "<td><a class=\"device_details\" id=\"" + deviceList[i].id + "\" href=\"#\">Details</a></td>\n" +
             "</tr>";
@@ -97,12 +102,12 @@ function populateActiveDevicesTable(deviceList) {
         }
 
         tableBody += "<tr>\n" +
-            "<td class=\"name\">" + deviceList[i].hardwareModelName + "</td>\n" +
-            "<td class=\"serial\">" + deviceList[i].serialNumber + "</td>\n" +
-            "<td class=\"imei\">" + deviceList[i].imei + "</td>\n" +
-            "<td class=\"inventory\">" + deviceList[i].inventoryNumber + "</td>\n" +
+            "<td class=\"name\">" + formatString(deviceList[i].hardwareModelName) + "</td>\n" +
+            "<td class=\"serial\">" + formatString(deviceList[i].serialNumber) + "</td>\n" +
+            "<td class=\"imei\">" + formatString(deviceList[i].imei) + "</td>\n" +
+            "<td class=\"inventory\">" + formatString(deviceList[i].inventoryNumber) + "</td>\n" +
             "<td class=\"lent-out-since\">" + getShortDate(deviceList[i].currentlyLentOutSince) + "</td>\n" +
-            "<td class=\"lent-out-by\">" + getShortDate(deviceList[i].currentlyLentOutBy) + "</td>\n" +
+            "<td class=\"lent-out-by\">" + formatString(getShortDate(deviceList[i].currentlyLentOutBy)) + "</td>\n" +
             "<td class=\"action\">" + action + "</td>\n" +
             "<td><a class=\"device_details\" id=\"" + deviceList[i].id + "\" href=\"#\">Details</a></td>\n" +
             "</tr>";
@@ -127,12 +132,12 @@ function populateAllDevicesTable(deviceList) {
         }
 
         tableBody += "<tr>\n" +
-            "<td class=\"name\">" + deviceList[i].hardwareModelName + "</td>\n" +
-            "<td class=\"serial\">" + deviceList[i].serialNumber + "</td>\n" +
-            "<td class=\"imei\">" + deviceList[i].imei + "</td>\n" +
-            "<td class=\"inventory\">" + deviceList[i].inventoryNumber + "</td>\n" +
+            "<td class=\"name\">" + formatString(deviceList[i].hardwareModelName) + "</td>\n" +
+            "<td class=\"serial\">" + formatString(deviceList[i].serialNumber) + "</td>\n" +
+            "<td class=\"imei\">" + formatString(deviceList[i].imei) + "</td>\n" +
+            "<td class=\"inventory\">" + formatString(deviceList[i].inventoryNumber) + "</td>\n" +
             "<td class=\"lent-out-since\">" + getShortDate(deviceList[i].currentlyLentOutSince) + "</td>\n" +
-            "<td class=\"lent-out-by\">" + getShortDate(deviceList[i].currentlyLentOutBy) + "</td>\n" +
+            "<td class=\"lent-out-by\">" + formatString(getShortDate(deviceList[i].currentlyLentOutBy)) + "</td>\n" +
             "<td class=\"sorted-out\">" + getShortDate(deviceList[i].sortedOutDate) + "</td>\n" +
             "<td class=\"action\">" + action + "</td>\n" +
             "<td><a class=\"device_details\" id=\"" + deviceList[i].id + "\" href=\"#\">Details</a></td>\n" +
@@ -150,10 +155,10 @@ function populateHardwareManagementTable(hardwareList) {
 
     for (var i = 0; i < hardwareList.length; i++) {
         tableBody += "<tr>\n" +
-            "<td class=\"name\">" + hardwareList[i].name + "</td>\n" +
-            "<td class=\"version\">" + hardwareList[i].version + "</td>\n" +
-            "<td class=\"type\">" + hardwareList[i].typeOfDevice + "</td>\n" +
-            "<td class=\"os\">" + hardwareList[i].operatingSystem + "</td>\n" +
+            "<td class=\"name\">" + formatString(hardwareList[i].name) + "</td>\n" +
+            "<td class=\"version\">" + formatString(hardwareList[i].version) + "</td>\n" +
+            "<td class=\"type\">" + formatString(hardwareList[i].typeOfDevice) + "</td>\n" +
+            "<td class=\"os\">" + formatString(hardwareList[i].operatingSystem) + "</td>\n" +
             "<td>" + hardwareList[i].sumOfDevices + "</td>\n" +
             "<td><a class=\"edit_model\" id=\"" + hardwareList[i].id + "\" href=\"#\">Edit</a></td>\n" +
             "<td><a class=\"remove_model\" id=\"" + hardwareList[i].id + "\" href=\"#\">Remove</a></td>\n" +

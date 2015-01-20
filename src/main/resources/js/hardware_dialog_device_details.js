@@ -44,31 +44,31 @@ function showDeviceDetailDialogAjax(baseUrl, device) {
         "    <tbody>\n" +
         "        <tr>\n" +
         "            <td>Name</td>\n" +
-        "            <td>" + device.hardwareModel.name + "</td>\n" +
+        "            <td>" + formatString(device.hardwareModel.name) + "</td>\n" +
         "        </tr>\n" +
         "        <tr>\n" +
         "            <td>Type</td>\n" +
-        "            <td>" + device.hardwareModel.typeOfDevice + "</td>\n" +
+        "            <td>" + formatString(device.hardwareModel.typeOfDevice) + "</td>\n" +
         "        </tr>\n" +
         "        <tr>\n" +
         "            <td>Version</td>\n" +
-        "            <td>" + device.hardwareModel.version + "</td>\n" +
+        "            <td>" + formatString(device.hardwareModel.version) + "</td>\n" +
         "        </tr>\n" +
         "        <tr>\n" +
         "            <td>Price</td>\n" +
-        "            <td>" + device.hardwareModel.price + "</td>\n" +
+        "            <td>" + formatString(device.hardwareModel.price) + "</td>\n" +
         "        </tr>\n" +
         "        <tr>\n" +
         "            <td>Producer</td>\n" +
-        "            <td>" + device.hardwareModel.producer + "</td>\n" +
+        "            <td>" + formatString(device.hardwareModel.producer) + "</td>\n" +
         "        </tr>\n" +
         "        <tr>\n" +
         "            <td>OS</td>\n" +
-        "            <td>" + device.hardwareModel.operatingSystem + "</td>\n" +
+        "            <td>" + formatString(device.hardwareModel.operatingSystem) + "</td>\n" +
         "        </tr>\n" +
         "        <tr>\n" +
         "            <td>Article Number</td>\n" +
-        "            <td>" + device.hardwareModel.articleNumber + "</td>\n" +
+        "            <td>" + formatString(device.hardwareModel.articleNumber) + "</td>\n" +
         "        </tr>\n" +
         "    </tbody>\n" +
         "</table>";
@@ -77,15 +77,15 @@ function showDeviceDetailDialogAjax(baseUrl, device) {
         "    <tbody>\n" +
         "        <tr>\n" +
         "            <td>Serial Number</td>\n" +
-        "            <td>" + device.serialNumber + "</td>\n" +
+        "            <td>" + formatString(device.serialNumber) + "</td>\n" +
         "        </tr>\n" +
         "        <tr>\n" +
         "            <td>IMEI</td>\n" +
-        "            <td>" + device.imei + "</td>\n" +
+        "            <td>" + formatString(device.imei) + "</td>\n" +
         "        </tr>\n" +
         "        <tr>\n" +
         "            <td>Inventory Number</td>\n" +
-        "            <td>" + device.inventoryNumber + "</td>\n" +
+        "            <td>" + formatString(device.inventoryNumber) + "</td>\n" +
         "        </tr>\n" +
         "        <tr>\n" +
         "            <td>Received Date</td>\n" +
@@ -93,11 +93,11 @@ function showDeviceDetailDialogAjax(baseUrl, device) {
         "        </tr>\n" +
         "        <tr>\n" +
         "            <td>Received From</td>\n" +
-        "            <td>" + device.receivedFrom + "</td>\n" +
+        "            <td>" + formatString(device.receivedFrom) + "</td>\n" +
         "        </tr>\n" +
         "        <tr>\n" +
         "            <td>Useful life of asset</td>\n" +
-        "            <td>" + device.usefulLiveOfAsset + "</td>\n" +
+        "            <td>" + formatString(device.usefulLiveOfAsset) + "</td>\n" +
         "        </tr>\n" +
         "        <tr>\n" +
         "            <td>Sorted Out Date</td>\n" +
@@ -105,7 +105,7 @@ function showDeviceDetailDialogAjax(baseUrl, device) {
         "        </tr>\n" +
         "        <tr>\n" +
         "            <td>Sorted Out Comment</td>\n" +
-        "            <td>" + device.sortedOutComment + "</td>\n" +
+        "            <td>" + formatString(device.sortedOutComment) + "</td>\n" +
         "        </tr>\n" +
         "    </tbody>\n" +
         "</table>\n" +
@@ -122,9 +122,9 @@ function showDeviceDetailDialogAjax(baseUrl, device) {
         "    <tbody>\n";
     for (var i = 0; i < device.comments.length; i++) {
         commentContent += "        <tr>\n" +
-            "            <td headers=\"basic-author\">" + device.comments[i].author + "</td>\n" +
+            "            <td headers=\"basic-author\">" + formatString(device.comments[i].author) + "</td>\n" +
             "            <td headers=\"basic-date\"><nobr>" + getShortDate(device.comments[i].date) + "</nobr></td>\n" +
-            "            <td headers=\"basic-comment\">" + device.comments[i].comment + "</td>\n" +
+            "            <td headers=\"basic-comment\">" + formatString(device.comments[i].comment) + "</td>\n" +
             "        </tr>\n";
     }
     commentContent += "    </tbody>\n" +
@@ -144,12 +144,12 @@ function showDeviceDetailDialogAjax(baseUrl, device) {
         "    <tbody>\n";
     for (var i = 0; i < device.lendings.length; i++) {
         historyContent += "        <tr>\n" +
-            "            <td headers=\"basic-issuer\">" + device.lendings[i].lentOutIssuer + "</td>\n" +
-            "            <td headers=\"basic-by\">" + device.lendings[i].lentOutBy + "</td>\n" +
+            "            <td headers=\"basic-issuer\">" + formatString(device.lendings[i].lentOutIssuer) + "</td>\n" +
+            "            <td headers=\"basic-by\">" + formatString(device.lendings[i].lentOutBy) + "</td>\n" +
             "            <td headers=\"basic-begin\"><nobr>" + getShortDate(device.lendings[i].begin) + "</nobr></td>\n" +
             "            <td headers=\"basic-end\"><nobr>" + getShortDate(device.lendings[i].end) + "</nobr></td>\n" +
-            "            <td headers=\"basic-purpose\">" + device.lendings[i].purpose + "</td>\n" +
-            "            <td headers=\"basic-comment\">" + device.lendings[i].comment + "</td>\n" +
+            "            <td headers=\"basic-purpose\">" + formatString(device.lendings[i].purpose) + "</td>\n" +
+            "            <td headers=\"basic-comment\">" + formatString(device.lendings[i].comment) + "</td>\n" +
             "        </tr>\n";
     }
     historyContent +=
@@ -163,7 +163,7 @@ function showDeviceDetailDialogAjax(baseUrl, device) {
     dialog.addPanel("Lending History", historyContent, "panel-body");
 
     dialog.addButton("OK", function (dialog) {
-        dialog.hide();
+        dialog.remove();
     });
 
     dialog.gotoPage(0);

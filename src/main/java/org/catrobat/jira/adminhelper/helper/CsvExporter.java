@@ -29,7 +29,7 @@ import static org.apache.commons.lang3.StringEscapeUtils.unescapeHtml4;
 
 public class CsvExporter {
 
-    public static final String DELIMITER = ",";
+    public static final String DELIMITER = ";";
     private final List<Device> deviceList;
     private final UserManager userManager;
 

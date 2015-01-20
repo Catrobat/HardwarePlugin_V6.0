@@ -42,7 +42,7 @@ public class CsvImporter {
 
     public String importCsv(String csvString) {
         Map<String, HardwareModel> hardwareModelMap = new TreeMap<String, HardwareModel>();
-        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+        DateFormat dateFormat = new SimpleDateFormat("M/d/y");
         StringBuilder errorStringBuilder = new StringBuilder("<ul>");
         int lineNumber = 0;
         for (String line : csvString.split("\\r?\\n")) {
@@ -122,8 +122,10 @@ public class CsvImporter {
             }
 
             Device device = deviceService.add(hardwareModel, imei, serialNumber, inventoryNumber, receivedFrom, receivedDate, usefulLifeOfAsset);
+            System.out.println("Add device: " + hardwareModel + ", " + imei + ", " + serialNumber + ", " + inventoryNumber);
             if (device == null) {
-                errorStringBuilder.append("<li>device couldn't be added (maybe already existing, line ")
+                System.out.println("failed: " + imei + ", " + serialNumber + ", " + inventoryNumber);
+                errorStringBuilder.append("<li style=\"color:red;\">device couldn't be added (maybe already existing, line ")
                         .append(lineNumber)
                         .append(")</li>");
                 continue;
@@ -132,49 +134,71 @@ public class CsvImporter {
             deviceService.sortOutDevice(device.getID(), sortedOutDate, sortedOutComment);
 
             // lending
-            Date lendingBegin = null;
-            try {
-                if (columns[15].length() != 0) {
-                    lendingBegin = dateFormat.parse(columns[15]);
-                }
-            } catch (ParseException e) {
-                errorStringBuilder.append("<li>lending begin date on line ")
-                        .append(lineNumber)
-                        .append(" has wrong format (date set to null)</li>");
-            }
-            Date lendingEnd = null;
-            try {
-                if (columns[16].length() != 0) {
-                    lendingEnd = dateFormat.parse(columns[16]);
-                }
-            } catch (ParseException e) {
-                errorStringBuilder.append("<li>lending end date on line ")
-                        .append(lineNumber)
-                        .append(" has wrong format (date set to null)</li>");
-            }
             String purpose = columns[17];
             String lendingComment = columns[18];
             String lendingIssuerUser = columns[19];
             String lendingByUser = columns[20];
-            Lending lending = lendingService.lendOut(device, lendingByUser, lendingIssuerUser, purpose, lendingComment, lendingBegin);
-            if (lendingEnd != null) {
-                lendingService.bringBack(lending, purpose, lendingComment, lendingEnd);
+            if (lendingIssuerUser.trim().length() != 0 && lendingByUser.trim().length() != 0) {
+                Date lendingBegin = null;
+                try {
+                    if (columns[15].length() != 0) {
+                        lendingBegin = dateFormat.parse(columns[15]);
+                    }
+                } catch (ParseException e) {
+                    errorStringBuilder.append("<li>lending begin date on line ")
+                            .append(lineNumber)
+                            .append(" has wrong format (date set to null)</li>");
+                }
+                Date lendingEnd = null;
+                try {
+                    if (columns[16].length() != 0) {
+                        lendingEnd = dateFormat.parse(columns[16]);
+                    }
+                } catch (ParseException e) {
+                    errorStringBuilder.append("<li>lending end date on line ")
+                            .append(lineNumber)
+                            .append(" has wrong format (date set to null)</li>");
+                }
+                Lending lending = lendingService.lendOut(device, lendingByUser, lendingIssuerUser, purpose, lendingComment, lendingBegin);
+                if (lending == null) {
+                    errorStringBuilder.append("<li style=\"color:red;\">lending couldn't be added (line ")
+                            .append(lineNumber)
+                            .append(")</li>");
+                }
+                if (lendingEnd != null) {
+                    lendingService.bringBack(lending, purpose, lendingComment, lendingEnd);
+                }
+            } else if (lendingIssuerUser.trim().length() != 0 || lendingByUser.trim().length() != 0) {
+                errorStringBuilder.append("<li style=\"color:red;\">lending couldn't be added - issuer or user empty (line ")
+                        .append(lineNumber)
+                        .append(")</li>");
             }
 
             // comment
             String deviceComment = columns[21];
             String author = columns[22];
-            Date commentDate = null;
-            try {
-                if (columns[23].length() != 0) {
-                    commentDate = dateFormat.parse(columns[23]);
+            if (deviceComment.trim().length() != 0 && author.trim().length() != 0) {
+                Date commentDate = null;
+                try {
+                    if (columns[23].length() != 0) {
+                        commentDate = dateFormat.parse(columns[23]);
+                    }
+                } catch (ParseException e) {
+                    errorStringBuilder.append("<li>device comment date on line ")
+                            .append(lineNumber)
+                            .append(" has wrong format (date set to null)</li>");
                 }
-            } catch (ParseException e) {
-                errorStringBuilder.append("<li>device comment date on line ")
+                DeviceComment addedDeviceComment = deviceCommentService.addDeviceComment(device, author, deviceComment, commentDate);
+                if (addedDeviceComment == null) {
+                    errorStringBuilder.append("<li style=\"color:red;\">device comment couldn't be added (line ")
+                            .append(lineNumber)
+                            .append(")</li>");
+                }
+            } else if (deviceComment.trim().length() != 0 || author.trim().length() != 0) {
+                errorStringBuilder.append("<li style=\"color:red;\">device comment couldn't be added - author or comment empty (line ")
                         .append(lineNumber)
-                        .append(" has wrong format (date set to null)</li>");
+                        .append(")</li>");
             }
-            deviceCommentService.addDeviceComment(device, author, deviceComment, commentDate);
         }
         errorStringBuilder.append("</ul>");
 

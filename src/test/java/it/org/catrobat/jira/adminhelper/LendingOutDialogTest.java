@@ -16,46 +16,14 @@
 
 package it.org.catrobat.jira.adminhelper;
 
-import com.atlassian.jira.tests.TestBase;
-import com.thoughtworks.selenium.SeleneseTestBase;
-import com.thoughtworks.selenium.Selenium;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverBackedSelenium;
-
-import java.awt.event.KeyEvent;
-import java.io.File;
 
 import static com.thoughtworks.selenium.SeleneseTestBase.fail;
 
-public class LendingOutDialogBackedTest extends TestBase {
-    private Selenium selenium;
-
-    @Before
-    public void setUp() throws Exception {
-//        new DataRestorer(jira()).doRestore();
-        jira().gotoLoginPage().loginAsSysAdmin(HardwareServletPage.class);
-        WebDriver driver = jira().getTester().getDriver();
-        String baseUrl = "http://localhost:2990/";
-        selenium = new WebDriverBackedSelenium(driver, baseUrl);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        new DataRestorer(jira()).doRestore();
-    }
-
-    @Test
-    public void testAAA() {
-
-    }
+public class LendingOutDialogTest extends SeleniumTestBase {
 
     @Test
     public void testLendingOutDialog() throws Exception {
-//        selenium.open("/jira/secure/Dashboard.jspa");
-//        selenium.click("id=hardware_management_link");
         selenium.waitForPageToLoad("30000");
         verifyEquals("2/3", selenium.getText("css=td.available"));
         selenium.click("id=1");
@@ -109,9 +77,13 @@ public class LendingOutDialogBackedTest extends TestBase {
         selenium.type("css=#lending-comment", "Selenium Lending Comment");
         selenium.click("css=button.button-panel-button.lend-out-save");
         verifyEquals("1/3", selenium.getText("css=td.available"));
-    }
-
-    private void verifyEquals(String expected, String actual) {
-        SeleneseTestBase.assertEquals(expected, actual);
+        verifyEquals("Success!\nDevice lent out successfully", selenium.getText("//div[@id='aui-message-bar']/div"));
+        selenium.click("css=a#aui-uid-1");
+        verifyEquals("Nexus 4 (8 GB)", selenium.getText("//tbody[@id='table-lent-out']/tr[3]/td"));
+        verifyEquals("789", selenium.getText("//tbody[@id='table-lent-out']/tr[3]/td[2]"));
+        verifyEquals("890", selenium.getText("//tbody[@id='table-lent-out']/tr[3]/td[3]"));
+        verifyEquals("901", selenium.getText("//tbody[@id='table-lent-out']/tr[3]/td[4]"));
+        verifyEquals("Blah", selenium.getText("//tbody[@id='table-lent-out']/tr[3]/td[5]"));
+        verifyEquals("2014-12-01", selenium.getText("//tbody[@id='table-lent-out']/tr[3]/td[6]"));
     }
 }

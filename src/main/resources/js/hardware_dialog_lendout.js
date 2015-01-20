@@ -72,9 +72,9 @@ function showLendOutDialogAjax(baseUrl, hardwareId, deviceList, deviceId) {
     deviceList.map = [];
     for (var i = 0; i < deviceList.length; i++) {
         contentDevices += "<tr>\n" +
-            "<td class=\"serial\">" + deviceList[i].serialNumber + "</td>\n" +
-            "<td class=\"imei\">" + deviceList[i].imei + "</td>\n" +
-            "<td class=\"inventory\">" + deviceList[i].inventoryNumber + "</td>\n" +
+            "<td class=\"serial\">" + formatString(deviceList[i].serialNumber) + "</td>\n" +
+            "<td class=\"imei\">" + formatString(deviceList[i].imei) + "</td>\n" +
+            "<td class=\"inventory\">" + formatString(deviceList[i].inventoryNumber) + "</td>\n" +
             "<td><a class=\"choose\" id=\"" + deviceList[i].id + "\" href=\"#\">Choose...</a></td>\n" +
             "</tr>\n";
 
