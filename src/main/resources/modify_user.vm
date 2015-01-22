@@ -19,6 +19,7 @@
     <title>Create New User</title>
     <meta name="decorator" content="atl.admin"/>
     <meta name="application-base-url" content="$applicationProperties.getBaseUrl()">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/list.js/1.1.1/list.min.js"></script>
     $webResourceManager.requireResource("org.catrobat.jira.AdminHelper:modify-resources")
 </head>
 <body class="aui-layout aui-theme-default">
