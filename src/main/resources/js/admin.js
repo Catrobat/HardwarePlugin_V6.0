@@ -39,11 +39,12 @@ AJS.toInit(function () {
                 for (var i = 0; i < config.teams.length; i++) {
                     var team = config.teams[i];
                     teams.push(team['name']);
+                    var tempTeamName = team['name'].replace(/ /g, '-');
                     AJS.$("#teams").append("<h3>" + team['name'] + "</h3><fieldset>");
-                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + team['name'] + "-github-teams\">GitHub Teams</label><input class=\"text github\" type=\"text\" id=\"" + team['name'] + "-github-teams\" name=\"github-teams\" value=\"" + team["githubTeams"] + "\"></div>");
-                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + team['name'] + "-coordinator\">Coordinator</label><input class=\"text jira-group\" type=\"text\" id=\"" + team['name'] + "-coordinator\" value=\"" + team['coordinatorGroups'] + "\"></div>");
-                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + team['name'] + "-senior\">Senior</label><input class=\"text jira-group\" type=\"text\" id=\"" + team['name'] + "-senior\" value=\"" + team['seniorGroups'] + "\"></div>");
-                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + team['name'] + "-developer\">Developer</label><input class=\"text jira-group\" type=\"text\" id=\"" + team['name'] + "-developer\" value=\"" + team['developerGroups'] + "\"></div>");
+                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + tempTeamName + "-github-teams\">GitHub Teams</label><input class=\"text github\" type=\"text\" id=\"" + tempTeamName + "-github-teams\" name=\"github-teams\" value=\"" + team["githubTeams"] + "\"></div>");
+                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + tempTeamName + "-coordinator\">Coordinator</label><input class=\"text jira-group\" type=\"text\" id=\"" + tempTeamName + "-coordinator\" value=\"" + team['coordinatorGroups'] + "\"></div>");
+                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + tempTeamName + "-senior\">Senior</label><input class=\"text jira-group\" type=\"text\" id=\"" + tempTeamName + "-senior\" value=\"" + team['seniorGroups'] + "\"></div>");
+                    AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + tempTeamName + "-developer\">Developer</label><input class=\"text jira-group\" type=\"text\" id=\"" + tempTeamName + "-developer\" value=\"" + team['developerGroups'] + "\"></div>");
                     AJS.$("#teams").append("</fieldset>");
                 }
 
@@ -219,23 +220,24 @@ AJS.toInit(function () {
         config.approvedGroups = approvedGroups;
         config.teams = [];
         for (var i = 0; i < teams.length; i++) {
+            var tempTeamName = teams[i].replace(/ /g, '-');
             var tempTeam = {};
             tempTeam.name = teams[i];
-            tempTeam.githubTeams = AJS.$("#" + tempTeam.name + "-github-teams").auiSelect2("val");
+            tempTeam.githubTeams = AJS.$("#" + tempTeamName + "-github-teams").auiSelect2("val");
 
-            tempTeam.coordinatorGroups = AJS.$("#" + tempTeam.name + "-coordinator").auiSelect2("val");
-            for(var i = 0; i < tempTeam.coordinatorGroups.length; i++) {
-                tempTeam.coordinatorGroups[i] = tempTeam.coordinatorGroups[i].replace(/^groups-/i, "");
+            tempTeam.coordinatorGroups = AJS.$("#" + tempTeamName + "-coordinator").auiSelect2("val");
+            for(var j = 0; j < tempTeam.coordinatorGroups.length; j++) {
+                tempTeam.coordinatorGroups[j] = tempTeam.coordinatorGroups[j].replace(/^groups-/i, "");
             }
 
-            tempTeam.seniorGroups = AJS.$("#" + tempTeam.name + "-senior").auiSelect2("val");
-            for(var i = 0; i < tempTeam.seniorGroups.length; i++) {
-                tempTeam.seniorGroups[i] = tempTeam.seniorGroups[i].replace(/^groups-/i, "");
+            tempTeam.seniorGroups = AJS.$("#" + tempTeamName + "-senior").auiSelect2("val");
+            for(var j = 0; j < tempTeam.seniorGroups.length; j++) {
+                tempTeam.seniorGroups[j] = tempTeam.seniorGroups[j].replace(/^groups-/i, "");
             }
 
-            tempTeam.developerGroups = AJS.$("#" + tempTeam.name + "-developer").auiSelect2("val");
-            for(var i = 0; i < tempTeam.developerGroups.length; i++) {
-                tempTeam.developerGroups[i] = tempTeam.developerGroups[i].replace(/^groups-/i, "");
+            tempTeam.developerGroups = AJS.$("#" + tempTeamName + "-developer").auiSelect2("val");
+            for(var j = 0; j < tempTeam.developerGroups.length; j++) {
+                tempTeam.developerGroups[j] = tempTeam.developerGroups[j].replace(/^groups-/i, "");
             }
 
             config.teams.push(tempTeam);

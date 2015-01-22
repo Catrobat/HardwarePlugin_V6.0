@@ -15,9 +15,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.catrobat.jira</groupId>
     <artifactId>AdminHelper</artifactId>
@@ -171,7 +169,6 @@
             <version>${testkit.version}</version>
             <scope>test</scope>
         </dependency>
-
         <!-- Testing Dependencies -->
         <dependency>
             <groupId>com.atlassian.selenium</groupId>
@@ -204,7 +201,6 @@
                     <productDataVersion>${jira.version}</productDataVersion>
                     <productDataPath>${basedir}/src/test/resources/generated-test-resources.zip</productDataPath>
                     <jvmArgs>-Xms1g -Xmx2g -XX:MaxPermSize=1g -XX:-UseGCOverheadLimit -server</jvmArgs>
-
                     <pluginArtifacts>
                         <pluginArtifact>
                             <groupId>com.atlassian.activeobjects</groupId>
@@ -227,8 +223,8 @@
         </plugins>
     </build>
     <properties>
-        <jira.version>6.3.5</jira.version>
-        <amps.version>5.0.4</amps.version>
+        <jira.version>6.3.14</jira.version>
+        <amps.version>5.0.13</amps.version>
         <ao.version>0.23.2</ao.version>
         <rest.version>2.7.1</rest.version>
         <plugin.testrunner.version>1.2.0</plugin.testrunner.version>

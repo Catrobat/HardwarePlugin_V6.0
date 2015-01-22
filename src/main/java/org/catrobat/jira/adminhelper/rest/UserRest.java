@@ -403,6 +403,14 @@ public class UserRest extends RestHelper {
                             if (error != null) {
                                 return error;
                             }
+                            error = addToGroups(jiraUser, team.getSeniorGroups());
+                            if (error != null) {
+                                return error;
+                            }
+                            error = addToGroups(jiraUser, team.getDeveloperGroups());
+                            if (error != null) {
+                                return error;
+                            }
                             githubTeamSet.addAll(team.getGithubTeams());
                         }
                     }
@@ -413,6 +421,10 @@ public class UserRest extends RestHelper {
                     for (JsonTeam team : config.getTeams()) {
                         if (team.getName().equals(seniorOf)) {
                             Response error = addToGroups(jiraUser, team.getSeniorGroups());
+                            if (error != null) {
+                                return error;
+                            }
+                            error = addToGroups(jiraUser, team.getDeveloperGroups());
                             if (error != null) {
                                 return error;
                             }

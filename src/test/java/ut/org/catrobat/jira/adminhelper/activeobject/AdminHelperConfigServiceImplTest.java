@@ -177,7 +177,7 @@ public class AdminHelperConfigServiceImplTest {
                 Arrays.asList("coordinator", "got", "usually", "more groups"),
                 Arrays.asList("seniors", "got", "some less"),
                 Arrays.asList("developers")));
-        assertNotNull(configurationService.addTeam("team2", githubIdList,
+        assertNotNull(configurationService.addTeam("team 2", githubIdList,
                 Arrays.asList("coordinator", "got", "usually", "more groups"),
                 Arrays.asList("seniors", "got", "some less"),
                 Arrays.asList("developers")));
@@ -185,6 +185,7 @@ public class AdminHelperConfigServiceImplTest {
         config = configurationService.getConfiguration();
         assertEquals(2, config.getTeams().length);
         assertEquals("team1", config.getTeams()[0].getTeamName());
+        assertEquals("team 2", config.getTeams()[1].getTeamName());
         assertEquals(2, config.getTeams()[0].getGithubTeams().length);
         assertEquals(8, config.getTeams()[0].getGroups().length);
         assertEquals(7, ao.find(Group.class).length);
