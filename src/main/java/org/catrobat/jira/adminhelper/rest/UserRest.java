@@ -252,7 +252,14 @@ public class UserRest extends RestHelper {
                 JsonUser jsonUser = new JsonUser();
                 jsonUser.setUserName(lending.getLendingByUserKey());
                 jsonUser.setDisplayName(lending.getLendingByUserKey());
-                jsonUsers.put(jsonUser.getUserName().toLowerCase(), jsonUser);
+                String userKey = jsonUser.getUserName()
+                        .toLowerCase()
+                        .replaceAll(" ", "")
+                        .replaceAll("&auml;", "ae")
+                        .replaceAll("&ouml;", "oe")
+                        .replaceAll("&uuml;", "ue")
+                        .replaceAll("&szlig;", "ss");
+                jsonUsers.put(userKey, jsonUser);
             }
         }
 
