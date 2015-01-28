@@ -40,6 +40,7 @@ public class DeviceServiceImplTest {
     private ActiveObjects ao;
     private DeviceService deviceService;
     private LendingService lendingService;
+    private HardwareModelService hardwareModelService;
 
     @Before
     public void setUp() throws Exception {
@@ -47,6 +48,8 @@ public class DeviceServiceImplTest {
         ao = new TestActiveObjects(entityManager);
         deviceService = new DeviceServiceImpl(ao);
         lendingService = new LendingServiceImpl(ao);
+        hardwareModelService = new HardwareModelServiceImpl(ao, new TypeOfDeviceServiceImpl(ao),
+                new ProducerServiceImpl(ao), new OperatingSystemServiceImpl(ao));
     }
 
     @Test
@@ -229,8 +232,8 @@ public class DeviceServiceImplTest {
 
         deviceService.sortOutDevice(1, new Date(), "comment");
         ao.flushAll();
-        assertEquals(1, deviceService.getSortedOutDevicesForHardware(1).size());
-        assertEquals(0, deviceService.getSortedOutDevicesForHardware(2).size());
+        assertEquals(1, deviceService.getSortedOutDevicesForHardware(hardwareModelService.get(1)).size());
+        assertEquals(0, deviceService.getSortedOutDevicesForHardware(hardwareModelService.get(2)).size());
     }
 
 }

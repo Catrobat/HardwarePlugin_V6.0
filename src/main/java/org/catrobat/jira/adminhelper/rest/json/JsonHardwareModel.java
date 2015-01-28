@@ -67,7 +67,7 @@ public class JsonHardwareModel {
 
     public JsonHardwareModel(HardwareModel toCopy, LendingService lendingService, DeviceService deviceService) {
         this(toCopy);
-        sumOfDevices = toCopy.getDevices().length - deviceService.getSortedOutDevicesForHardware(toCopy.getID()).size();
+        sumOfDevices = toCopy.getDevices().length - deviceService.getSortedOutDevicesForHardware(toCopy).size();
         available = sumOfDevices - lendingService.currentlyLentOutDevices(toCopy).size();
     }
 

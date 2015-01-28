@@ -39,5 +39,5 @@ public interface DeviceService {
 
     List<Device> getSortedOutDevices();
 
-    List<Device> getSortedOutDevicesForHardware(int hardwareId);
+    List<Device> getSortedOutDevicesForHardware(HardwareModel hardwareModel);
 }

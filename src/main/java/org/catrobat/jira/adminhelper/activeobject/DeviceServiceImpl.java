@@ -246,7 +246,7 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
-    public List<Device> getSortedOutDevicesForHardware(int hardwareId) {
+    public List<Device> getSortedOutDevicesForHardware(HardwareModel hardwareModel) {
         // TODO issues with postgresql
 //        return Arrays.asList(ao.find(Device.class, Query.select()
 //                .alias(Device.class, "device")
@@ -256,8 +256,8 @@ public class DeviceServiceImpl implements DeviceService {
 //                .where("device.SORTED_OUT_DATE IS NOT NULL AND device.HARDWARE_MODEL_ID = ?", hardwareId)));
 
         List<Device> deviceList = new ArrayList<Device>();
-        for(Device device : all()) {
-            if (device.getSortedOutDate() != null && device.getHardwareModel().getID() == hardwareId) {
+        for(Device device : hardwareModel.getDevices()) {
+            if(device.getSortedOutDate() != null) {
                 deviceList.add(device);
             }
         }

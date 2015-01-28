@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.catrobat.jira</groupId>
     <artifactId>AdminHelper</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <organization>
         <name>Catrobat</name>
         <url>https://github.com/felly/jiraadminhelper</url>
@@ -136,14 +136,6 @@
             <version>1.6.2</version>
             <scope>test</scope>
         </dependency>
-        <!-- TODO
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
-            <scope>test</scope>
-        </dependency>
-        -->
         <dependency>
             <groupId>com.atlassian.jira</groupId>
             <artifactId>atlassian-jira-pageobjects</artifactId>
