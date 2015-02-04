@@ -20,7 +20,7 @@ var lendingOutDialog;
 var createHardwareDialog;
 var returnDialog;
 var removeHardwareDialog;
-var sortOutDialog;
+var editNameDialog;
 
 var urlRest = "/rest/admin-helper/latest";
 var urlRestHardware = urlRest + "/hardware";
@@ -166,7 +166,7 @@ function initIndividualRelatedLendingTab(baseUrl) {
                         AJS.$("#table-individual").html(tableHtml);
                     }
                     AJS.$("#search-filter-individual").val('');
-                    individualList = new List("tabs-individual-lending", {valueNames: ["name", "serial", "imei",
+                    individualList = new List("tabs-individual-lending", {page: Number.MAX_VALUE, valueNames: ["name", "serial", "imei",
                         "inventory", "issuer", "begin", "end", "purpose", "comment"]});
                     AJS.$("#table-individual").trigger("update");
                 },

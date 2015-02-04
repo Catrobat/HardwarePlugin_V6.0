@@ -38,7 +38,10 @@ function populateOverviewTable(hardwareList) {
     AJS.$("#table-overview-body").html(tableBody);
     AJS.$("#table-overview").trigger("update");
 
-    var overviewList = new List("tabs-overview", {valueNames: ["name", "version", "type", "os"]});
+    var overviewList = new List("tabs-overview", {page: Number.MAX_VALUE, valueNames: ["name", "version", "type", "os"]});
+    overviewList.on('updated', function() {
+        AJS.$("#table-overview").trigger("update");
+    });
 }
 
 function populateLentOutTable(hardwareList) {
@@ -61,7 +64,10 @@ function populateLentOutTable(hardwareList) {
     AJS.$("#table-lent-out").html(tableBody);
     AJS.$("#table-lent-out").trigger("update");
 
-    var overviewList = new List("tabs-lent-out", {valueNames: ["name", "serial", "imei", "inventory", "lent-out-by", "lent-out-since"]});
+    var lentOutList = new List("tabs-lent-out", {page: Number.MAX_VALUE, valueNames: ["name", "serial", "imei", "inventory", "lent-out-by", "lent-out-since"]});
+    lentOutList.on('updated', function() {
+        AJS.$("#table-lent-out").trigger("update");
+    });
 }
 
 function populateSortedOutTable(deviceList) {
@@ -74,6 +80,7 @@ function populateSortedOutTable(deviceList) {
             "<td class=\"serial\">" + formatString(deviceList[i].serialNumber) + "</td>\n" +
             "<td class=\"imei\">" + formatString(deviceList[i].imei) + "</td>\n" +
             "<td class=\"inventory\">" + formatString(deviceList[i].inventoryNumber) + "</td>\n" +
+            "<td class=\"received-from\">" + formatString(deviceList[i].receivedFrom) + "</td>\n" +
             "<td class=\"date\">" + sortedOut.toISOString().split("T")[0] + "</td>\n" +
             "<td><a class=\"device_details\" id=\"" + deviceList[i].id + "\" href=\"#\">Details</a></td>\n" +
             "</tr>";
@@ -82,7 +89,10 @@ function populateSortedOutTable(deviceList) {
     AJS.$("#table-sorted-out").html(tableBody);
     AJS.$("#table-sorted-out").trigger("update");
 
-    var sortedOutList = new List("tabs-sorted-out", {valueNames: ["name", "serial", "imei", "inventory", "date"]});
+    var sortedOutList = new List("tabs-sorted-out", {page: Number.MAX_VALUE, valueNames: ["name", "serial", "imei", "inventory", "received-from", "date"]});
+    sortedOutList.on('updated', function() {
+        AJS.$("#table-sorted-out").trigger("update");
+    });
 }
 
 function populateActiveDevicesTable(deviceList) {
@@ -106,6 +116,7 @@ function populateActiveDevicesTable(deviceList) {
             "<td class=\"serial\">" + formatString(deviceList[i].serialNumber) + "</td>\n" +
             "<td class=\"imei\">" + formatString(deviceList[i].imei) + "</td>\n" +
             "<td class=\"inventory\">" + formatString(deviceList[i].inventoryNumber) + "</td>\n" +
+            "<td class=\"received-from\">" + formatString(deviceList[i].receivedFrom) + "</td>\n" +
             "<td class=\"lent-out-since\">" + getShortDate(deviceList[i].currentlyLentOutSince) + "</td>\n" +
             "<td class=\"lent-out-by\">" + formatString(getShortDate(deviceList[i].currentlyLentOutBy)) + "</td>\n" +
             "<td class=\"action\">" + action + "</td>\n" +
@@ -116,7 +127,10 @@ function populateActiveDevicesTable(deviceList) {
     AJS.$("#table-active-devices").html(tableBody);
     AJS.$("#table-active-devices").trigger("update");
 
-    var activeDevicesList = new List("tabs-active-devices", {valueNames: ["name", "serial", "imei", "inventory", "lent-out-since", "lent-out-by", "action"]});
+    var activeDevicesList = new List("tabs-active-devices", {page: Number.MAX_VALUE, valueNames: ["name", "serial", "imei", "inventory", "received-from", "lent-out-since", "lent-out-by", "action"]});
+    activeDevicesList.on('updated', function() {
+        AJS.$("#table-active-devices").trigger("update");
+    });
 }
 
 function populateAllDevicesTable(deviceList) {
@@ -136,6 +150,7 @@ function populateAllDevicesTable(deviceList) {
             "<td class=\"serial\">" + formatString(deviceList[i].serialNumber) + "</td>\n" +
             "<td class=\"imei\">" + formatString(deviceList[i].imei) + "</td>\n" +
             "<td class=\"inventory\">" + formatString(deviceList[i].inventoryNumber) + "</td>\n" +
+            "<td class=\"received-from\">" + formatString(deviceList[i].receivedFrom) + "</td>\n" +
             "<td class=\"lent-out-since\">" + getShortDate(deviceList[i].currentlyLentOutSince) + "</td>\n" +
             "<td class=\"lent-out-by\">" + formatString(getShortDate(deviceList[i].currentlyLentOutBy)) + "</td>\n" +
             "<td class=\"sorted-out\">" + getShortDate(deviceList[i].sortedOutDate) + "</td>\n" +
@@ -147,7 +162,10 @@ function populateAllDevicesTable(deviceList) {
     AJS.$("#table-all-devices").html(tableBody);
     AJS.$("#table-all-devices").trigger("update");
 
-    var allDevicesList = new List("tabs-all-devices", {valueNames: ["name", "serial", "imei", "inventory", "lent-out-since", "lent-out-by", "sorted-out", "action"]});
+    var allDevicesList = new List("tabs-all-devices", {page: Number.MAX_VALUE, valueNames: ["name", "serial", "imei", "inventory", "received-from", "lent-out-since", "lent-out-by", "sorted-out", "action"]});
+    allDevicesList.on('updated', function() {
+        AJS.$("#table-all-devices").trigger("update");
+    });
 }
 
 function populateHardwareManagementTable(hardwareList) {
@@ -168,5 +186,8 @@ function populateHardwareManagementTable(hardwareList) {
     AJS.$("#table-management").html(tableBody);
     AJS.$("#table-management").trigger("update");
 
-    var managementList = new List("tabs-hardware-management", {valueNames: ["name", "version", "type", "os"]});
+    var managementList = new List("tabs-hardware-management", {page: Number.MAX_VALUE, valueNames: ["name", "version", "type", "os"]});
+    managementList.on('updated', function() {
+        AJS.$("#table-management").trigger("update");
+    });
 }

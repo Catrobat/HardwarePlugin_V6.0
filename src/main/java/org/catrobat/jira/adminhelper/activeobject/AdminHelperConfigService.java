@@ -43,6 +43,8 @@ public interface AdminHelperConfigService {
     Team addTeam(String teamName, List<Integer> githubTeamIdList, List<String> coordinatorGroups,
                  List<String> seniorGroups, List<String> developerGroups);
 
+    AdminHelperConfig editTeam(String oldTeamName, String newTeamName);
+
     AdminHelperConfig removeTeam(String teamName);
 
     List<String> getGroupsForRole(String teamName, TeamToGroup.Role role);

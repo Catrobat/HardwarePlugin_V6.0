@@ -41,12 +41,17 @@
         <div class="aui-page-panel-inner">
             <section class="aui-page-panel-content">
                 <p>
-                    Changes on the GitHub username can be taken by clicking on the username if the user is active.
-                    Inactivate will remove the user from all user directory groups and add the user to the "Deactivated"
-                    group. Also if the GitHub username is given it will remove the user from all GitHub teams within the
-                    organization. Activate will ask to add the user to specific teams. Again the user will be removed
-                    from every group and added to configured groups plus to the corresponding GitHub teams if the GitHub
-                    username is given.
+                    If a user is enabled, a Github user name and GitHub team affiliation can be added by clicking on
+                    'add&nbsp;GitHub&nbsp;name'. The GitHub user name and/or GitHub team affiliation can be changed by
+                    clicking on the old user name. 'Disable&nbsp;user' will add the user to the 'Disabled' group and
+                    remove him/her from all other LDAP user groups. The 'Disabled' group prohibits the user from logging
+                    into this account. If a GitHub user name is assigned to the disabled account, the GitHub user name
+                    will be deleted from all GitHub teams within the organization.
+                </p>
+                <p>
+                    'Enable user' will open a prompt where teams and roles can be selected for this user.
+                    After clicking 'OK' all previous affiliations with user groups (especially the 'Disabled' group)
+                    will be deleted and new ones will be created according to the selections in the prompt.
                 </p>
                 <table id="user-table" class="aui aui-table-interactive aui-table-sortable">
                     <thead>

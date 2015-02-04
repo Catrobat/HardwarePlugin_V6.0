@@ -127,6 +127,7 @@
                 <th>Serialnumber</th>
                 <th>IMEI</th>
                 <th>Inventorynumber</th>
+                <th>Received From</th>
                 <th>Lent out since</th>
                 <th>Lent out by</th>
                 <th>Action</th>
@@ -135,7 +136,7 @@
             </thead>
             <tbody class="list" id="table-active-devices">
             #* will be filled out by JavaScript *#
-            <tr><td colspan="8"><span class="aui-icon aui-icon-wait">Loading...</span></td></tr>
+            <tr><td colspan="9"><span class="aui-icon aui-icon-wait">Loading...</span></td></tr>
             </tbody>
         </table>
     </div>
@@ -157,6 +158,7 @@
                 <th>Serialnumber</th>
                 <th>IMEI</th>
                 <th>Inventorynumber</th>
+                <th>Received From</th>
                 <th>Sorted out since</th>
                 <th class="aui-table-column-unsortable">Details</th>
             </tr>
@@ -185,6 +187,7 @@
                 <th>Serialnumber</th>
                 <th>IMEI</th>
                 <th>Inventorynumber</th>
+                <th>Received From</th>
                 <th>Lent out since</th>
                 <th>Lent out by</th>
                 <th>Sorted out since</th>

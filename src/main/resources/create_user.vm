@@ -86,15 +86,23 @@
 
                 <h3>Teams</h3>
                 <p>
-                    According to which role is chosen the user will be added to each team's configured groups in the
-                    user directory. Independendly the user will be added to configured GitHub teams if the GitHub
-                    username is given and the user is in any role of the teams below. Changes on the GitHub username
-                    can be taken at 'Modify User'.
+                    Please choose at least one team and one role (coordinator, senior or member) for the new user.
+                    Depending on the selected team and role the new user will be created and added to different user
+                    groups within the configured User Directory (e.g. Jira Internal Directory, LDAP, ...).
+                    If a GitHub user name is entered, the new user will also be added automatically to a GitHub team and
+                    repository.
                 </p>
                 <p>
-                    The team membership of users won't be saved. This interface is just to fasten up assigning users to
-                    user directory groups and to invite them to the GitHub organization and the according GitHub
-                    organization's teams.
+                    The relationships between teams, roles, user groups and GitHub teams are defined in
+                    'Helper&nbsp;Configuration'. Team membership is only an auxiliary structure during the creation of
+                    new users. It simplifies the process of adding new users to user groups, to GitHub and GitHub
+                    teams. After creating a new user, team membership will not be stored and is of no further use.
+                </p>
+                <p>
+                    If the user groups of a user have to be changed afterwards, this can be done in the
+                    standard Jira User Management or by disabling and enabling the user in 'Modify&nbsp;User'. If a
+                    GitHub user name has to be added or changed after the initial user creation, this can be done in
+                    'Modify&nbsp;User'.
                 </p>
                 <table class="aui">
                     <thead>

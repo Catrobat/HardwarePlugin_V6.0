@@ -189,6 +189,29 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
     }
 
     @Override
+    public AdminHelperConfig editTeam(String oldTeamName, String newTeamName){
+        if(oldTeamName == null || newTeamName == null) {
+            return null;
+        }
+
+        Team[] tempTeamArray = ao.find(Team.class, Query.select().where("upper(\"TEAM_NAME\") = upper(?)", oldTeamName));
+        if (tempTeamArray.length == 0) {
+            return null;
+        }
+        Team team = tempTeamArray[0];
+
+        tempTeamArray = ao.find(Team.class, Query.select().where("upper(\"TEAM_NAME\") = upper(?)", newTeamName));
+        if (tempTeamArray.length != 0) {
+            return null;
+        }
+
+        team.setTeamName(newTeamName);
+        team.save();
+
+        return getConfiguration();
+    }
+
+    @Override
     public AdminHelperConfig removeTeam(String teamName) {
         Team[] teamArray = ao.find(Team.class, Query.select().where("upper(\"TEAM_NAME\") = upper(?)", teamName));
         if (teamArray.length == 0) {

@@ -63,7 +63,7 @@ public class ConfigResourceRest extends RestHelper {
             return unauthorized;
         }
 
-        return Response.ok(new JsonConfig(configService.getConfiguration(), configService)).build();
+        return Response.ok(new JsonConfig(configService)).build();
     }
 
     @GET
@@ -186,6 +186,29 @@ public class ConfigResourceRest extends RestHelper {
         }
 
         boolean successful = configService.addTeam(modifyTeam, null, null, null, null) != null;
+
+        if (successful)
+            return Response.noContent().build();
+
+        return Response.serverError().build();
+    }
+
+    @PUT
+    @Path("/editTeam")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response editTeam(final String[] teams, @Context HttpServletRequest request) {
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
+        }
+
+        if(teams == null || teams.length != 2) {
+            return Response.serverError().build();
+        } else if(teams[1].trim().length() == 0) {
+            return Response.serverError().entity("Team name must not be empty").build();
+        }
+
+        boolean successful = configService.editTeam(teams[0], teams[1]) != null;
 
         if (successful)
             return Response.noContent().build();

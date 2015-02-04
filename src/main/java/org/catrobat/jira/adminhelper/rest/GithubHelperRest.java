@@ -28,7 +28,6 @@ import com.atlassian.jira.user.util.UserUtil;
 import com.atlassian.sal.api.user.UserManager;
 import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
 import org.catrobat.jira.adminhelper.helper.GithubHelper;
-import org.catrobat.jira.adminhelper.rest.json.JsonConfig;
 import org.catrobat.jira.adminhelper.rest.json.JsonUser;
 
 import javax.servlet.http.HttpServletRequest;
@@ -73,10 +72,6 @@ public class GithubHelperRest extends RestHelper {
             return Response.serverError().entity("JSON User Object not complete").build();
         }
 
-        if (jsonUser.getDeveloperList().size() == 0) {
-            return Response.serverError().entity("No team selected").build();
-        }
-
         if (!githubHelper.doesUserExist(jsonUser.getGithubName())) {
             return Response.serverError().entity("Github User does not exist").build();
         }
@@ -93,10 +88,6 @@ public class GithubHelperRest extends RestHelper {
         String oldGithubName = extendedPreferences.getText(UserRest.GITHUB_PROPERTY);
 
         if (oldGithubName != null) {
-            if (oldGithubName.toLowerCase().equals(jsonUser.getGithubName().toLowerCase())) {
-                return Response.serverError().entity("Github Username not changed").build();
-            }
-
             boolean stillExists = false;
             for (ApplicationUser tempApplicationUser : userUtil.getAllApplicationUsers()) {
                 if (tempApplicationUser.getUsername().toLowerCase().equals(applicationUser.getUsername().toLowerCase())) {
@@ -104,8 +95,8 @@ public class GithubHelperRest extends RestHelper {
                 }
 
                 extendedPreferences = userPreferencesManager.getExtendedPreferences(tempApplicationUser);
-                String tempUserGithubname = extendedPreferences.getText(UserRest.GITHUB_PROPERTY);
-                if (tempUserGithubname != null && oldGithubName.toLowerCase().equals(tempUserGithubname.toLowerCase())) {
+                String tempUserGithubName = extendedPreferences.getText(UserRest.GITHUB_PROPERTY);
+                if (tempUserGithubName != null && oldGithubName.toLowerCase().equals(tempUserGithubName.toLowerCase())) {
                     stillExists = true;
                     break;
                 }
@@ -125,8 +116,6 @@ public class GithubHelperRest extends RestHelper {
         }
 
         UserRest userRest = new UserRest(userManager, userPreferencesManager, configService, permissionManager, groupManager, directoryManager, null);
-        userRest.addUserToGithubAndJiraGroups(jsonUser, applicationUser.getDirectoryUser(), new JsonConfig(configService.getConfiguration(), configService));
-
-        return Response.ok().build();
+        return userRest.addUserToGithubTeams(jsonUser);
     }
 }

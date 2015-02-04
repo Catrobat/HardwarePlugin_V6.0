@@ -69,7 +69,8 @@ public final class JsonConfig {
 
     }
 
-    public JsonConfig(AdminHelperConfig toCopy, AdminHelperConfigService configService) {
+    public JsonConfig(AdminHelperConfigService configService) {
+        AdminHelperConfig toCopy = configService.getConfiguration();
         if (toCopy.getGithubApiToken() != null && toCopy.getGithubApiToken().length() != 0) {
             this.githubToken = "enter token if you want to change it";
         } else {

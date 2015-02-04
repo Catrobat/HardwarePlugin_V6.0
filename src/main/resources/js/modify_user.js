@@ -52,7 +52,7 @@ AJS.toInit(function () {
         closeOnOutsideClick: true
     });
 
-    dialog.addHeader("Activate User");
+    dialog.addHeader("Enable User");
     dialog.addPanel("Panel 1", tableSkeleton, "panel-body");
 
     dialog.addButton("OK", function (dialog) {
@@ -72,11 +72,11 @@ AJS.toInit(function () {
                 for (var i = 0; i < users.length; i++) {
                     var obj = users[i];
                     var username = obj['active'] ? obj['userName'] : "<del>" + obj['userName'] + "</del>";
-                    var actionClass = obj['active'] ? "inactivate" : "activate";
+                    var actionClass = obj['active'] ? "disable" : "enable";
                     var githubColumnText = obj['githubName'] ? obj['githubName'] : "add GitHub name";
                     var githubColumn = obj['active'] ?
                         "<a id=\"" + obj['userName'] + "\" class=\"change-github\" href=\"#\">" + githubColumnText + "</a>" :
-                        githubColumnText;
+                        (obj['githubName'] ? obj['githubName'] : "");
                     AJS.$("#user-body").append("<tr><td headers=\"basic-username\" class=\"username\">" + username + "</td>" +
                         "<td headers=\"basic-first-name\" class=\"first-name\">" + obj['firstName'] + "</td>" +
                         "<td headers=\"basic-last-name\" class=\"last-name\">" + obj['lastName'] + "</td>" +
@@ -86,7 +86,10 @@ AJS.toInit(function () {
                 }
 
                 AJS.$("#user-table").trigger("update");
-                var userList = new List("modify-user", {valueNames: ["username", "first-name", "last-name", "email", "github", "action"]});
+                var userList = new List("modify-user", {page: Number.MAX_VALUE, valueNames: ["username", "first-name", "last-name", "email", "github", "action"]});
+                userList.on('updated', function() {
+                    AJS.$("#user-table").trigger("update");
+                });
             },
             error: function () {
                 AJS.messages.error({
@@ -95,11 +98,11 @@ AJS.toInit(function () {
                 });
             }
         }).done(function () {
-            AJS.$(".inactivate").click(function (event) {
+            AJS.$(".disable").click(function (event) {
                 event.preventDefault();
                 inactivateUser(event.target.id);
             });
-            AJS.$(".activate").click(function (event) {
+            AJS.$(".enable").click(function (event) {
                 event.preventDefault();
                 activateUser(event.target.id);
             });
@@ -117,8 +120,8 @@ AJS.toInit(function () {
                 "<legend><span>Team</span></legend>\n";
             for (var i = 0; i < teamList.length; i++) {
                 checkboxSet += "<div class=\"checkbox\">\n" +
-                    "<input class=\"checkbox\" type=\"checkbox\" name=\"" + teamList[i].name + "\" id=\"" + teamList[i].name + "\">\n" +
-                    "<label for=\"" + teamList[i].name + "\">" + teamList[i].name + "</label>\n" +
+                    "<input class=\"checkbox\" type=\"checkbox\" name=\"" + teamList[i].name + "\" id=\"" + teamList[i].name.replace(/ /g, '-') + "\">\n" +
+                    "<label for=\"" + teamList[i].name.replace(/ /g, '-') + "\">" + teamList[i].name + "</label>\n" +
                     "</div>\n";
             }
             checkboxSet += "</fieldset>";
@@ -138,7 +141,7 @@ AJS.toInit(function () {
             dialog.addSubmit("OK", function (dialog) {
                 var selectedTeamList = [];
                 for (var i = 0; i < teamList.length; i++) {
-                    if (AJS.$("#" + teamList[i].name).prop("checked")) {
+                    if (AJS.$("#" + teamList[i].name.replace(/ /g, '-')).prop("checked")) {
                         selectedTeamList.push(teamList[i].name);
                     }
                 }
@@ -187,7 +190,7 @@ AJS.toInit(function () {
                 populateTable();
                 AJS.messages.success({
                     title: "Success!",
-                    body: "GitHub Name changed!"
+                    body: "GitHub User changed!"
                 });
             },
             error: function (e) {
@@ -225,7 +228,7 @@ AJS.toInit(function () {
                 populateTable();
                 AJS.messages.success({
                     title: "Success!",
-                    body: "User activated!"
+                    body: "User enabled!"
                 });
             },
             error: function (e) {
@@ -247,7 +250,7 @@ AJS.toInit(function () {
                 populateTable();
                 AJS.messages.success({
                     title: "Success!",
-                    body: "User inactivated!"
+                    body: "User disabled!"
                 });
             },
             error: function (e) {

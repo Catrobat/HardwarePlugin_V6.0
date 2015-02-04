@@ -472,6 +472,8 @@ public class HardwareRest extends RestHelper {
             return unauthorized;
         }
 
+
+
         ArrayList<JsonLending> lendingArrayList = new ArrayList<JsonLending>();
         com.atlassian.jira.user.util.UserManager jiraUserManager = ComponentAccessor.getUserManager();
         for(Lending lending : lendingService.searchAllForUser(userKey)) {
@@ -503,9 +505,9 @@ public class HardwareRest extends RestHelper {
     @Path("/devices/{deviceId}/sort-out")
     @Produces(MediaType.APPLICATION_JSON)
     public Response sortOutDevice(@Context HttpServletRequest request, @PathParam("deviceId") int deviceId, JsonDevice jsonDevice) {
-        String username = userManager.getRemoteUsername(request);
-        if (username == null || !permissionCondition.isApproved(username)) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
         }
 
         Device device = deviceService.getDeviceById(deviceId);

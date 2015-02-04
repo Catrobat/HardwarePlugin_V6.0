@@ -130,7 +130,7 @@ public class LendingServiceImpl implements LendingService {
         }
 
         return Arrays.asList(ao.find(Lending.class, Query.select()
-                .where("upper(\"LENDING_BY_USER_KEY\") = upper(?)", lendingByUserKey.trim())
+                .where("upper(\"LENDING_BY_USER_KEY\") = upper(?)", escapeHtml4(lendingByUserKey.trim()))
                 .order("BEGIN ASC")));
     }
 }

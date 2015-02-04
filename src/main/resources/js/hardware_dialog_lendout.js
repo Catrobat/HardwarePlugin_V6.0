@@ -239,7 +239,7 @@ function showLendOutDialogAjax(baseUrl, hardwareId, deviceList, deviceId) {
     lendingOutDialog.gotoPanel(0);
     lendingOutDialog.show();
 
-    var lendOutDialogList = new List("lend-out-dialog", {valueNames: ["serial", "imei", "inventory"]});
+    var lendOutDialogList = new List("lend-out-dialog", {page: Number.MAX_VALUE, valueNames: ["serial", "imei", "inventory"]});
 
     if(typeof deviceId != 'undefined') {
         AJS.$("#lend-out-dialog").find("a#" + deviceId).closest("tr").css("background-color", "");

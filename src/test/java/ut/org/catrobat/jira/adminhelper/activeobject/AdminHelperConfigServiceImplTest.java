@@ -201,6 +201,26 @@ public class AdminHelperConfigServiceImplTest {
     }
 
     @Test
+    public void testEditTeam() {
+        testAddTeam();
+        assertEquals(3, configurationService.getConfiguration().getTeams().length);
+        assertNotNull(configurationService.editTeam("team1", "new-team"));
+        ao.flushAll();
+        assertEquals(3, configurationService.getConfiguration().getTeams().length);
+        assertEquals("new-team", configurationService.getConfiguration().getTeams()[0].getTeamName());
+
+        assertNull(configurationService.editTeam(null, "new-name"));
+        assertNull(configurationService.editTeam("team1", "new-name"));
+        ao.flushAll();
+        assertEquals(3, configurationService.getConfiguration().getTeams().length);
+
+        assertNull(configurationService.editTeam("new-team", "team 2"));
+        assertNull(configurationService.editTeam("new-team", null));
+        ao.flushAll();
+        assertEquals(3, configurationService.getConfiguration().getTeams().length);
+    }
+
+    @Test
     public void testRemoveTeam() {
         testAddTeam();
         assertEquals(3, configurationService.getConfiguration().getTeams().length);

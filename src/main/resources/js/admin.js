@@ -18,6 +18,7 @@
 AJS.toInit(function () {
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
     var teams = [];
+    var editNameDialog;
 
     function scrollToAnchor(aid) {
         var aTag = AJS.$("a[name='" + aid + "']");
@@ -36,11 +37,14 @@ AJS.toInit(function () {
                 if (config.githubOrganization)
                     AJS.$("#github_organization").val(config.githubOrganization);
                 teams = [];
+                AJS.$("#teams").empty();
                 for (var i = 0; i < config.teams.length; i++) {
                     var team = config.teams[i];
                     teams.push(team['name']);
                     var tempTeamName = team['name'].replace(/ /g, '-');
-                    AJS.$("#teams").append("<h3>" + team['name'] + "</h3><fieldset>");
+                    AJS.$("#teams").append("<h3>" + team['name'] +
+                    "<button class=\"aui-button aui-button-subtle\" value=\"" + team['name'] + "\">" +
+                    "<span class=\"aui-icon aui-icon-small aui-iconfont-edit\">Editing</span> Edit</button></h3><fieldset>");
                     AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + tempTeamName + "-github-teams\">GitHub Teams</label><input class=\"text github\" type=\"text\" id=\"" + tempTeamName + "-github-teams\" name=\"github-teams\" value=\"" + team["githubTeams"] + "\"></div>");
                     AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + tempTeamName + "-coordinator\">Coordinator</label><input class=\"text jira-group\" type=\"text\" id=\"" + tempTeamName + "-coordinator\" value=\"" + team['coordinatorGroups'] + "\"></div>");
                     AJS.$("#teams").append("<div class=\"field-group\"><label for=\"" + tempTeamName + "-senior\">Senior</label><input class=\"text jira-group\" type=\"text\" id=\"" + tempTeamName + "-senior\" value=\"" + team['seniorGroups'] + "\"></div>");
@@ -286,6 +290,70 @@ AJS.toInit(function () {
         });
     }
 
+    function editTeam(teamName){
+        // may be in background and therefore needs to be removed
+        if (editNameDialog) {
+            try {
+                editNameDialog.remove();
+            } catch (err) {
+                // may be removed already
+            }
+        }
+
+        editNameDialog = new AJS.Dialog({
+            width: 600,
+            height: 200,
+            id: "edit-name-dialog",
+            closeOnOutsideClick: true
+        });
+
+        var content = "<form class=\"aui\">\n" +
+            "    <fieldset>\n" +
+            "        <div class=\"field-group\">\n" +
+            "            <label for=\"new-name\">New Team Name</label>\n" +
+            "            <input class=\"text\" type=\"text\" id=\"new-name\" name=\"new-name\" title=\"new-name\">\n" +
+            "        </div>\n" +
+            "    </fieldset>\n" +
+            " </form> ";
+
+        editNameDialog.addHeader("New Team Name for " + teamName);
+        editNameDialog.addPanel("Panel 1", content, "panel-body");
+
+        editNameDialog.addButton("Save", function (dialog) {
+            AJS.$.ajax({
+                url: baseUrl + "/rest/admin-helper/1.0/config/editTeam",
+                type: "PUT",
+                contentType: "application/json",
+                data: JSON.stringify([teamName, AJS.$("#new-name").val()]),
+                processData: false,
+                success: function () {
+                    AJS.messages.success({
+                        title: "Success!",
+                        body: "Team edited!"
+                    });
+                    populateForm();
+                    scrollToAnchor('top');
+                },
+                error: function (error) {
+                    AJS.messages.error({
+                        title: "Error!",
+                        body: "Something went wrong!<br />" + error.responseText
+                    });
+                    scrollToAnchor('top');
+                }
+            });
+
+            dialog.remove();
+        });
+        editNameDialog.addLink("Cancel", function (dialog) {
+            dialog.remove();
+        }, "#");
+
+        editNameDialog.gotoPage(0);
+        editNameDialog.gotoPanel(0);
+        editNameDialog.show();
+    }
+
     function removeTeam() {
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/config/removeTeam",
@@ -312,8 +380,12 @@ AJS.toInit(function () {
 
     AJS.$("#general").submit(function (e) {
         e.preventDefault();
-        updateConfig();
-        scrollToAnchor('top');
+        if(AJS.$(document.activeElement).val() === 'Save') {
+            updateConfig();
+            scrollToAnchor('top');
+        } else {
+            editTeam(AJS.$(document.activeElement).val());
+        }
     });
 
     AJS.$("#modify-teams").submit(function (e) {

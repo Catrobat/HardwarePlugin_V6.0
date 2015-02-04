@@ -46,8 +46,12 @@
                     <input class="text" type="text" id="plugin-permission" name="plugin-permission"
                            title="plugin-permission">
 
-                    <div class="description">All jira administrators in these groups may see and manipulate this
-                        plugin
+                    <div class="description">
+                        <ul>
+                            <li>If nothing is given, every Jira Administrator may read/write</li>
+                            <li>If a group is given, every Jira Administrator within this group may read/write</li>
+                            <li>If a single user is given and this user is a Jira Administrator this user may read/write</li>
+                        </ul>
                     </div>
                 </div>
             </fieldset>
@@ -121,6 +125,9 @@
         </form>
     </div>
     <div class="tabs-pane" id="tabs-teams">
+        <p>
+            Removing a team just effects the configuration and no user will be modified.
+        </p>
         <form id="modify-teams" class="aui">
             <fieldset>
                 <div class="field-group">

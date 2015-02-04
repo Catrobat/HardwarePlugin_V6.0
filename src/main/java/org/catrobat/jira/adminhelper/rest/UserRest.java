@@ -93,7 +93,7 @@ public class UserRest extends RestHelper {
             return Response.serverError().entity("User already exists!").build();
         }
 
-        JsonConfig config = new JsonConfig(configService.getConfiguration(), configService);
+        JsonConfig config = new JsonConfig(configService);
 
         try {
             UserTemplate user = new UserTemplate(jsonUser.getUserName(), config.getUserDirectoryId());
@@ -288,7 +288,7 @@ public class UserRest extends RestHelper {
             return Response.serverError().entity("No Team selected").build();
         }
 
-        JsonConfig config = new JsonConfig(configService.getConfiguration(), configService);
+        JsonConfig config = new JsonConfig(configService);
 
         // remove user from all groups (especially from DISABLED_GROUP) since he will be added to chosen groups afterwards
         try {
@@ -397,6 +397,41 @@ public class UserRest extends RestHelper {
         }
 
         return null; // everything ok
+    }
+
+    public Response addUserToGithubTeams(JsonUser jsonUser) {
+        JsonConfig config = new JsonConfig(configService);
+        Set<String> githubTeamSet = new HashSet<String>();
+        if (jsonUser.getDeveloperList() != null) {
+            for (String developerOf : jsonUser.getDeveloperList()) {
+                for (JsonTeam team : config.getTeams()) {
+                    if (team.getName().equals(developerOf)) {
+                        githubTeamSet.addAll(team.getGithubTeams());
+                    }
+                }
+            }
+        } else {
+            return Response.serverError().entity("Developer-List must be given").build();
+        }
+
+        GithubHelper githubHelper = new GithubHelper(configService);
+        if (jsonUser.getGithubName() != null && !jsonUser.getGithubName().trim().equals("")) {
+            StringBuilder errors = new StringBuilder();
+            for (String team : githubTeamSet) {
+                String returnValue = githubHelper.addUserToTeam(jsonUser.getGithubName(), team);
+                if (returnValue != null) {
+                    errors.append(returnValue);
+                }
+            }
+
+            if (errors.length() != 0) {
+                return Response.serverError().entity(errors.toString()).build();
+            }
+        } else {
+            return Response.serverError().entity("Github name must be given").build();
+        }
+
+        return Response.ok().build();
     }
 
     public Response addUserToGithubAndJiraGroups(JsonUser jsonUser, User jiraUser, JsonConfig config) {
