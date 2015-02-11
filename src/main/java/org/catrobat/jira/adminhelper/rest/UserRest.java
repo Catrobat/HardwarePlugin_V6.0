@@ -35,13 +35,17 @@ import com.atlassian.jira.user.ApplicationUsers;
 import com.atlassian.jira.user.preferences.ExtendedPreferences;
 import com.atlassian.jira.user.preferences.UserPreferencesManager;
 import com.atlassian.jira.user.util.UserUtil;
+import com.atlassian.mail.Email;
+import com.atlassian.mail.queue.SingleMailQueueItem;
 import com.atlassian.sal.api.user.UserManager;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
 import org.catrobat.jira.adminhelper.activeobject.Lending;
 import org.catrobat.jira.adminhelper.activeobject.LendingService;
 import org.catrobat.jira.adminhelper.helper.GithubHelper;
 import org.catrobat.jira.adminhelper.rest.json.JsonConfig;
+import org.catrobat.jira.adminhelper.rest.json.JsonResource;
 import org.catrobat.jira.adminhelper.rest.json.JsonTeam;
 import org.catrobat.jira.adminhelper.rest.json.JsonUser;
 
@@ -50,13 +54,13 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.security.SecureRandom;
 import java.util.*;
 
 @Path("/user")
 public class UserRest extends RestHelper {
     public static final String GITHUB_PROPERTY = "github";
     public static final String DISABLED_GROUP = "Disabled";
-    public static final String DEFAULT_PASSWORD = "catrobat";
 
     private final UserPreferencesManager userPreferencesManager;
     private final AdminHelperConfigService configService;
@@ -102,8 +106,10 @@ public class UserRest extends RestHelper {
             user.setEmailAddress(jsonUser.getEmail());
             user.setDisplayName(jsonUser.getFirstName() + " " + jsonUser.getLastName());
             user.setActive(true);
-            PasswordCredential credential = new PasswordCredential(DEFAULT_PASSWORD);
+            String password = RandomStringUtils.random(16, 0, 0, true, true, null, new SecureRandom());
+            PasswordCredential credential = new PasswordCredential(password);
             directoryManager.addUser(config.getUserDirectoryId(), user, credential);
+            sendEmail(jsonUser.getFirstName(), jsonUser.getUserName(), jsonUser.getEmail(), password);
         } catch (DirectoryNotFoundException e) {
             e.printStackTrace();
             return Response.serverError().entity("User-Directory was not found. Please check the settings!").build();
@@ -141,31 +147,25 @@ public class UserRest extends RestHelper {
             return response;
         }
 
-        Response errorResponse;
-        try {
-            List<String> groups = new ArrayList<String>();
-            if (jsonUser.isRoomCalendar()) {
-                groups.add(config.getRoomCalendarGroup());
-            }
-            if (jsonUser.isMeetingCalendar()) {
-                groups.add(config.getMeetingCalendarGroup());
-            }
-            if (jsonUser.isMasterStudent()) {
-                groups.add(config.getMasterStudentGroup());
-            }
-            if (jsonUser.isPhdStudent()) {
-                groups.add(config.getPhdStudentGroup());
-            }
-            errorResponse = addToGroups(ApplicationUsers.toDirectoryUser(jiraUser), groups);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Response.serverError().entity("Could not add to Calendar/Student groups.").build();
-        }
-        if (errorResponse != null) {
-            return errorResponse;
-        }
-
         return Response.ok().build();
+    }
+
+    private void sendEmail(String name, String username, String emailAddress, String password) {
+        Email email = new Email(emailAddress);
+        email.setFromName("Jira Administrators");
+        email.setFrom("no-reply@catrob.at");
+        email.setEncoding("UTF-8");
+        email.setMimeType("text/plain");
+        email.setSubject("Welcome to Catrobat");
+        email.setBody("Hi " + name + ",\n" +
+                "your account has been created and you may login to Jira and other resources with following credentials:\n\n" +
+                "Username: \t" + username + "\n" +
+                "Password: \t" + password + "\n\n" +
+                "Best regards,\n" +
+                "Catrobat-Admins");
+
+        SingleMailQueueItem item = new SingleMailQueueItem(email);
+        ComponentAccessor.getMailQueue().addItem(item);
     }
 
     @GET
@@ -284,8 +284,9 @@ public class UserRest extends RestHelper {
             return Response.serverError().entity("User not found").build();
         }
 
-        if (jsonUser.getCoordinatorList().size() == 0 && jsonUser.getSeniorList().size() == 0 && jsonUser.getDeveloperList().size() == 0) {
-            return Response.serverError().entity("No Team selected").build();
+        if (jsonUser.getCoordinatorList().size() == 0 && jsonUser.getSeniorList().size() == 0 && jsonUser.getDeveloperList().size() == 0
+                && jsonUser.getResourceList().size() == 0) {
+            return Response.serverError().entity("No Team and no resource selected").build();
         }
 
         JsonConfig config = new JsonConfig(configService);
@@ -487,6 +488,16 @@ public class UserRest extends RestHelper {
                         }
                     }
                 }
+            }
+
+            List<String> groups = new ArrayList<String>();
+            for (JsonResource resource : jsonUser.getResourceList()) {
+                groups.add(resource.getGroupName());
+            }
+            Response error = addToGroups(jiraUser, groups);
+
+            if (error != null) {
+                return error;
             }
         } catch (UserNotFoundException e) {
             e.printStackTrace();

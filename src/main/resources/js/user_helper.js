@@ -16,19 +16,27 @@
 
 "use strict";
 
-function populateTeamTable(baseUrl, tableId) {
-    getConfigAndCallback(baseUrl, function (config) {
-        AJS.$(tableId).empty();
-        for (var i = 0; i < config.teams.length; i++) {
-            var obj = config.teams[i];
-            AJS.$(tableId).append("<tr><td headers=\"basic-team\">" + obj['name'] +
-                "</td><td headers=\"basic-coordinator\"><input class=\"radio\" type=\"radio\" name=\"" + obj['name'] +
-                "\" id=\"" + obj['name'] + "-coordinator\" value=\"coordinator\"></td><td headers=\"basic-senior\"><input class=\"radio\" type=\"radio\" name=\"" +
-                obj['name'] + "\" id=\"" + obj['name'] + "-senior\" value=\"senior\"></td><td headers=\"basic-developer\"><input class=\"radio\" type=\"radio\" name=\"" +
-                obj['name'] + "\" id=\"" + obj['name'] + "-developer\" value=\"developer\"></td><td headers=\"basic-none\"><input class=\"radio\" type=\"radio\" checked=\"checked\" name=\"" +
-                obj['name'] + "\" id=\"" + obj['name'] + "-none\" value=\"none\"></td></tr>");
-        }
-    });
+function populateTeamTable(config, tableId, resourceId) {
+    AJS.$(tableId).empty();
+    for (var i = 0; i < config.teams.length; i++) {
+        var obj = config.teams[i];
+        AJS.$(tableId).append("<tr><td headers=\"basic-team\">" + obj['name'] +
+        "</td><td headers=\"basic-coordinator\"><input class=\"radio\" type=\"radio\" name=\"" + obj['name'] +
+        "\" id=\"" + obj['name'] + "-coordinator\" value=\"coordinator\"></td><td headers=\"basic-senior\"><input class=\"radio\" type=\"radio\" name=\"" +
+        obj['name'] + "\" id=\"" + obj['name'].replace(/ /g, "-") + "-senior\" value=\"senior\"></td><td headers=\"basic-developer\"><input class=\"radio\" type=\"radio\" name=\"" +
+        obj['name'] + "\" id=\"" + obj['name'].replace(/ /g, "-") + "-developer\" value=\"developer\"></td><td headers=\"basic-none\"><input class=\"radio\" type=\"radio\" checked=\"checked\" name=\"" +
+        obj['name'] + "\" id=\"" + obj['name'].replace(/ /g, "-") + "-none\" value=\"none\"></td></tr>");
+    }
+
+    AJS.$(resourceId).empty();
+    for (i = 0; i < config.resources.length; i++) {
+        obj = config.resources[i];
+        AJS.$(resourceId).append('<div class="checkbox">' +
+            '<input class="checkbox" type="checkbox" id="' + obj.resourceName.replace(/ /g, "-") + '">' +
+            '<label for="' + obj.resourceName.replace(/ /g, "-") + '">' + obj.resourceName + '</label>' +
+            '</div>'
+        );
+    }
 }
 
 function getTeamList(baseUrl, callme) {
@@ -49,10 +57,10 @@ function getConfigAndCallback(baseUrl, callback) {
         success: function (config) {
             callback(config);
         },
-        error: function () {
+        error: function (error) {
             AJS.messages.error({
                 title: "Error!",
-                body: "Something went wrong!"
+                body: "Something went wrong!<br />" + error.responseText
             });
         }
     });

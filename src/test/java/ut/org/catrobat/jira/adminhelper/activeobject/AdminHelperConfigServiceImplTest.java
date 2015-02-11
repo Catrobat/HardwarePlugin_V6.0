@@ -404,4 +404,50 @@ public class AdminHelperConfigServiceImplTest {
         ao.flushAll();
         assertEquals(0, ao.find(ApprovedUser.class).length);
     }
+
+    @Test
+    public void testResource() {
+        assertNotNull(configurationService.addResource("blob", null));
+        assertNotNull(configurationService.addResource(" BLAB  ", ""));
+        assertNotNull(configurationService.addResource(" BLuB", "not empty"));
+        ao.flushAll();
+        assertEquals(3, ao.find(Resource.class).length);
+
+        Resource[] resources = ao.find(Resource.class);
+        assertEquals("blob", resources[0].getResourceName());
+        assertEquals(null, resources[0].getGroupName());
+        assertEquals(configurationService.getConfiguration(), resources[0].getConfiguration());
+        assertEquals("BLAB", resources[1].getResourceName());
+        assertEquals("", resources[1].getGroupName());
+        assertEquals("BLuB", resources[2].getResourceName());
+        assertEquals("not empty", resources[2].getGroupName());
+
+        assertNull(configurationService.addResource(" bLOb   ", null));
+        assertNull(configurationService.addResource("blab", null));
+        assertNull(configurationService.addResource("   ", null));
+        assertNull(configurationService.addResource(null, null));
+        ao.flushAll();
+        assertEquals(3, ao.find(Resource.class).length);
+
+        assertNotNull(configurationService.editResource(" bLOb  ", "not empty either"));
+        ao.flushAll();
+        assertEquals(3, ao.find(Resource.class).length);
+
+        resources = ao.find(Resource.class);
+        assertEquals("blob", resources[0].getResourceName());
+        assertEquals("not empty either", resources[0].getGroupName());
+        assertEquals(configurationService.getConfiguration(), resources[0].getConfiguration());
+
+        assertNull(configurationService.editResource(" bL b  ", "not empty either"));
+        assertNull(configurationService.editResource(null, "not empty either"));
+        ao.flushAll();
+        assertEquals(3, ao.find(Resource.class).length);
+
+        assertNotNull(configurationService.removeResource(" BLOB   "));
+        assertNotNull(configurationService.removeResource(" BIOB   "));
+        assertNotNull(configurationService.removeResource(null));
+        ao.flushAll();
+        assertEquals(2, ao.find(Resource.class).length);
+
+    }
 }

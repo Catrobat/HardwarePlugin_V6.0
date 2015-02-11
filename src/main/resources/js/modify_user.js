@@ -16,7 +16,8 @@
 
 "use strict";
 
-var tableSkeleton = "<table class=\"aui\">\n" +
+var tableSkeleton = "<h3>Teams</h3>" +
+    "<table class=\"aui\">\n" +
     "<thead>\n" +
     "<tr>\n" +
     "<th id=\"basic-team\">Team</th>\n" +
@@ -28,7 +29,9 @@ var tableSkeleton = "<table class=\"aui\">\n" +
     "</thead>\n" +
     "<tbody id=\"team-body\">\n" +
     "</tbody>\n" +
-    "</table>";
+    "</table>" +
+    "<h3>Individual Resources</h3>" +
+    "<fieldset id=\"individual-resources\" class=\"group\"></fieldset>";
 
 function getGithubForm(githubUsername, checkBoxSet) {
     return "<form id=\"d\" class=\"aui\">\n" +
@@ -43,7 +46,19 @@ function getGithubForm(githubUsername, checkBoxSet) {
 }
 
 AJS.toInit(function () {
+    AJS.$(document).ajaxStart(function () {
+        AJS.$(".loadingDiv").show();
+    });
+    AJS.$(document).ajaxStop(function () {
+        AJS.$(".loadingDiv").hide();
+    });
+
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
+
+    var config;
+    getConfigAndCallback(baseUrl, function (ajaxConfig) {
+        config = ajaxConfig;
+    });
 
     var dialog = new AJS.Dialog({
         width: 840,
@@ -75,19 +90,22 @@ AJS.toInit(function () {
                     var actionClass = obj['active'] ? "disable" : "enable";
                     var githubColumnText = obj['githubName'] ? obj['githubName'] : "add GitHub name";
                     var githubColumn = obj['active'] ?
-                        "<a id=\"" + obj['userName'] + "\" class=\"change-github\" href=\"#\">" + githubColumnText + "</a>" :
+                    "<a id=\"" + obj['userName'] + "\" class=\"change-github\" href=\"#\">" + githubColumnText + "</a>" :
                         (obj['githubName'] ? obj['githubName'] : "");
                     AJS.$("#user-body").append("<tr><td headers=\"basic-username\" class=\"username\">" + username + "</td>" +
-                        "<td headers=\"basic-first-name\" class=\"first-name\">" + obj['firstName'] + "</td>" +
-                        "<td headers=\"basic-last-name\" class=\"last-name\">" + obj['lastName'] + "</td>" +
-                        "<td headers=\"basic-email\" class=\"email\">" + obj['email'] + "</td>" +
-                        "<td headers=\"basic-github\" class=\"github\">" + githubColumn + "</td>" +
-                        "<td headers=\"basic-action\" class=\"action\"><a id=\"" + obj['userName'] + "\" class=\"" + actionClass + "\" href=\"#\">" + actionClass + "</a></tr>");
+                    "<td headers=\"basic-first-name\" class=\"first-name\">" + obj['firstName'] + "</td>" +
+                    "<td headers=\"basic-last-name\" class=\"last-name\">" + obj['lastName'] + "</td>" +
+                    "<td headers=\"basic-email\" class=\"email\">" + obj['email'] + "</td>" +
+                    "<td headers=\"basic-github\" class=\"github\">" + githubColumn + "</td>" +
+                    "<td headers=\"basic-action\" class=\"action\"><a id=\"" + obj['userName'] + "\" class=\"" + actionClass + "\" href=\"#\">" + actionClass + "</a></tr>");
                 }
 
                 AJS.$("#user-table").trigger("update");
-                var userList = new List("modify-user", {page: Number.MAX_VALUE, valueNames: ["username", "first-name", "last-name", "email", "github", "action"]});
-                userList.on('updated', function() {
+                var userList = new List("modify-user", {
+                    page: Number.MAX_VALUE,
+                    valueNames: ["username", "first-name", "last-name", "email", "github", "action"]
+                });
+                userList.on('updated', function () {
                     AJS.$("#user-table").trigger("update");
                 });
             },
@@ -114,69 +132,67 @@ AJS.toInit(function () {
     }
 
     function showChangeGithubDialog(userName, githubName) {
-        getConfigAndCallback(baseUrl, function (config) {
-            var teamList = config.teams;
-            var checkboxSet = "<fieldset class=\"group\">\n" +
-                "<legend><span>Team</span></legend>\n";
+        var teamList = config.teams;
+        var checkboxSet = "<fieldset class=\"group\">\n" +
+            "<legend><span>Team</span></legend>\n";
+        for (var i = 0; i < teamList.length; i++) {
+            checkboxSet += "<div class=\"checkbox\">\n" +
+            "<input class=\"checkbox\" type=\"checkbox\" name=\"" + teamList[i].name + "\" id=\"" + teamList[i].name.replace(/ /g, '-') + "\">\n" +
+            "<label for=\"" + teamList[i].name.replace(/ /g, '-') + "\">" + teamList[i].name + "</label>\n" +
+            "</div>\n";
+        }
+        checkboxSet += "</fieldset>";
+
+        var dialog = new AJS.Dialog({
+            width: 600,
+            height: 400,
+            id: "change-github-dialog",
+            closeOnOutsideClick: true
+        });
+
+        githubName = githubName == "add GitHub name" ? "" : githubName;
+
+        dialog.addHeader("Change GitHub User");
+        dialog.addPanel("Panel 1", getGithubForm(githubName, checkboxSet), "panel-body");
+
+        dialog.addSubmit("OK", function (dialog) {
+            var selectedTeamList = [];
             for (var i = 0; i < teamList.length; i++) {
-                checkboxSet += "<div class=\"checkbox\">\n" +
-                    "<input class=\"checkbox\" type=\"checkbox\" name=\"" + teamList[i].name + "\" id=\"" + teamList[i].name.replace(/ /g, '-') + "\">\n" +
-                    "<label for=\"" + teamList[i].name.replace(/ /g, '-') + "\">" + teamList[i].name + "</label>\n" +
-                    "</div>\n";
+                if (AJS.$("#" + teamList[i].name.replace(/ /g, '-')).prop("checked")) {
+                    selectedTeamList.push(teamList[i].name);
+                }
             }
-            checkboxSet += "</fieldset>";
+            changeGithubUser(userName, AJS.$("#github-name").auiSelect2("val"), selectedTeamList);
+            dialog.remove();
+        });
+        dialog.addLink("Cancel", function (dialog) {
+            dialog.remove();
+        }, "#");
 
-            var dialog = new AJS.Dialog({
-                width: 600,
-                height: 400,
-                id: "change-github-dialog",
-                closeOnOutsideClick: true
-            });
+        dialog.show();
 
-            githubName = githubName == "add GitHub name" ? "" : githubName;
-
-            dialog.addHeader("Change GitHub User");
-            dialog.addPanel("Panel 1", getGithubForm(githubName, checkboxSet), "panel-body");
-
-            dialog.addSubmit("OK", function (dialog) {
-                var selectedTeamList = [];
-                for (var i = 0; i < teamList.length; i++) {
-                    if (AJS.$("#" + teamList[i].name.replace(/ /g, '-')).prop("checked")) {
-                        selectedTeamList.push(teamList[i].name);
+        AJS.$("#github-name").auiSelect2({
+            placeholder: "Search for user",
+            minimumInputLength: 1,
+            ajax: {
+                url: "https://api.github.com/search/users",
+                dataType: "json",
+                data: function (term, page) {
+                    return "q=" + term + "+type:User&order=asc&access_token=" + config.githubTokenPublic;
+                },
+                results: function (data, page) {
+                    var select2data = [];
+                    for (var i = 0; i < data.items.length; i++) {
+                        select2data.push({id: data.items[i].login, text: data.items[i].login});
                     }
+                    return {results: select2data};
                 }
-                changeGithubUser(userName, AJS.$("#github-name").auiSelect2("val"), selectedTeamList);
-                dialog.remove();
-            });
-            dialog.addLink("Cancel", function (dialog) {
-                dialog.remove();
-            }, "#");
-
-            dialog.show();
-
-            AJS.$("#github-name").auiSelect2({
-                placeholder: "Search for user",
-                minimumInputLength: 1,
-                ajax: {
-                    url: "https://api.github.com/search/users",
-                    dataType: "json",
-                    data: function (term, page) {
-                        return "q=" + term + "+type:User&order=asc&access_token=" + config.githubTokenPublic;
-                    },
-                    results: function (data, page) {
-                        var select2data = [];
-                        for (var i = 0; i < data.items.length; i++) {
-                            select2data.push({id: data.items[i].login, text: data.items[i].login});
-                        }
-                        return {results: select2data};
-                    }
-                }
-            });
-
-            if (githubName.length != 0) {
-                AJS.$("#github-name").auiSelect2("data", {id: githubName, text: githubName});
             }
         });
+
+        if (githubName.length != 0) {
+            AJS.$("#github-name").auiSelect2("data", {id: githubName, text: githubName});
+        }
     }
 
     function changeGithubUser(userName, githubName, teamList) {
@@ -218,6 +234,15 @@ AJS.toInit(function () {
                 userToModify.developerList.push(teamList[i]);
             }
         }
+
+        userToModify.resourceList = [];
+        for (i = 0; i < config.resources.length; i++) {
+            var resource = config.resources[i];
+            if (AJS.$('#' + resource.resourceName.replace(/ /g, "-")).attr('checked')) {
+                userToModify.resourceList.push(resource);
+            }
+        }
+
 
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/user/activateUser",
@@ -267,8 +292,7 @@ AJS.toInit(function () {
         dialog.gotoPanel(0);
         dialog.userName = userName;
         dialog.show();
-
-        populateTeamTable(baseUrl, "#team-body");
+        populateTeamTable(config, "#team-body", "#individual-resources");
     }
 
     populateTable();

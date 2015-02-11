@@ -62,7 +62,7 @@ public class GithubHelper {
 
     public String removeUserFromAllTeams(final String userName) {
         if (!doesUserExist(userName)) {
-            return "User does not exist on GitHub";
+            return null; // does not exist - nobody to remove
         }
 
         try {

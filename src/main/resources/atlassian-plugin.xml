@@ -39,6 +39,7 @@
         <dependency>com.atlassian.auiplugin:aui-select2</dependency>
         <resource type="download" name="create_user.js" location="js/create_user.js"/>
         <resource type="download" name="user_helper.js" location="js/user_helper.js"/>
+        <resource type="download" name="admin_helper.css" location="css/admin_helper.css"/>
     </web-resource>
 
     <web-resource name="Modify User Resources" key="modify-resources">
@@ -132,6 +133,7 @@
 
     <ao key="ao-module">
         <description>The module configuring the Active Objects service used by this plugin</description>
+        <upgradeTask>org.catrobat.jira.adminhelper.activeobject.upgrade.UpgradeTask</upgradeTask>
         <entity>org.catrobat.jira.adminhelper.activeobject.AdminHelperConfig</entity>
         <entity>org.catrobat.jira.adminhelper.activeobject.ApprovedGroup</entity>
         <entity>org.catrobat.jira.adminhelper.activeobject.ApprovedUser</entity>

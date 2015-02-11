@@ -16,7 +16,38 @@
 
 "use strict";
 AJS.toInit(function () {
+    AJS.$(document).ajaxStart(function () {
+        AJS.$(".loadingDiv").show();
+    });
+    AJS.$(document).ajaxStop(function () {
+        AJS.$(".loadingDiv").hide();
+    });
+
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
+    var config;
+
+    getConfigAndCallback(baseUrl, function (ajaxConfig) {
+        config = ajaxConfig;
+        populateTeamTable(config, "#team-body", "#individual-resources");
+        AJS.$("#github").auiSelect2({
+            placeholder: "Search for user",
+            minimumInputLength: 1,
+            ajax: {
+                url: "https://api.github.com/search/users",
+                dataType: "json",
+                data: function (term, page) {
+                    return "q=" + term + "+type:User&order=asc&access_token=" + config.githubTokenPublic;
+                },
+                results: function (data, page) {
+                    var select2data = [];
+                    for (var i = 0; i < data.items.length; i++) {
+                        select2data.push({id: data.items[i].login, text: data.items[i].login});
+                    }
+                    return {results: select2data};
+                }
+            }
+        });
+    });
 
     AJS.$('#firstname').change(function () {
         updateUsername();
@@ -44,23 +75,8 @@ AJS.toInit(function () {
     }
 
     function resetForm() {
-        getTeamList(baseUrl, resetFormAjax);
-    }
-
-    function resetFormAjax(teamList) {
-        AJS.$("#username").attr("value", "");
-        AJS.$("#firstname").attr("value", "");
-        AJS.$("#lastname").attr("value", "");
-        AJS.$("#email").attr("value", "");
+        AJS.$("#create")[0].reset();
         AJS.$("#github").auiSelect2("data", null);
-        AJS.$("#room-calendar").prop("checked", false);
-        AJS.$("#meeting-calendar").prop("checked", false);
-        AJS.$("#master-student").prop("checked", false);
-        AJS.$("#phd-student").prop("checked", false);
-
-        for (var i = 0; i < teamList.length; i++) {
-            AJS.$("#" + teamList[i] + "-none").prop("checked", true);
-        }
     }
 
     function createUser(teamList) {
@@ -79,13 +95,20 @@ AJS.toInit(function () {
         userToCreate.developerList = [];
 
         for (var i = 0; i < teamList.length; i++) {
-            var value = AJS.$("input[name='" + teamList[i] + "']:checked").val();
+            var value = AJS.$("input[name='" + teamList[i].replace(/ /g, "-") + "']:checked").val();
             if (value == "coordinator") {
                 userToCreate.coordinatorList.push(teamList[i]);
             } else if (value == "senior") {
                 userToCreate.seniorList.push(teamList[i]);
             } else if (value == "developer") {
                 userToCreate.developerList.push(teamList[i]);
+            }
+        }
+        userToCreate.resourceList = [];
+        for (i = 0; i < config.resources.length; i++) {
+            var resource = config.resources[i];
+            if (AJS.$('#' + resource.resourceName.replace(/ /g, "-")).attr('checked')) {
+                userToCreate.resourceList.push(resource);
             }
         }
 
@@ -109,29 +132,6 @@ AJS.toInit(function () {
             }
         });
     }
-
-    populateTeamTable(baseUrl, "#team-body");
-
-    getConfigAndCallback(baseUrl, function (config) {
-        AJS.$("#github").auiSelect2({
-            placeholder: "Search for user",
-            minimumInputLength: 1,
-            ajax: {
-                url: "https://api.github.com/search/users",
-                dataType: "json",
-                data: function (term, page) {
-                    return "q=" + term + "+type:User&order=asc&access_token=" + config.githubTokenPublic;
-                },
-                results: function (data, page) {
-                    var select2data = [];
-                    for (var i = 0; i < data.items.length; i++) {
-                        select2data.push({id: data.items[i].login, text: data.items[i].login});
-                    }
-                    return {results: select2data};
-                }
-            }
-        });
-    });
 
     AJS.$("#create").submit(function (e) {
         e.preventDefault();

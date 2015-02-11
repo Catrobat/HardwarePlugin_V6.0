@@ -16,8 +16,16 @@
 
 "use strict";
 AJS.toInit(function () {
+    AJS.$(document).ajaxStart(function () {
+        AJS.$(".loadingDiv").show();
+    });
+    AJS.$(document).ajaxStop(function () {
+        AJS.$(".loadingDiv").hide();
+    });
+
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
     var teams = [];
+    var localTempResources = [];
     var editNameDialog;
 
     function scrollToAnchor(aid) {
@@ -36,6 +44,17 @@ AJS.toInit(function () {
                     AJS.$("#github_token_public").val(config.githubTokenPublic);
                 if (config.githubOrganization)
                     AJS.$("#github_organization").val(config.githubOrganization);
+                localTempResources = [];
+                AJS.$("#resources").empty();
+                for (var i = 0; i < config.resources.length; i++) {
+                    var resource = config.resources[i];
+                    localTempResources.push(resource['resourceName']);
+                    var tempResourceName = resource['resourceName'].replace(/ /g, '-');
+                    AJS.$("#resources").append('<div class="field-group">' +
+                        '<label for="room-calendar">' + resource['resourceName'] + '</label>' +
+                        '<input class="text single-jira-group" type="text" id="' + tempResourceName + '">' +
+                        '</div>');
+                }
                 teams = [];
                 AJS.$("#teams").empty();
                 for (var i = 0; i < config.teams.length; i++) {
@@ -52,7 +71,7 @@ AJS.toInit(function () {
                     AJS.$("#teams").append("</fieldset>");
                 }
 
-                if(config.availableGithubTeams) {
+                if (config.availableGithubTeams) {
                     AJS.$(".github").auiSelect2({
                         placeholder: "Search for teams",
                         tags: config.availableGithubTeams,
@@ -113,10 +132,16 @@ AJS.toInit(function () {
                         results: function (data, page) {
                             var select2data = [];
                             for (var i = 0; i < data.groups.groups.length; i++) {
-                                select2data.push({id: "groups-" + data.groups.groups[i].name, text: data.groups.groups[i].name});
+                                select2data.push({
+                                    id: "groups-" + data.groups.groups[i].name,
+                                    text: data.groups.groups[i].name
+                                });
                             }
                             for (var i = 0; i < data.users.users.length; i++) {
-                                select2data.push({id: "users-" + data.users.users[i].name, text: data.users.users[i].name});
+                                select2data.push({
+                                    id: "users-" + data.users.users[i].name,
+                                    text: data.users.users[i].name
+                                });
                             }
                             return {results: select2data};
                         }
@@ -174,11 +199,18 @@ AJS.toInit(function () {
                 }
 
                 AJS.$("#plugin-permission").auiSelect2("data", approved);
-                AJS.$("#userdirectory").auiSelect2("data", {id: config.userDirectoryId, text: config.userDirectoryName});
-                AJS.$("#room-calendar").auiSelect2("data", {id: config.roomCalendarGroup, text: config.roomCalendarGroup});
-                AJS.$("#meeting-calendar").auiSelect2("data", {id: config.meetingCalendarGroup, text: config.meetingCalendarGroup});
-                AJS.$("#master-student").auiSelect2("data", {id: config.masterStudentGroup, text: config.masterStudentGroup});
-                AJS.$("#phd-student").auiSelect2("data", {id: config.phdStudentGroup, text: config.phdStudentGroup});
+                AJS.$("#userdirectory").auiSelect2("data", {
+                    id: config.userDirectoryId,
+                    text: config.userDirectoryName
+                });
+                for(var i = 0; i < config.resources.length; i++) {
+                    var resource = config.resources[i];
+                    var tempResourceName = resource['resourceName'].replace(/ /g, "-");
+                    AJS.$("#" + tempResourceName).auiSelect2("data", {
+                            id: resource['resourceName'],
+                            text: resource['groupName']
+                        });
+                }
             },
             error: function (error) {
                 AJS.messages.error({
@@ -204,10 +236,14 @@ AJS.toInit(function () {
         config.githubTokenPublic = AJS.$("#github_token_public").val();
         config.githubOrganization = AJS.$("#github_organization").val();
         config.userDirectoryId = AJS.$("#userdirectory").auiSelect2("val");
-        config.meetingCalendarGroup = AJS.$("#meeting-calendar").auiSelect2("val");
-        config.roomCalendarGroup = AJS.$("#room-calendar").auiSelect2("val");
-        config.masterStudentGroup = AJS.$("#master-student").auiSelect2("val");
-        config.phdStudentGroup = AJS.$("#phd-student").auiSelect2("val");
+        config.resources = [];
+        for(var i = 0; i < localTempResources.length; i++) {
+            var resource = {};
+            resource.resourceName = localTempResources[i];
+            var tempResourceName = localTempResources[i].replace(/ /g, "-");
+            resource.groupName = AJS.$("#" + tempResourceName).auiSelect2("val");
+            config.resources.push(resource);
+        }
 
         var usersAndGroups = AJS.$("#plugin-permission").auiSelect2("val");
         var approvedUsers = [];
@@ -230,17 +266,17 @@ AJS.toInit(function () {
             tempTeam.githubTeams = AJS.$("#" + tempTeamName + "-github-teams").auiSelect2("val");
 
             tempTeam.coordinatorGroups = AJS.$("#" + tempTeamName + "-coordinator").auiSelect2("val");
-            for(var j = 0; j < tempTeam.coordinatorGroups.length; j++) {
+            for (var j = 0; j < tempTeam.coordinatorGroups.length; j++) {
                 tempTeam.coordinatorGroups[j] = tempTeam.coordinatorGroups[j].replace(/^groups-/i, "");
             }
 
             tempTeam.seniorGroups = AJS.$("#" + tempTeamName + "-senior").auiSelect2("val");
-            for(var j = 0; j < tempTeam.seniorGroups.length; j++) {
+            for (var j = 0; j < tempTeam.seniorGroups.length; j++) {
                 tempTeam.seniorGroups[j] = tempTeam.seniorGroups[j].replace(/^groups-/i, "");
             }
 
             tempTeam.developerGroups = AJS.$("#" + tempTeamName + "-developer").auiSelect2("val");
-            for(var j = 0; j < tempTeam.developerGroups.length; j++) {
+            for (var j = 0; j < tempTeam.developerGroups.length; j++) {
                 tempTeam.developerGroups[j] = tempTeam.developerGroups[j].replace(/^groups-/i, "");
             }
 
@@ -281,16 +317,60 @@ AJS.toInit(function () {
                     body: "Team added!"
                 });
             },
-            error: function () {
+            error: function (error) {
                 AJS.messages.error({
                     title: "Error!",
-                    body: "Something went wrong!"
+                    body: "Something went wrong!<br />" + error.responseText
                 });
             }
         });
     }
 
-    function editTeam(teamName){
+    function addResource() {
+        AJS.$.ajax({
+            url: baseUrl + "/rest/admin-helper/1.0/config/addResource",
+            type: "PUT",
+            contentType: "application/json",
+            data: AJS.$("#edit-resource").attr("value"),
+            processData: false,
+            success: function () {
+                AJS.messages.success({
+                    title: "Success!",
+                    body: "Resource added!"
+                });
+            },
+            error: function (error) {
+                AJS.messages.error({
+                    title: "Error!",
+                    body: "Something went wrong!<br />" + error.responseText
+                });
+            }
+        });
+    }
+
+    function removeResource() {
+        AJS.$.ajax({
+            url: baseUrl + "/rest/admin-helper/1.0/config/removeResource",
+            type: "PUT",
+            contentType: "application/json",
+            data: AJS.$("#edit-resource").attr("value"),
+            processData: false,
+            success: function () {
+                AJS.messages.success({
+                    title: "Success!",
+                    body: "Resource removed!"
+                });
+            },
+            error: function (error) {
+                AJS.messages.error({
+                    title: "Error!",
+                    body: "Something went wrong!<br />" + error.responseText
+                });
+            }
+        });
+    }
+
+    function editTeam(teamName) {
         // may be in background and therefore needs to be removed
         if (editNameDialog) {
             try {
@@ -380,7 +460,7 @@ AJS.toInit(function () {
 
     AJS.$("#general").submit(function (e) {
         e.preventDefault();
-        if(AJS.$(document.activeElement).val() === 'Save') {
+        if (AJS.$(document.activeElement).val() === 'Save') {
             updateConfig();
             scrollToAnchor('top');
         } else {
@@ -394,9 +474,21 @@ AJS.toInit(function () {
         scrollToAnchor('top');
     });
 
+    AJS.$("#modify-resources").submit(function (e) {
+        e.preventDefault();
+        addResource();
+        scrollToAnchor('top');
+    });
+
     AJS.$("#remove").click(function (e) {
         e.preventDefault();
         removeTeam();
+        scrollToAnchor('top');
+    });
+
+    AJS.$("#remove-resource").click(function (e) {
+        e.preventDefault();
+        removeResource();
         scrollToAnchor('top');
     });
 

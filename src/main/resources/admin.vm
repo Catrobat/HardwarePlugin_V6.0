@@ -23,8 +23,8 @@
 </head>
 <body>
 <a name="top"></a>
-
 <div id="aui-message-bar"></div>
+<div class="loadingDiv"><span class="aui-icon aui-icon-wait">Loading...</span></div>
 <div class="aui-tabs horizontal-tabs">
     <ul class="tabs-menu">
         <li class="menu-item active-tab">
@@ -66,26 +66,10 @@
                         Adds user to given user directory.
                     </div>
                 </div>
-                <div class="field-group">
-                    <label for="room-calendar">Room Calendar Group</label>
-                    <input class="text single-jira-group" type="text" id="room-calendar" name="room-calendar"
-                           title="room-calendar">
-                </div>
-                <div class="field-group">
-                    <label for="room-calendar">Meeting Calendar Group</label>
-                    <input class="text single-jira-group" type="text" id="meeting-calendar" name="meeting-calendar"
-                           title="meeting-calendar">
-                </div>
-                <div class="field-group">
-                    <label for="master-student">Master Student Group</label>
-                    <input class="text single-jira-group" type="text" id="master-student" name="master-student"
-                           title="master-student">
-                </div>
-                <div class="field-group">
-                    <label for="phd-student">PhD Student Group</label>
-                    <input class="text single-jira-group" type="text" id="phd-student" name="phd-student"
-                           title="phd-student">
-                </div>
+            </fieldset>
+            <h2>Individual Resources</h2>
+            <fieldset id="resources">
+
             </fieldset>
             <h2>GitHub</h2>
             <fieldset>
@@ -125,6 +109,7 @@
         </form>
     </div>
     <div class="tabs-pane" id="tabs-teams">
+        <h2>Teams</h2>
         <p>
             Removing a team just effects the configuration and no user will be modified.
         </p>
@@ -137,6 +122,19 @@
                 <div class="field-group">
                     <input type="submit" value="Create" class="aui-button aui-button-primary">
                     <input type="submit" value="Remove" id="remove" class="aui-button">
+                </div>
+            </fieldset>
+        </form>
+        <h2>Resources</h2>
+        <form id="modify-resources" class="aui">
+            <fieldset>
+                <div class="field-group">
+                    <label for="edit-resource">Resource name<span class="aui-icon icon-required"> required</span></label>
+                    <input class="text" type="text" id="edit-resource" name="edit-resource" title="edit-resource">
+                </div>
+                <div class="field-group">
+                    <input type="submit" value="Create" class="aui-button aui-button-primary">
+                    <input type="submit" value="Remove" id="remove-resource" class="aui-button">
                 </div>
             </fieldset>
         </form>

@@ -23,6 +23,7 @@
 </head>
 <body class="aui-layout aui-theme-default">
 <div id="aui-message-bar"></div>
+<div class="loadingDiv"><span class="aui-icon aui-icon-wait">Loading...</span></div>
 <header class="aui-page-header">
     <div class="aui-page-header-inner">
         <h2>Create New User</h2>
@@ -64,24 +65,8 @@
                 </fieldset>
 
                 <h3>Individual Resources</h3>
-                <fieldset class="group">
-                    <legend><span>Resources</span></legend>
-                    <div class="checkbox">
-                        <input class="checkbox" type="checkbox" name="room-calendar" id="room-calendar">
-                        <label for="room-calendar">Room calendar</label>
-                    </div>
-                    <div class="checkbox">
-                        <input class="checkbox" type="checkbox" name="meeting-calendar" id="meeting-calendar">
-                        <label for="meeting-calendar">Meeting calendar</label>
-                    </div>
-                    <div class="checkbox">
-                        <input class="checkbox" type="checkbox" name="master-student" id="master-student">
-                        <label for="master-student">Master student</label>
-                    </div>
-                    <div class="checkbox">
-                        <input class="checkbox" type="checkbox" name="phd-student" id="phd-student">
-                        <label for="phd-student">PhD student</label>
-                    </div>
+                <fieldset id="individual-resources" class="group">
+
                 </fieldset>
 
                 <h3>Teams</h3>

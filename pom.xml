@@ -88,6 +88,11 @@
             <version>1.4.0</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.3.2</version>
+        </dependency>
+        <dependency>
             <groupId>org.kohsuke</groupId>
             <artifactId>github-api</artifactId>
             <version>1.59</version>
@@ -193,6 +198,9 @@
                     <productDataVersion>${jira.version}</productDataVersion>
                     <productDataPath>${basedir}/src/test/resources/generated-test-resources.zip</productDataPath>
                     <jvmArgs>-Xms1g -Xmx2g -XX:MaxPermSize=1g -XX:-UseGCOverheadLimit -server</jvmArgs>
+                    <systemPropertyVariables>
+                        <atlassian.mail.senddisabled>false</atlassian.mail.senddisabled>
+                    </systemPropertyVariables>
                     <pluginArtifacts>
                         <pluginArtifact>
                             <groupId>com.atlassian.activeobjects</groupId>

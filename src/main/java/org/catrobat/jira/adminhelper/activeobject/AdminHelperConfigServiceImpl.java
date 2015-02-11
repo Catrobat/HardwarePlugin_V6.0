@@ -22,6 +22,8 @@ import net.java.ao.Query;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
+
 public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
 
     private final ActiveObjects ao;
@@ -74,35 +76,53 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
     }
 
     @Override
-    public AdminHelperConfig setRoomCalendarGroup(String roomCalendarGroup) {
+    public AdminHelperConfig addResource(String resourceName, String groupName) {
+        if (resourceName == null || resourceName.trim().length() == 0) {
+            return null;
+        }
+        String tempResourceName = escapeHtml4(resourceName.trim());
+        Resource[] resources = ao.find(Resource.class, Query.select().where("upper(\"RESOURCE_NAME\") = upper(?)", tempResourceName));
+        if (resources.length != 0) {
+            return null;
+        }
+
         AdminHelperConfig config = getConfiguration();
-        config.setRoomCalendarGroup(roomCalendarGroup);
-        config.save();
+        Resource resource = ao.create(Resource.class);
+        resource.setResourceName(tempResourceName);
+        resource.setGroupName(groupName);
+        resource.setConfiguration(config);
+        resource.save();
+
         return config;
     }
 
     @Override
-    public AdminHelperConfig setMeetingCalendarGroup(String meetingCalendarGroup) {
-        AdminHelperConfig config = getConfiguration();
-        config.setMeetingCalendarGroup(meetingCalendarGroup);
-        config.save();
-        return config;
+    public AdminHelperConfig editResource(String resourceName, String newGroupName) {
+        if (resourceName == null || resourceName.trim().length() == 0) {
+            return null;
+        }
+        String tempResourceName = escapeHtml4(resourceName.trim());
+        Resource[] resources = ao.find(Resource.class, Query.select().where("upper(\"RESOURCE_NAME\") = upper(?)", tempResourceName));
+        if (resources.length == 0) {
+            return null;
+        }
+        resources[0].setGroupName(newGroupName);
+        resources[0].save();
+
+        return getConfiguration();
     }
 
     @Override
-    public AdminHelperConfig setMasterStudentGroup(String masterStudentGroup) {
-        AdminHelperConfig config = getConfiguration();
-        config.setMasterStudentGroup(masterStudentGroup);
-        config.save();
-        return config;
-    }
+    public AdminHelperConfig removeResource(String resourceName) {
+        String tempResourceName = null;
+        if (resourceName != null) {
+            tempResourceName = escapeHtml4(resourceName.trim());
+        }
 
-    @Override
-    public AdminHelperConfig setPhdStudentGroup(String phdStudentGroup) {
-        AdminHelperConfig config = getConfiguration();
-        config.setPhdStudentGroup(phdStudentGroup);
-        config.save();
-        return config;
+        Resource[] resources = ao.find(Resource.class, Query.select().where("upper(\"RESOURCE_NAME\") = upper(?)", tempResourceName));
+        ao.delete(resources);
+
+        return getConfiguration();
     }
 
     @Override
@@ -189,8 +209,8 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
     }
 
     @Override
-    public AdminHelperConfig editTeam(String oldTeamName, String newTeamName){
-        if(oldTeamName == null || newTeamName == null) {
+    public AdminHelperConfig editTeam(String oldTeamName, String newTeamName) {
+        if (oldTeamName == null || newTeamName == null) {
             return null;
         }
 
@@ -247,8 +267,8 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
                         .where("\"ROLE\" = ?", role)
         );
 
-        for(TeamToGroup teamToGroup : teamToGroupArray) {
-            if(teamToGroup.getTeam().getTeamName().toLowerCase().equals(teamName.toLowerCase())) {
+        for (TeamToGroup teamToGroup : teamToGroupArray) {
+            if (teamToGroup.getTeam().getTeamName().toLowerCase().equals(teamName.toLowerCase())) {
                 groupList.add(teamToGroup.getGroup().getGroupName());
             }
         }

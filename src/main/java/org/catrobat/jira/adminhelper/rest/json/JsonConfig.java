@@ -45,6 +45,8 @@ public final class JsonConfig {
     @XmlElement
     private String githubOrganization;
     @XmlElement
+    private List<JsonResource> resources;
+    @XmlElement
     private List<JsonTeam> teams;
     @XmlElement
     private List<String> approvedGroups;
@@ -56,14 +58,6 @@ public final class JsonConfig {
     private long userDirectoryId;
     @XmlElement
     private String userDirectoryName;
-    @XmlElement
-    private String roomCalendarGroup;
-    @XmlElement
-    private String meetingCalendarGroup;
-    @XmlElement
-    private String masterStudentGroup;
-    @XmlElement
-    private String phdStudentGroup;
 
     public JsonConfig() {
 
@@ -79,10 +73,10 @@ public final class JsonConfig {
         this.githubTokenPublic = toCopy.getPublicGithubApiToken();
         this.githubOrganization = toCopy.getGithubOrganisation();
 
-        this.roomCalendarGroup = toCopy.getRoomCalendarGroup();
-        this.meetingCalendarGroup = toCopy.getMeetingCalendarGroup();
-        this.masterStudentGroup = toCopy.getMasterStudentGroup();
-        this.phdStudentGroup = toCopy.getPhdStudentGroup();
+        this.resources = new ArrayList<JsonResource>();
+        for(Resource resource : toCopy.getResources()) {
+            this.resources.add(new JsonResource(resource));
+        }
 
         Map<String, JsonTeam> teamMap = new TreeMap<String, JsonTeam>();
         for (Team team : toCopy.getTeams()) {
@@ -194,35 +188,11 @@ public final class JsonConfig {
         this.userDirectoryName = userDirectoryName;
     }
 
-    public String getRoomCalendarGroup() {
-        return roomCalendarGroup;
+    public List<JsonResource> getResources() {
+        return resources;
     }
 
-    public void setRoomCalendarGroup(String roomCalendarGroup) {
-        this.roomCalendarGroup = roomCalendarGroup;
-    }
-
-    public String getMeetingCalendarGroup() {
-        return meetingCalendarGroup;
-    }
-
-    public void setMeetingCalendarGroup(String meetingCalendarGroup) {
-        this.meetingCalendarGroup = meetingCalendarGroup;
-    }
-
-    public String getMasterStudentGroup() {
-        return masterStudentGroup;
-    }
-
-    public void setMasterStudentGroup(String masterStudentGroup) {
-        this.masterStudentGroup = masterStudentGroup;
-    }
-
-    public String getPhdStudentGroup() {
-        return phdStudentGroup;
-    }
-
-    public void setPhdStudentGroup(String phdStudentGroup) {
-        this.phdStudentGroup = phdStudentGroup;
+    public void setResources(List<JsonResource> resources) {
+        this.resources = resources;
     }
 }

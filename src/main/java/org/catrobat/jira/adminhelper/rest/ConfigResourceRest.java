@@ -27,6 +27,7 @@ import com.atlassian.sal.api.user.UserManager;
 import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
 import org.catrobat.jira.adminhelper.activeobject.Team;
 import org.catrobat.jira.adminhelper.rest.json.JsonConfig;
+import org.catrobat.jira.adminhelper.rest.json.JsonResource;
 import org.catrobat.jira.adminhelper.rest.json.JsonTeam;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHTeam;
@@ -119,10 +120,10 @@ public class ConfigResourceRest extends RestHelper {
         configService.setPublicApiToken(jsonConfig.getGithubTokenPublic());
         configService.setOrganisation(jsonConfig.getGithubOrganization());
         configService.setUserDirectoryId(jsonConfig.getUserDirectoryId());
-        configService.setRoomCalendarGroup(jsonConfig.getRoomCalendarGroup());
-        configService.setMeetingCalendarGroup(jsonConfig.getMeetingCalendarGroup());
-        configService.setMasterStudentGroup(jsonConfig.getMasterStudentGroup());
-        configService.setPhdStudentGroup(jsonConfig.getPhdStudentGroup());
+
+        for(JsonResource jsonResource : jsonConfig.getResources()) {
+            configService.editResource(jsonResource.getResourceName(), jsonResource.getGroupName());
+        }
 
         if (jsonConfig.getApprovedGroups() != null) {
             configService.clearApprovedGroups();
@@ -231,5 +232,47 @@ public class ConfigResourceRest extends RestHelper {
             return Response.noContent().build();
 
         return Response.serverError().build();
+    }
+
+    @PUT
+    @Path("/addResource")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addResource(final String resourceName, @Context HttpServletRequest request) {
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
+        }
+
+        if(resourceName == null || resourceName.trim().length() == 0) {
+            return Response.serverError().entity("Resource-Name must not be empty").build();
+        }
+
+        boolean successful = configService.addResource(resourceName, null) != null;
+
+        if (successful)
+            return Response.noContent().build();
+
+        return Response.serverError().entity("Maybe name already taken?").build();
+    }
+
+    @PUT
+    @Path("/removeResource")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response removeResource(final String resourceName, @Context HttpServletRequest request) {
+        Response unauthorized = checkPermission(request);
+        if (unauthorized != null) {
+            return unauthorized;
+        }
+
+        if(resourceName == null || resourceName.trim().length() == 0) {
+            return Response.serverError().entity("Resource-Name must not be empty").build();
+        }
+
+        boolean successful = configService.removeResource(resourceName) != null;
+
+        if (successful)
+            return Response.noContent().build();
+
+        return Response.serverError().entity("Maybe no resource with given name?").build();
     }
 }

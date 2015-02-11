@@ -80,6 +80,7 @@ public class AdminHelperDatabaseUpdater implements DatabaseUpdater {
         em.migrate(Lending.class);
         em.migrate(OperatingSystem.class);
         em.migrate(Producer.class);
+        em.migrate(Resource.class);
         em.migrate(Team.class);
         em.migrate(TeamToGithubTeam.class);
         em.migrate(TeamToGroup.class);
