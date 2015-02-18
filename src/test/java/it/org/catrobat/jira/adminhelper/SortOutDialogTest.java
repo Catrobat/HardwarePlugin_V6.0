@@ -20,6 +20,8 @@ import org.junit.Test;
 
 import java.util.Calendar;
 
+import static com.thoughtworks.selenium.SeleneseTestBase.fail;
+
 public class SortOutDialogTest extends SeleniumTestBase {
 
     @Test
@@ -35,7 +37,8 @@ public class SortOutDialogTest extends SeleniumTestBase {
         verifyEquals("555", selenium.getText("//tbody[@id='table-sorted-out']/tr[2]/td[2]"));
         verifyEquals("", selenium.getText("//tbody[@id='table-sorted-out']/tr[2]/td[3]"));
         verifyEquals("", selenium.getText("//tbody[@id='table-sorted-out']/tr[2]/td[4]"));
-        verifyEquals("2014-09-23", selenium.getText("//tbody[@id='table-sorted-out']/tr[2]/td[5]"));
+        verifyEquals("", selenium.getText("//tbody[@id='table-sorted-out']/tr[2]/td[5]"));
+        verifyEquals("2014-09-23", selenium.getText("//tbody[@id='table-sorted-out']/tr[2]/td[6]"));
         selenium.click("css=#aui-uid-2 > strong");
         verifyEquals("Nexus 4 (8 GB)", selenium.getText("css=#table-active-devices > tr > td.name"));
         verifyEquals("111", selenium.getText("css=#table-active-devices > tr > td.serial"));
@@ -66,12 +69,14 @@ public class SortOutDialogTest extends SeleniumTestBase {
         verifyEquals("222", selenium.getText("//tbody[@id='table-sorted-out']/tr[2]/td[2]"));
         verifyEquals("222", selenium.getText("//tbody[@id='table-sorted-out']/tr[2]/td[3]"));
         verifyEquals("222", selenium.getText("//tbody[@id='table-sorted-out']/tr[2]/td[4]"));
-        verifyEquals("2014-09-23", selenium.getText("//tbody[@id='table-sorted-out']/tr[2]/td[5]"));
+        verifyEquals("Google Inc.", selenium.getText("//tbody[@id='table-sorted-out']/tr[2]/td[5]"));
+        verifyEquals("2014-09-23", selenium.getText("//tbody[@id='table-sorted-out']/tr[2]/td[6]"));
         verifyEquals("Nexus 7 (8 GB)", selenium.getText("//tbody[@id='table-sorted-out']/tr[3]/td"));
         verifyEquals("555", selenium.getText("//tbody[@id='table-sorted-out']/tr[3]/td[2]"));
         verifyEquals("", selenium.getText("//tbody[@id='table-sorted-out']/tr[3]/td[3]"));
         verifyEquals("", selenium.getText("//tbody[@id='table-sorted-out']/tr[3]/td[4]"));
-        verifyEquals("2014-09-23", selenium.getText("//tbody[@id='table-sorted-out']/tr[3]/td[5]"));
+        verifyEquals("", selenium.getText("//tbody[@id='table-sorted-out']/tr[3]/td[5]"));
+        verifyEquals("2014-09-23", selenium.getText("//tbody[@id='table-sorted-out']/tr[3]/td[6]"));
         selenium.click("xpath=(//a[contains(text(),'Details')])[7]");
         selenium.click("//div[@id='device-details-dialog']/div/ul/li[2]/button");
         verifyEquals(today, selenium.getText("//div[@id='device-details-dialog']/div/div/div[2]/table/tbody/tr[7]/td[2]"));

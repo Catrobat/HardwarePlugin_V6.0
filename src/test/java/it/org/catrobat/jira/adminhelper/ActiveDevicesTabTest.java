@@ -16,6 +16,7 @@
 
 package it.org.catrobat.jira.adminhelper;
 
+import com.thoughtworks.selenium.SeleneseTestBase;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -38,8 +39,9 @@ public class ActiveDevicesTabTest extends SeleniumTestBase {
         verifyEquals("333", selenium.getText("//tbody[@id='table-active-devices']/tr[2]/td[2]"));
         verifyEquals("", selenium.getText("//tbody[@id='table-active-devices']/tr[2]/td[3]"));
         verifyEquals("", selenium.getText("//tbody[@id='table-active-devices']/tr[2]/td[4]"));
-        verifyEquals("2014-09-23", selenium.getText("//tbody[@id='table-active-devices']/tr[2]/td[5]"));
-        verifyEquals("stephanfellhofer", selenium.getText("//tbody[@id='table-active-devices']/tr[2]/td[6]"));
+        verifyEquals("Google Inc.", selenium.getText("//tbody[@id='table-active-devices']/tr[2]/td[5]"));
+        verifyEquals("2014-09-23", selenium.getText("//tbody[@id='table-active-devices']/tr[2]/td[6]"));
+        verifyEquals("stephanfellhofer", selenium.getText("//tbody[@id='table-active-devices']/tr[2]/td[7]"));
         verifyEquals("Return device", selenium.getText("link=Return device"));
         verifyEquals("Details", selenium.getText("xpath=(//a[contains(text(),'Details')])[4]"));
         verifyEquals("Nexus 4 (8 GB)", selenium.getText("//tbody[@id='table-active-devices']/tr[3]/td"));
@@ -60,8 +62,9 @@ public class ActiveDevicesTabTest extends SeleniumTestBase {
         verifyEquals("666", selenium.getText("//tbody[@id='table-active-devices']/tr[5]/td[2]"));
         verifyEquals("", selenium.getText("//tbody[@id='table-active-devices']/tr[5]/td[3]"));
         verifyEquals("", selenium.getText("//tbody[@id='table-active-devices']/tr[5]/td[4]"));
-        verifyEquals("2014-09-23", selenium.getText("//tbody[@id='table-active-devices']/tr[5]/td[5]"));
-        verifyEquals("admin", selenium.getText("//tbody[@id='table-active-devices']/tr[5]/td[6]"));
+        verifyEquals("", selenium.getText("//tbody[@id='table-active-devices']/tr[5]/td[5]"));
+        verifyEquals("2014-09-23", selenium.getText("//tbody[@id='table-active-devices']/tr[5]/td[6]"));
+        verifyEquals("admin", selenium.getText("//tbody[@id='table-active-devices']/tr[5]/td[7]"));
         verifyEquals("Return device", selenium.getText("xpath=(//a[contains(text(),'Return device')])[2]"));
         verifyEquals("Details", selenium.getText("xpath=(//a[contains(text(),'Details')])[7]"));
         selenium.click("id=1,1");

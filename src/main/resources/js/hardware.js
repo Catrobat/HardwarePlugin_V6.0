@@ -20,7 +20,7 @@ var lendingOutDialog;
 var createHardwareDialog;
 var returnDialog;
 var removeHardwareDialog;
-var editNameDialog;
+var sortOutDialog;
 
 var urlRest = "/rest/admin-helper/latest";
 var urlRestHardware = urlRest + "/hardware";

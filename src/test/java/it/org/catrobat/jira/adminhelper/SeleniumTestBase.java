@@ -43,7 +43,7 @@ public abstract class SeleniumTestBase extends TestBase {
         selenium = new WebDriverBackedSelenium(driver, baseUrl);
 
         Calendar calendar = Calendar.getInstance();
-        String month = "" + calendar.get(Calendar.MONTH) + 1;
+        String month = "" + (calendar.get(Calendar.MONTH) + 1);
         month = month.length() == 1 ? "0" + month : month;
         today = calendar.get(Calendar.YEAR) + "-" +
                 month + "-" +

@@ -84,10 +84,11 @@ public class CreateAndEditDeviceDialogTest extends SeleniumTestBase {
         verifyEquals("sel-ser-111", selenium.getText("//tbody[@id='table-all-devices']/tr[8]/td[2]"));
         verifyEquals("sel-imei-111", selenium.getText("//tbody[@id='table-all-devices']/tr[8]/td[3]"));
         verifyEquals("sel-inv-111", selenium.getText("//tbody[@id='table-all-devices']/tr[8]/td[4]"));
-        verifyEquals("", selenium.getText("//tbody[@id='table-all-devices']/tr[8]/td[5]"));
+        verifyEquals("SeleniumReceived", selenium.getText("//tbody[@id='table-all-devices']/tr[8]/td[5]"));
         verifyEquals("", selenium.getText("//tbody[@id='table-all-devices']/tr[8]/td[6]"));
         verifyEquals("", selenium.getText("//tbody[@id='table-all-devices']/tr[8]/td[7]"));
-        verifyEquals("Lending out / Sort out", selenium.getText("//tbody[@id='table-all-devices']/tr[8]/td[8]"));
+        verifyEquals("", selenium.getText("//tbody[@id='table-all-devices']/tr[8]/td[8]"));
+        verifyEquals("Lending out / Sort out", selenium.getText("//tbody[@id='table-all-devices']/tr[8]/td[9]"));
         selenium.click("xpath=(//a[contains(text(),'Details')])[18]");
         selenium.click("//div[@id='device-details-dialog']/div/ul/li[2]/button");
         verifyEquals("sel-ser-111", selenium.getText("//div[@id='device-details-dialog']/div/div/div[2]/table/tbody/tr/td[2]"));
@@ -130,7 +131,7 @@ public class CreateAndEditDeviceDialogTest extends SeleniumTestBase {
         verifyEquals("sel-ser-222", selenium.getText("//tbody[@id='table-all-devices']/tr[5]/td[2]"));
         verifyEquals("sel-imei-222", selenium.getText("//tbody[@id='table-all-devices']/tr[5]/td[3]"));
         verifyEquals("sel-inv-222", selenium.getText("//tbody[@id='table-all-devices']/tr[5]/td[4]"));
-        verifyEquals("1974-01-01", selenium.getText("//tbody[@id='table-all-devices']/tr[5]/td[7]"));
+        verifyEquals("1974-01-01", selenium.getText("//tbody[@id='table-all-devices']/tr[5]/td[8]"));
         selenium.click("xpath=(//a[contains(text(),'Details')])[15]");
         selenium.click("//div[@id='device-details-dialog']/div/ul/li[2]/button");
         verifyEquals("Google Inc.", selenium.getText("//div[@id='device-details-dialog']/div/div/div[2]/table/tbody/tr[5]/td[2]"));
