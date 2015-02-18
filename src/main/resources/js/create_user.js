@@ -16,12 +16,12 @@
 
 "use strict";
 AJS.toInit(function () {
-    AJS.$(document).ajaxStart(function () {
-        AJS.$(".loadingDiv").show();
-    });
-    AJS.$(document).ajaxStop(function () {
-        AJS.$(".loadingDiv").hide();
-    });
+    //AJS.$(document).ajaxStart(function () {
+    //    AJS.$(".loadingDiv").show();
+    //});
+    //AJS.$(document).ajaxStop(function () {
+    //    AJS.$(".loadingDiv").hide();
+    //});
 
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
     var config;
@@ -112,6 +112,7 @@ AJS.toInit(function () {
             }
         }
 
+        AJS.$(".loadingDiv").show();
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/user/createUser",
             type: "PUT",
@@ -123,12 +124,14 @@ AJS.toInit(function () {
                     body: "User created!"
                 });
                 resetForm();
+                AJS.$(".loadingDiv").hide();
             },
             error: function (e) {
                 AJS.messages.error({
                     title: "Error!",
                     body: "Something went wrong!<br />" + e.responseText
                 });
+                AJS.$(".loadingDiv").hide();
             }
         });
     }

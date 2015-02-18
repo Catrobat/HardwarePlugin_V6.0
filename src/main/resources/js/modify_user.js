@@ -46,12 +46,12 @@ function getGithubForm(githubUsername, checkBoxSet) {
 }
 
 AJS.toInit(function () {
-    AJS.$(document).ajaxStart(function () {
-        AJS.$(".loadingDiv").show();
-    });
-    AJS.$(document).ajaxStop(function () {
-        AJS.$(".loadingDiv").hide();
-    });
+    //AJS.$(document).ajaxStart(function () {
+    //    AJS.$(".loadingDiv").show();
+    //});
+    //AJS.$(document).ajaxStop(function () {
+    //    AJS.$(".loadingDiv").hide();
+    //});
 
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
 
@@ -79,6 +79,7 @@ AJS.toInit(function () {
     }, "#");
 
     function populateTable() {
+        AJS.$(".loadingDiv").show();
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/user/getUsers",
             dataType: "json",
@@ -108,12 +109,15 @@ AJS.toInit(function () {
                 userList.on('updated', function () {
                     AJS.$("#user-table").trigger("update");
                 });
+
+                AJS.$(".loadingDiv").hide();
             },
             error: function () {
                 AJS.messages.error({
                     title: "Error!",
                     body: "Something went wrong!"
                 });
+                AJS.$(".loadingDiv").hide();
             }
         }).done(function () {
             AJS.$(".disable").click(function (event) {
@@ -197,6 +201,7 @@ AJS.toInit(function () {
 
     function changeGithubUser(userName, githubName, teamList) {
         var jsonUser = {userName: userName, githubName: githubName, developerList: teamList};
+        AJS.$(".loadingDiv").show();
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/github/changeGithubname",
             type: "PUT",
@@ -208,12 +213,15 @@ AJS.toInit(function () {
                     title: "Success!",
                     body: "GitHub User changed!"
                 });
+
+                AJS.$(".loadingDiv").hide();
             },
             error: function (e) {
                 AJS.messages.error({
                     title: "Error!",
                     body: e.responseText
                 });
+                AJS.$(".loadingDiv").hide();
             }
         });
     }
@@ -243,7 +251,7 @@ AJS.toInit(function () {
             }
         }
 
-
+        AJS.$(".loadingDiv").show();
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/user/activateUser",
             type: "PUT",
@@ -255,17 +263,20 @@ AJS.toInit(function () {
                     title: "Success!",
                     body: "User enabled!"
                 });
+                AJS.$(".loadingDiv").hide();
             },
             error: function (e) {
                 AJS.messages.error({
                     title: "Error!",
                     body: "Something went wrong!<br />" + e.responseText
                 });
+                AJS.$(".loadingDiv").hide();
             }
         });
     }
 
     function inactivateUser(userName) {
+        AJS.$(".loadingDiv").show();
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/user/inactivateUser",
             type: "PUT",
@@ -277,12 +288,14 @@ AJS.toInit(function () {
                     title: "Success!",
                     body: "User disabled!"
                 });
+                AJS.$(".loadingDiv").hide();
             },
             error: function (e) {
                 AJS.messages.error({
                     title: "Error!",
                     body: "Something went wrong!<br />" + e.responseText
                 });
+                AJS.$(".loadingDiv").hide();
             }
         });
     }

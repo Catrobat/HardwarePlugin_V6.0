@@ -73,10 +73,11 @@ public final class JsonConfig {
         this.githubTokenPublic = toCopy.getPublicGithubApiToken();
         this.githubOrganization = toCopy.getGithubOrganisation();
 
-        this.resources = new ArrayList<JsonResource>();
+        Map<String, JsonResource> tempMap = new TreeMap<String, JsonResource>();
         for(Resource resource : toCopy.getResources()) {
-            this.resources.add(new JsonResource(resource));
+            tempMap.put(resource.getResourceName().toLowerCase(), new JsonResource(resource));
         }
+        this.resources = new ArrayList<JsonResource>(tempMap.values());
 
         Map<String, JsonTeam> teamMap = new TreeMap<String, JsonTeam>();
         for (Team team : toCopy.getTeams()) {

@@ -16,12 +16,12 @@
 
 "use strict";
 AJS.toInit(function () {
-    AJS.$(document).ajaxStart(function () {
-        AJS.$(".loadingDiv").show();
-    });
-    AJS.$(document).ajaxStop(function () {
-        AJS.$(".loadingDiv").hide();
-    });
+    //AJS.$(document).ajaxStart(function () {
+    //    AJS.$(".loadingDiv").show();
+    //});
+    //AJS.$(document).ajaxStop(function () {
+    //    AJS.$(".loadingDiv").hide();
+    //});
 
     var baseUrl = AJS.$("meta[name='application-base-url']").attr("content");
     var teams = [];
@@ -34,6 +34,7 @@ AJS.toInit(function () {
     }
 
     function populateForm() {
+        AJS.$(".loadingDiv").show();
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/latest/config/getConfig",
             dataType: "json",
@@ -211,12 +212,16 @@ AJS.toInit(function () {
                             text: resource['groupName']
                         });
                 }
+
+                AJS.$(".loadingDiv").hide();
             },
             error: function (error) {
                 AJS.messages.error({
                     title: "Error!",
                     body: "Something went wrong!"
                 });
+
+                AJS.$(".loadingDiv").hide();
             }
         });
     }
@@ -283,6 +288,7 @@ AJS.toInit(function () {
             config.teams.push(tempTeam);
         }
 
+        AJS.$(".loadingDiv").show();
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/config/saveConfig",
             type: "PUT",
@@ -294,17 +300,20 @@ AJS.toInit(function () {
                     title: "Success!",
                     body: "Settings saved!"
                 });
+                AJS.$(".loadingDiv").hide();
             },
             error: function (error) {
                 AJS.messages.error({
                     title: "Error!",
                     body: error.responseText
                 });
+                AJS.$(".loadingDiv").hide();
             }
         });
     }
 
     function addTeam() {
+        AJS.$(".loadingDiv").show();
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/config/addTeam",
             type: "PUT",
@@ -316,17 +325,20 @@ AJS.toInit(function () {
                     title: "Success!",
                     body: "Team added!"
                 });
+                AJS.$(".loadingDiv").hide();
             },
             error: function (error) {
                 AJS.messages.error({
                     title: "Error!",
                     body: "Something went wrong!<br />" + error.responseText
                 });
+                AJS.$(".loadingDiv").hide();
             }
         });
     }
 
     function addResource() {
+        AJS.$(".loadingDiv").show();
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/config/addResource",
             type: "PUT",
@@ -338,17 +350,20 @@ AJS.toInit(function () {
                     title: "Success!",
                     body: "Resource added!"
                 });
+                AJS.$(".loadingDiv").hide();
             },
             error: function (error) {
                 AJS.messages.error({
                     title: "Error!",
                     body: "Something went wrong!<br />" + error.responseText
                 });
+                AJS.$(".loadingDiv").hide();
             }
         });
     }
 
     function removeResource() {
+        AJS.$(".loadingDiv").show();
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/config/removeResource",
             type: "PUT",
@@ -360,12 +375,14 @@ AJS.toInit(function () {
                     title: "Success!",
                     body: "Resource removed!"
                 });
+                AJS.$(".loadingDiv").hide();
             },
             error: function (error) {
                 AJS.messages.error({
                     title: "Error!",
                     body: "Something went wrong!<br />" + error.responseText
                 });
+                AJS.$(".loadingDiv").hide();
             }
         });
     }
@@ -400,6 +417,7 @@ AJS.toInit(function () {
         editNameDialog.addPanel("Panel 1", content, "panel-body");
 
         editNameDialog.addButton("Save", function (dialog) {
+            AJS.$(".loadingDiv").show();
             AJS.$.ajax({
                 url: baseUrl + "/rest/admin-helper/1.0/config/editTeam",
                 type: "PUT",
@@ -413,6 +431,7 @@ AJS.toInit(function () {
                     });
                     populateForm();
                     scrollToAnchor('top');
+                    AJS.$(".loadingDiv").hide();
                 },
                 error: function (error) {
                     AJS.messages.error({
@@ -420,6 +439,7 @@ AJS.toInit(function () {
                         body: "Something went wrong!<br />" + error.responseText
                     });
                     scrollToAnchor('top');
+                    AJS.$(".loadingDiv").hide();
                 }
             });
 
@@ -435,6 +455,7 @@ AJS.toInit(function () {
     }
 
     function removeTeam() {
+        AJS.$(".loadingDiv").show();
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/config/removeTeam",
             type: "PUT",
@@ -446,12 +467,14 @@ AJS.toInit(function () {
                     title: "Success!",
                     body: "Team removed!"
                 });
+                AJS.$(".loadingDiv").hide();
             },
             error: function () {
                 AJS.messages.error({
                     title: "Error!",
                     body: "Something went wrong!"
                 });
+                AJS.$(".loadingDiv").hide();
             }
         });
     }

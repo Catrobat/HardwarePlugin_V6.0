@@ -51,10 +51,12 @@ function getTeamList(baseUrl, callme) {
 }
 
 function getConfigAndCallback(baseUrl, callback) {
+    AJS.$(".loadingDiv").show();
     AJS.$.ajax({
         url: baseUrl + "/rest/admin-helper/latest/config/getConfig",
         dataType: "json",
         success: function (config) {
+            AJS.$(".loadingDiv").hide();
             callback(config);
         },
         error: function (error) {
@@ -62,6 +64,7 @@ function getConfigAndCallback(baseUrl, callback) {
                 title: "Error!",
                 body: "Something went wrong!<br />" + error.responseText
             });
+            AJS.$(".loadingDiv").hide();
         }
     });
 }
