@@ -148,15 +148,15 @@ function showNewDeviceDialogAjax(baseUrl, hardwareList, editableDevice) {
                         body: "Device added successfully"
                     });
                     fillOutAllTables(baseUrl);
+                    dialog.remove();
                 },
                 error: function (error) {
-                    AJS.messages.error({
+                    AJS.messages.error("#dialog_error", {
                         title: "Error!",
                         body: error.responseText
                     });
                 }
             });
-            dialog.remove();
         } else {
             AJS.messages.error("#dialog_error", {
                 title: "Error!",

@@ -30,6 +30,7 @@ import static org.apache.commons.lang3.StringEscapeUtils.unescapeHtml4;
 public class CsvExporter {
 
     public static final String DELIMITER = ";";
+    public static final String NEW_LINE = "\n";
     private final List<Device> deviceList;
     private final UserManager userManager;
 
@@ -63,7 +64,7 @@ public class CsvExporter {
                 "Lent By" + DELIMITER +
                 "Device Comment" + DELIMITER +
                 "Device Comment Author" + DELIMITER +
-                "Device Comment Date" + "\n");
+                "Device Comment Date" + NEW_LINE);
 
         for (Device device : deviceList) {
             HardwareModel hardwareModel = device.getHardwareModel();
@@ -144,9 +145,9 @@ public class CsvExporter {
                     sb.append(unescape(latestDeviceComment.getAuthor())).append(DELIMITER);
                 }
 
-                sb.append(latestDeviceComment.getDate()).append("\n");
+                sb.append(latestDeviceComment.getDate()).append(NEW_LINE);
             } else {
-                sb.append(DELIMITER + DELIMITER + "\n");
+                sb.append(DELIMITER + DELIMITER + NEW_LINE);
             }
         }
 
@@ -155,9 +156,9 @@ public class CsvExporter {
 
     private String unescape(String escapedHtml4String) {
         if (escapedHtml4String == null || escapedHtml4String.trim().length() == 0) {
-            return "";
+            return "\"\"";
         } else {
-            return unescapeHtml4(escapedHtml4String);
+            return "\"" + unescapeHtml4(escapedHtml4String).replaceAll("\"", "\"\"") + "\"";
         }
     }
 }
