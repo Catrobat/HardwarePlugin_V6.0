@@ -48,7 +48,11 @@
     width: 400px;
 }
 
-div.loadingDiv{
+.padding-bottom {
+    padding-bottom: 10px;
+}
+
+div.loadingDiv {
     width: 100%;
     height: 100%;
     z-index: 10;
@@ -59,7 +63,7 @@ div.loadingDiv{
     padding-top: 20px;
     padding-left: 20px;
     vertical-align: middle;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
 div.change-details {

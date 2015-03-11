@@ -76,6 +76,14 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
     }
 
     @Override
+    public AdminHelperConfig setDefaultGithubTeamId(int defaultGithubTeamId) {
+        AdminHelperConfig config = getConfiguration();
+        config.setDefaultGithubTeamId(defaultGithubTeamId);
+        config.save();
+        return config;
+    }
+
+    @Override
     public AdminHelperConfig addResource(String resourceName, String groupName) {
         if (resourceName == null || resourceName.trim().length() == 0) {
             return null;

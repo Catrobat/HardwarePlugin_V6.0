@@ -45,6 +45,8 @@ public final class JsonConfig {
     @XmlElement
     private String githubOrganization;
     @XmlElement
+    private String defaultGithubTeam;
+    @XmlElement
     private List<JsonResource> resources;
     @XmlElement
     private List<JsonTeam> teams;
@@ -74,7 +76,7 @@ public final class JsonConfig {
         this.githubOrganization = toCopy.getGithubOrganisation();
 
         Map<String, JsonResource> tempMap = new TreeMap<String, JsonResource>();
-        for(Resource resource : toCopy.getResources()) {
+        for (Resource resource : toCopy.getResources()) {
             tempMap.put(resource.getResourceName().toLowerCase(), new JsonResource(resource));
         }
         this.resources = new ArrayList<JsonResource>(tempMap.values());
@@ -105,6 +107,7 @@ public final class JsonConfig {
 
         GithubHelper githubHelper = new GithubHelper(configService);
         this.availableGithubTeams = githubHelper.getAvailableTeams();
+        this.defaultGithubTeam = githubHelper.getTeamName(toCopy.getDefaultGithubTeamId());
 
         this.userDirectoryId = toCopy.getUserDirectoryId();
         DirectoryManager directoryManager = ComponentAccessor.getComponent(DirectoryManager.class);
@@ -195,5 +198,13 @@ public final class JsonConfig {
 
     public void setResources(List<JsonResource> resources) {
         this.resources = resources;
+    }
+
+    public String getDefaultGithubTeam() {
+        return defaultGithubTeam;
+    }
+
+    public void setDefaultGithubTeam(String defaultGithubTeam) {
+        this.defaultGithubTeam = defaultGithubTeam;
     }
 }

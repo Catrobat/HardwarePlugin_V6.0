@@ -32,6 +32,8 @@ public interface AdminHelperConfigService {
 
     AdminHelperConfig setUserDirectoryId(long userDirectoryId);
 
+    public AdminHelperConfig setDefaultGithubTeamId(int defaultGithubTeamId);
+
     Team addTeam(String teamName, List<Integer> githubTeamIdList, List<String> coordinatorGroups,
                  List<String> seniorGroups, List<String> developerGroups);
 

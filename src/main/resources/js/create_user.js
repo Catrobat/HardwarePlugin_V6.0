@@ -86,10 +86,7 @@ AJS.toInit(function () {
         userToCreate.lastName = AJS.$("#lastname").attr("value");
         userToCreate.email = AJS.$("#email").attr("value");
         userToCreate.githubName = AJS.$("#github").auiSelect2("val");
-        userToCreate.roomCalendar = AJS.$("#room-calendar").prop("checked");
-        userToCreate.meetingCalendar = AJS.$("#meeting-calendar").prop("checked");
-        userToCreate.masterStudent = AJS.$("#master-student").prop("checked");
-        userToCreate.phdStudent = AJS.$("#phd-student").prop("checked");
+        userToCreate.addToDefaultGithubTeam = AJS.$("#defaultGithubTeam").prop("checked");
         userToCreate.coordinatorList = [];
         userToCreate.seniorList = [];
         userToCreate.developerList = [];

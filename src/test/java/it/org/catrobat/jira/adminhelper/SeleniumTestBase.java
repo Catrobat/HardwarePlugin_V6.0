@@ -26,7 +26,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverBackedSelenium;
 
 import java.util.Calendar;
-import java.util.Locale;
 
 public abstract class SeleniumTestBase extends TestBase {
     protected Selenium selenium;

@@ -87,6 +87,7 @@ public class GithubHelperRest extends RestHelper {
         ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(applicationUser);
         String oldGithubName = extendedPreferences.getText(UserRest.GITHUB_PROPERTY);
 
+        // remove user from older github teams if github user is existing only once
         if (oldGithubName != null) {
             boolean stillExists = false;
             for (ApplicationUser tempApplicationUser : userUtil.getAllApplicationUsers()) {
@@ -107,6 +108,7 @@ public class GithubHelperRest extends RestHelper {
             }
         }
 
+        // set the new github user name in the user preferences
         extendedPreferences = userPreferencesManager.getExtendedPreferences(applicationUser);
         try {
             extendedPreferences.setText(UserRest.GITHUB_PROPERTY, jsonUser.getGithubName());

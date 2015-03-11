@@ -152,6 +152,15 @@ public class ConfigResourceRest extends RestHelper {
                 GHOrganization organization = gitHub.getOrganization(organizationName);
                 Collection<GHTeam> teamList = organization.getTeams().values();
 
+                if(jsonConfig.getDefaultGithubTeam() != null) {
+                    for (GHTeam team : teamList) {
+                        if (jsonConfig.getDefaultGithubTeam().toLowerCase().equals(team.getName().toLowerCase())) {
+                            configService.setDefaultGithubTeamId(team.getId());
+                            break;
+                        }
+                    }
+                }
+
                 for (JsonTeam jsonTeam : jsonConfig.getTeams()) {
                     configService.removeTeam(jsonTeam.getName());
 

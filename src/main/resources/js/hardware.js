@@ -120,6 +120,7 @@ function initIndividualRelatedLendingTab(baseUrl) {
         ajax: {
             url: baseUrl + urlSuffixUserSearch,
             dataType: "json",
+            type: "POST",
             data: function (term, page) {
                 return {query: term};
             },

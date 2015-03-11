@@ -207,6 +207,7 @@ function showLendOutDialogAjax(baseUrl, hardwareId, deviceList, deviceId) {
         ajax: {
             //url: baseUrl + "/rest/api/2/user/picker",
             url: baseUrl + urlSuffixUserSearch,
+            type: "POST",
             dataType: "json",
             data: function (term, page) {
                 return {query: term};

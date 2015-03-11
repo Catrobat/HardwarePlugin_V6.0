@@ -99,6 +99,10 @@
                             href="https://github.com/blog/1509-personal-api-tokens">token</a> with "admin:org" scope.
                     </div>
                 </div>
+                <div class="field-group">
+                    <label for="default-github-team">Default GitHub Team</label>
+                    <input class="text github-single" type="text" id="default-github-team" name="default-github-team">
+                </div>
             </fieldset>
             <h2>Team Configuration</h2>
 

@@ -142,6 +142,7 @@ public class UserRest extends RestHelper {
             e.printStackTrace();
         }
 
+        // User just needs to be added to default github team if desired
         Response response = addUserToGithubAndJiraGroups(jsonUser, ApplicationUsers.toDirectoryUser(jiraUser), config);
         if (response != null && response.getStatus() == Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
             return response;
@@ -220,7 +221,18 @@ public class UserRest extends RestHelper {
     @GET
     @Path("/search")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response searchUser(@QueryParam("query") String query, @Context HttpServletRequest request) {
+    public Response searchUserGet(@QueryParam("query") String query, @Context HttpServletRequest request) {
+        return searchUser(query, request);
+    }
+
+    @POST
+    @Path("/search")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response searchUserPost(@QueryParam("query") String query, @Context HttpServletRequest request) {
+        return searchUser(query, request);
+    }
+
+    private Response searchUser(String query, HttpServletRequest request) {
         Response unauthorized = checkPermission(request);
         if (unauthorized != null) {
             return unauthorized;
@@ -418,8 +430,18 @@ public class UserRest extends RestHelper {
         GithubHelper githubHelper = new GithubHelper(configService);
         if (jsonUser.getGithubName() != null && !jsonUser.getGithubName().trim().equals("")) {
             StringBuilder errors = new StringBuilder();
+
+            // add user to selected teams
             for (String team : githubTeamSet) {
                 String returnValue = githubHelper.addUserToTeam(jsonUser.getGithubName(), team);
+                if (returnValue != null) {
+                    errors.append(returnValue);
+                }
+            }
+
+            // add user to default team if selected
+            if(jsonUser.isAddToDefaultGithubTeam()) {
+               String returnValue = githubHelper.addUserToDefaultTeam(jsonUser.getGithubName());
                 if (returnValue != null) {
                     errors.append(returnValue);
                 }
@@ -436,7 +458,6 @@ public class UserRest extends RestHelper {
     }
 
     public Response addUserToGithubAndJiraGroups(JsonUser jsonUser, User jiraUser, JsonConfig config) {
-        Set<String> githubTeamSet = new HashSet<String>();
         try {
             if (jsonUser.getCoordinatorList() != null) {
                 for (String coordinatorOf : jsonUser.getCoordinatorList()) {
@@ -454,7 +475,6 @@ public class UserRest extends RestHelper {
                             if (error != null) {
                                 return error;
                             }
-                            githubTeamSet.addAll(team.getGithubTeams());
                         }
                     }
                 }
@@ -471,7 +491,6 @@ public class UserRest extends RestHelper {
                             if (error != null) {
                                 return error;
                             }
-                            githubTeamSet.addAll(team.getGithubTeams());
                         }
                     }
                 }
@@ -484,7 +503,6 @@ public class UserRest extends RestHelper {
                             if (error != null) {
                                 return error;
                             }
-                            githubTeamSet.addAll(team.getGithubTeams());
                         }
                     }
                 }
@@ -517,17 +535,10 @@ public class UserRest extends RestHelper {
         }
 
         GithubHelper githubHelper = new GithubHelper(configService);
-        if (jsonUser.getGithubName() != null && !jsonUser.getGithubName().equals("")) {
-            StringBuilder errors = new StringBuilder();
-            for (String team : githubTeamSet) {
-                String returnValue = githubHelper.addUserToTeam(jsonUser.getGithubName(), team);
-                if (returnValue != null) {
-                    errors.append(returnValue);
-                }
-            }
-
-            if (errors.length() != 0) {
-                return Response.serverError().entity(errors.toString()).build();
+        if (jsonUser.getGithubName() != null && !jsonUser.getGithubName().equals("") && jsonUser.isAddToDefaultGithubTeam()) {
+            String error = githubHelper.addUserToDefaultTeam(jsonUser.getGithubName());
+            if (error != null) {
+                return Response.serverError().entity(error).build();
             }
         }
 

@@ -38,6 +38,10 @@ public interface AdminHelperConfig extends Entity {
 
     void setUserDirectoryId(long userDirectoryId);
 
+    int getDefaultGithubTeamId();
+
+    void setDefaultGithubTeamId(int defaultGithubTeamId);
+
     @OneToMany(reverse = "getConfiguration")
     Resource[] getResources();
 

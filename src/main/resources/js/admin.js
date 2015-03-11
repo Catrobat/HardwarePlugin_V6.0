@@ -72,6 +72,22 @@ AJS.toInit(function () {
                     AJS.$("#teams").append("</fieldset>");
                 }
 
+
+                var singleGithubData = [];
+                for(var i = 0; i < config.availableGithubTeams.length; i++) {
+                    singleGithubData.push({id: config.availableGithubTeams[i], text: config.availableGithubTeams[i]});
+                }
+                AJS.$(".github-single").auiSelect2({
+                    placeholder: "Search for team",
+                    minimumInputLength: 0,
+                    data: singleGithubData
+                });
+
+                AJS.$(".github-single").auiSelect2("data", {
+                    id: config.defaultGithubTeam,
+                    text: config.defaultGithubTeam
+                });
+
                 if (config.availableGithubTeams) {
                     AJS.$(".github").auiSelect2({
                         placeholder: "Search for teams",
@@ -241,6 +257,7 @@ AJS.toInit(function () {
         config.githubTokenPublic = AJS.$("#github_token_public").val();
         config.githubOrganization = AJS.$("#github_organization").val();
         config.userDirectoryId = AJS.$("#userdirectory").auiSelect2("val");
+        config.defaultGithubTeam = AJS.$("#default-github-team").auiSelect2("val");
         config.resources = [];
         for(var i = 0; i < localTempResources.length; i++) {
             var resource = {};

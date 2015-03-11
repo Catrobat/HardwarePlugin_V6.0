@@ -35,14 +35,26 @@ var tableSkeleton = "<h3>Teams</h3>" +
 
 function getGithubForm(githubUsername, checkBoxSet) {
     return "<form id=\"d\" class=\"aui\">\n" +
-        "    <fieldset>\n" +
-        "        <div class=\"field-group\">\n" +
-        "            <label for=\"github-name\">GitHub Name<span class=\"aui-icon icon-required\"> required</span></label>\n" +
-        "            <input class=\"text\" type=\"text\" id=\"github-name\" name=\"github-name\" title=\"github-name\" value=\"" + githubUsername + "\">\n" +
-        "        </div>\n" +
+        "<fieldset>\n" +
+        "<div class=\"field-group\">\n" +
+        "<label for=\"github-name\">GitHub Name<span class=\"aui-icon icon-required\"> required</span></label>\n" +
+        "<input class=\"text\" type=\"text\" id=\"github-name\" name=\"github-name\" title=\"github-name\" value=\"" + githubUsername + "\">\n" +
+        "</div>\n" +
+        "<div class=\"field-group\">" +
+        "<div class=\"checkbox\">" +
+        "<input class=\"checkbox\" type=\"checkbox\" name=\"defaultGithubTeam\" id=\"defaultGithubTeam\">" +
+        "<label for=\"defaultGithubTeam\">Default GitHub Team</label>" +
+        "</div>" +
+        "<div class=\"description\">" +
+        "User will be added to default GitHub team (important for Jenkins white listing)" +
+        "</div>" +
+        "</div>" +
+        "<hr>" +
+        "<p class=\"padding-bottom\">For experienced GitHub Users, Seniors and Coordinators only!<br>" +
+        "The user will be granted write access to the repositories of the following team(s).</p>" +
         checkBoxSet +
-        "    </fieldset>\n" +
-        " </form>   ";
+        "</fieldset>\n" +
+        "</form>";
 }
 
 AJS.toInit(function () {
@@ -141,8 +153,8 @@ AJS.toInit(function () {
             "<legend><span>Team</span></legend>\n";
         for (var i = 0; i < teamList.length; i++) {
             checkboxSet += "<div class=\"checkbox\">\n" +
-            "<input class=\"checkbox\" type=\"checkbox\" name=\"" + teamList[i].name + "\" id=\"" + teamList[i].name.replace(/ /g, '-') + "\">\n" +
-            "<label for=\"" + teamList[i].name.replace(/ /g, '-') + "\">" + teamList[i].name + "</label>\n" +
+            "<input class=\"checkbox\" type=\"checkbox\" name=\"" + teamList[i].name + "\" id=\"change-github-dialog-" + teamList[i].name.replace(/ /g, '-') + "\">\n" +
+            "<label for=\"change-github-dialog-" + teamList[i].name.replace(/ /g, '-') + "\">" + teamList[i].name + "</label>\n" +
             "</div>\n";
         }
         checkboxSet += "</fieldset>";
@@ -162,11 +174,11 @@ AJS.toInit(function () {
         dialog.addSubmit("OK", function (dialog) {
             var selectedTeamList = [];
             for (var i = 0; i < teamList.length; i++) {
-                if (AJS.$("#" + teamList[i].name.replace(/ /g, '-')).prop("checked")) {
+                if (AJS.$("#change-github-dialog-" + teamList[i].name.replace(/ /g, '-')).prop("checked")) {
                     selectedTeamList.push(teamList[i].name);
                 }
             }
-            changeGithubUser(userName, AJS.$("#github-name").auiSelect2("val"), selectedTeamList);
+            changeGithubUser(userName, AJS.$("#github-name").auiSelect2("val"), AJS.$("#defaultGithubTeam").prop("checked"), selectedTeamList);
             dialog.remove();
         });
         dialog.addLink("Cancel", function (dialog) {
@@ -199,8 +211,13 @@ AJS.toInit(function () {
         }
     }
 
-    function changeGithubUser(userName, githubName, teamList) {
-        var jsonUser = {userName: userName, githubName: githubName, developerList: teamList};
+    function changeGithubUser(userName, githubName, defaultTeam, teamList) {
+        var jsonUser = {
+            userName: userName,
+            githubName: githubName,
+            addToDefaultGithubTeam: defaultTeam,
+            developerList: teamList
+        };
         AJS.$(".loadingDiv").show();
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/github/changeGithubname",

@@ -57,9 +57,17 @@
                     <div class="field-group">
                         <label for="github">GitHub username</label>
                         <input class="text" type="text" id="github" name="github" title="github name">
-
                         <div class="description">
                             If unknown the GitHub username can be edited later on at 'Modify User'.
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <div class="checkbox">
+                            <input class="checkbox" type="checkbox" name="defaultGithubTeam" id="defaultGithubTeam">
+                            <label for="defaultGithubTeam">Default GitHub Team</label>
+                        </div>
+                        <div class="description">
+                            User will be added to default GitHub team (important for Jenkins white listing)
                         </div>
                     </div>
                 </fieldset>

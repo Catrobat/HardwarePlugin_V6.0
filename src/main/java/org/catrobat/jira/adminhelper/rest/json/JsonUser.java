@@ -48,6 +48,8 @@ public final class JsonUser {
     private List<String> developerList;
     @XmlElement
     private boolean active;
+    @XmlElement
+    private boolean addToDefaultGithubTeam;
 
     public String getUserName() {
         return userName;
@@ -135,5 +137,13 @@ public final class JsonUser {
 
     public void setResourceList(List<JsonResource> resourceList) {
         this.resourceList = resourceList;
+    }
+
+    public boolean isAddToDefaultGithubTeam() {
+        return addToDefaultGithubTeam;
+    }
+
+    public void setAddToDefaultGithubTeam(boolean addToDefaultGithubTeam) {
+        this.addToDefaultGithubTeam = addToDefaultGithubTeam;
     }
 }

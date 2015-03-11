@@ -166,6 +166,27 @@ public class AdminHelperConfigServiceImplTest {
     }
 
     @Test
+    public void testSetDefaultGithubTeamId() {
+        AdminHelperConfig config = configurationService.getConfiguration();
+        assertEquals(0, config.getDefaultGithubTeamId());
+
+        assertNotNull(configurationService.setDefaultGithubTeamId(1));
+        ao.flushAll();
+        config = configurationService.getConfiguration();
+        assertEquals(1, config.getDefaultGithubTeamId());
+
+        assertNotNull(configurationService.setDefaultGithubTeamId(Integer.MAX_VALUE));
+        ao.flushAll();
+        config = configurationService.getConfiguration();
+        assertEquals(Integer.MAX_VALUE, config.getDefaultGithubTeamId());
+
+        assertNotNull(configurationService.setDefaultGithubTeamId(Integer.MIN_VALUE));
+        ao.flushAll();
+        config = configurationService.getConfiguration();
+        assertEquals(Integer.MIN_VALUE, config.getDefaultGithubTeamId());
+    }
+
+    @Test
     public void testAddTeam() {
         AdminHelperConfig config;
 

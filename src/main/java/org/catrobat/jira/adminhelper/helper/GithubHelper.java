@@ -16,7 +16,6 @@
 
 package org.catrobat.jira.adminhelper.helper;
 
-import org.apache.commons.io.IOUtils;
 import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHTeam;
@@ -81,6 +80,34 @@ public class GithubHelper {
         return null; // everything went fine
     }
 
+    public String addUserToDefaultTeam(final String userName) {
+        if (userName == null || !doesUserExist(userName)) {
+            return "User does not exist on GitHub";
+        }
+        int teamId = configService.getConfiguration().getDefaultGithubTeamId();
+
+        try {
+            GitHub gitHub = GitHub.connectUsingOAuth(token);
+            GHOrganization organization = gitHub.getOrganization(organizationName);
+            GHTeam team = null;
+            for(Map.Entry<String, GHTeam> entrySet : organization.getTeams().entrySet()) {
+                if(entrySet.getValue().getId() == teamId) {
+                    team = entrySet.getValue();
+                    break;
+                }
+            }
+            GHUser user = gitHub.getUser(userName);
+            if(team != null && user != null) {
+                team.add(user);
+            }
+        } catch(IOException e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
+
+        return null; //everything went fine
+    }
+
     public String addUserToTeam(final String userName, final String teamName) {
         if (userName == null || !doesUserExist(userName)) {
             return "User does not exist on GitHub";
@@ -122,8 +149,8 @@ public class GithubHelper {
         try {
             GitHub gitHub = GitHub.connectUsingOAuth(token);
             GHOrganization organization = gitHub.getOrganization(organizationName);
-            for(GHTeam team : organization.listTeams()) {
-                if(team.getId() == githubTeamId) {
+            for (GHTeam team : organization.listTeams()) {
+                if (team.getId() == githubTeamId) {
                     return team.getName();
                 }
             }
