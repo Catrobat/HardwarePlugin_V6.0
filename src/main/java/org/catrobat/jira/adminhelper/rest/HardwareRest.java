@@ -463,10 +463,10 @@ public class HardwareRest extends RestHelper {
         return Response.ok(jsonDeviceList).build();
     }
 
-    @GET
+    @POST
     @Path("/lending/all-for-user")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getLendingForUser(@Context HttpServletRequest request, @QueryParam("user") String userKey) {
+    public Response getLendingForUser(@Context HttpServletRequest request, @FormParam("user") String userKey) {
         Response unauthorized = checkPermission(request);
         if (unauthorized != null) {
             return unauthorized;

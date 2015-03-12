@@ -228,7 +228,7 @@ public class UserRest extends RestHelper {
     @POST
     @Path("/search")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response searchUserPost(@QueryParam("query") String query, @Context HttpServletRequest request) {
+    public Response searchUserPost(@FormParam("query") String query, @Context HttpServletRequest request) {
         return searchUser(query, request);
     }
 

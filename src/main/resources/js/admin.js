@@ -42,9 +42,9 @@ AJS.toInit(function () {
                 if (config.githubToken)
                     AJS.$("#github_token").attr("placeholder", config.githubToken);
                 if (config.githubTokenPublic)
-                    AJS.$("#github_token_public").val(config.githubTokenPublic);
+                    AJS.$("#github_token_public").val(unescapeHtml(config.githubTokenPublic));
                 if (config.githubOrganization)
-                    AJS.$("#github_organization").val(config.githubOrganization);
+                    AJS.$("#github_organization").val(unescapeHtml(config.githubOrganization));
                 localTempResources = [];
                 AJS.$("#resources").empty();
                 for (var i = 0; i < config.resources.length; i++) {
@@ -536,4 +536,8 @@ AJS.toInit(function () {
         AJS.$("#teams").html("");
         populateForm();
     });
+
+    function unescapeHtml(safe) {
+        return AJS.$('<div />').html(safe).text();
+    }
 });

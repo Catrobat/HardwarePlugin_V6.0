@@ -196,9 +196,9 @@ function showLendOutDialogAjax(baseUrl, hardwareId, deviceList, deviceId) {
         selectedDeviceId = e.target.id;
         AJS.$("#lend-out-dialog").find("a#" + selectedDeviceId).closest("tr").css("background-color", "#e0e0e0");
 
-        AJS.$("#serial").val(deviceList[deviceList.map[selectedDeviceId]].serialNumber);
-        AJS.$("#imei").val(deviceList[deviceList.map[selectedDeviceId]].imei);
-        AJS.$("#inventory").val(deviceList[deviceList.map[selectedDeviceId]].inventoryNumber);
+        AJS.$("#serial").val(unescapeHtml(deviceList[deviceList.map[selectedDeviceId]].serialNumber));
+        AJS.$("#imei").val(unescapeHtml(deviceList[deviceList.map[selectedDeviceId]].imei));
+        AJS.$("#inventory").val(unescapeHtml(deviceList[deviceList.map[selectedDeviceId]].inventoryNumber));
     });
 
     AJS.$("#user").auiSelect2({
@@ -249,8 +249,8 @@ function showLendOutDialogAjax(baseUrl, hardwareId, deviceList, deviceId) {
         lendingOutDialog.gotoPanel(1);
         selectedDeviceId = deviceId;
 
-        AJS.$("#serial").val(deviceList[deviceList.map[deviceId]].serialNumber);
-        AJS.$("#imei").val(deviceList[deviceList.map[deviceId]].imei);
-        AJS.$("#inventory").val(deviceList[deviceList.map[deviceId]].inventoryNumber);
+        AJS.$("#serial").val(unescapeHtml(deviceList[deviceList.map[deviceId]].serialNumber));
+        AJS.$("#imei").val(unescapeHtml(deviceList[deviceList.map[deviceId]].imei));
+        AJS.$("#inventory").val(unescapeHtml(deviceList[deviceList.map[deviceId]].inventoryNumber));
     }
 }

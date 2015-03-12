@@ -78,6 +78,14 @@ public class CreateAndEditDeviceDialogTest extends SeleniumTestBase {
         selenium.keyPress("css=#select2-drop input.select2-input", "\\13");
         selenium.type("id=life_of_asset", "24");
         selenium.click("css=button.button-panel-button.dialog_submit_button");
+        for (int second = 0; ; second++) {
+            if (second >= 60) SeleneseTestBase.fail("timeout");
+            try {
+                if ("3".equals(selenium.getText("//tbody[@id='table-management']/tr[2]/td[5]"))) break;
+            } catch (Exception e) {
+            }
+            Thread.sleep(1000);
+        }
         verifyEquals("3", selenium.getText("//tbody[@id='table-management']/tr[2]/td[5]"));
         selenium.click("css=#aui-uid-4 > strong");
         verifyEquals("Nexus 7 (8 GB)", selenium.getText("//tbody[@id='table-all-devices']/tr[8]/td"));

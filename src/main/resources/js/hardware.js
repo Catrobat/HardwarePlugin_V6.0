@@ -144,9 +144,9 @@ function initIndividualRelatedLendingTab(baseUrl) {
         .on("select2-selecting", function (e) {
             AJS.$.ajax({
                 url: baseUrl + urlSuffixLendingForUser,
-                type: "GET",
+                type: "POST",
                 dataType: "json",
-                data: {user: e.val},
+                data: {user: unescapeHtml(e.val)},
                 success: function (lendingList) {
                     if(lendingList.length == 0) {
                         AJS.$("#table-individual").html('<tr><td colspan="10">No entry found for this user.</td></tr>');
@@ -256,4 +256,8 @@ function formatString(string) {
         return '';
     }
     return string;
+}
+
+function unescapeHtml(safe) {
+    return AJS.$('<div />').html(safe).text();
 }

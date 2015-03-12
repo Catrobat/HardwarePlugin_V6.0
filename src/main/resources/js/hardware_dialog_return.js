@@ -115,11 +115,12 @@ function showReturnDialogAjax(baseUrl, deviceId, lendingDetails) {
     AJS.$("#end-date").attr("value", today);
 
     if (lendingDetails.purpose) {
-        AJS.$("#lending-purpose").val(lendingDetails.purpose);
+        AJS.$("#lending-purpose").val(unescapeHtml(lendingDetails.purpose));
+
     }
 
     if (lendingDetails.comment) {
-        AJS.$("#lending-comment").val(lendingDetails.comment);
+        AJS.$("#lending-comment").val(unescapeHtml(lendingDetails.comment));
     }
 
     returnDialog.gotoPage(0);
