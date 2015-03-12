@@ -17,16 +17,16 @@
 package org.catrobat.jira.adminhelper.helper;
 
 import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
+import org.catrobat.jira.adminhelper.rest.json.JsonConfig;
+import org.catrobat.jira.adminhelper.rest.json.JsonTeam;
+import org.catrobat.jira.adminhelper.rest.json.JsonUser;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHTeam;
 import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class GithubHelper {
 
@@ -59,7 +59,56 @@ public class GithubHelper {
         return false;
     }
 
-    public String removeUserFromAllTeams(final String userName) {
+    public String removeUserFromAllOldGroups(final JsonUser jsonUser) {
+        JsonConfig config = new JsonConfig(configService);
+        Set<String> githubTeamSet = new HashSet<String>();
+        if (jsonUser.getDeveloperList() != null) {
+            for (String developerOf : jsonUser.getDeveloperList()) {
+                for (JsonTeam team : config.getTeams()) {
+                    if (team.getName().equals(developerOf)) {
+                        githubTeamSet.addAll(team.getGithubTeams());
+                    }
+                }
+            }
+        } else {
+            return "Developer-List must be given";
+        }
+
+        if (jsonUser.isAddToDefaultGithubTeam()) {
+            githubTeamSet.add(config.getDefaultGithubTeam());
+        }
+
+        try {
+            GitHub gitHub = GitHub.connectUsingOAuth(token);
+            GHOrganization organization = gitHub.getOrganization(organizationName);
+            GHUser user = gitHub.getUser(jsonUser.getGithubName());
+
+            if (organization == null || user == null)
+                return "User and/or Organization is null";
+
+            for (Map.Entry<String, GHTeam> entrySet : organization.getTeams().entrySet()) {
+                boolean delete = true;
+                for (String team : githubTeamSet) {
+                    if (entrySet.getValue().getName().toLowerCase().equals(team.toLowerCase())) {
+                        // do nothing - the user is still in this team
+                        delete = false;
+                        break;
+                    }
+                }
+
+                if (delete) {
+                    entrySet.getValue().remove(user);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
+
+        return null; // everything went fine
+    }
+
+    public String removeUserFromOrganization(final String userName) {
         if (!doesUserExist(userName)) {
             return null; // does not exist - nobody to remove
         }
@@ -90,17 +139,17 @@ public class GithubHelper {
             GitHub gitHub = GitHub.connectUsingOAuth(token);
             GHOrganization organization = gitHub.getOrganization(organizationName);
             GHTeam team = null;
-            for(Map.Entry<String, GHTeam> entrySet : organization.getTeams().entrySet()) {
-                if(entrySet.getValue().getId() == teamId) {
+            for (Map.Entry<String, GHTeam> entrySet : organization.getTeams().entrySet()) {
+                if (entrySet.getValue().getId() == teamId) {
                     team = entrySet.getValue();
                     break;
                 }
             }
             GHUser user = gitHub.getUser(userName);
-            if(team != null && user != null) {
+            if (team != null && user != null) {
                 team.add(user);
             }
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return e.getMessage();
         }

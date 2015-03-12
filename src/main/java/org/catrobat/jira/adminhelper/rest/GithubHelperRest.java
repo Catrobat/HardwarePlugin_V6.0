@@ -88,8 +88,8 @@ public class GithubHelperRest extends RestHelper {
         String oldGithubName = extendedPreferences.getText(UserRest.GITHUB_PROPERTY);
 
         // remove user from older github teams if github user is existing only once
+        boolean stillExists = false;
         if (oldGithubName != null) {
-            boolean stillExists = false;
             for (ApplicationUser tempApplicationUser : userUtil.getAllApplicationUsers()) {
                 if (tempApplicationUser.getUsername().toLowerCase().equals(applicationUser.getUsername().toLowerCase())) {
                     continue;
@@ -101,10 +101,6 @@ public class GithubHelperRest extends RestHelper {
                     stillExists = true;
                     break;
                 }
-            }
-
-            if (!stillExists) {
-                githubHelper.removeUserFromAllTeams(oldGithubName);
             }
         }
 
@@ -118,6 +114,19 @@ public class GithubHelperRest extends RestHelper {
         }
 
         UserRest userRest = new UserRest(userManager, userPreferencesManager, configService, permissionManager, groupManager, directoryManager, null);
-        return userRest.addUserToGithubTeams(jsonUser);
+        Response response = userRest.addUserToGithubTeams(jsonUser);
+        if (response.getStatus() != 200) {
+            return response;
+        }
+
+        if (!stillExists && oldGithubName != null) {
+            if (oldGithubName.toLowerCase().equals(jsonUser.getGithubName().toLowerCase())) {
+                githubHelper.removeUserFromAllOldGroups(jsonUser);
+            } else {
+                githubHelper.removeUserFromOrganization(oldGithubName);
+            }
+        }
+
+        return Response.ok().build();
     }
 }

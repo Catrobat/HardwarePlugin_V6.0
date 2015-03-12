@@ -347,7 +347,7 @@ public class UserRest extends RestHelper {
         String githubName = extendedPreferences.getText(GITHUB_PROPERTY);
         if (githubName != null) {
             GithubHelper githubHelper = new GithubHelper(configService);
-            String error = githubHelper.removeUserFromAllTeams(githubName);
+            String error = githubHelper.removeUserFromOrganization(githubName);
             if (error != null) {
                 return Response.serverError().entity(error).build();
             }
@@ -440,8 +440,8 @@ public class UserRest extends RestHelper {
             }
 
             // add user to default team if selected
-            if(jsonUser.isAddToDefaultGithubTeam()) {
-               String returnValue = githubHelper.addUserToDefaultTeam(jsonUser.getGithubName());
+            if (jsonUser.isAddToDefaultGithubTeam()) {
+                String returnValue = githubHelper.addUserToDefaultTeam(jsonUser.getGithubName());
                 if (returnValue != null) {
                     errors.append(returnValue);
                 }
