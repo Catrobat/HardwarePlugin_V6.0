@@ -52,7 +52,7 @@ AJS.toInit(function () {
                     localTempResources.push(resource['resourceName']);
                     var tempResourceName = resource['resourceName'].replace(/ /g, '-');
                     AJS.$("#resources").append('<div class="field-group">' +
-                        '<label for="room-calendar">' + resource['resourceName'] + '</label>' +
+                        '<label for="' + tempResourceName + '">' + resource['resourceName'] + '</label>' +
                         '<input class="text single-jira-group" type="text" id="' + tempResourceName + '">' +
                         '</div>');
                 }
@@ -224,7 +224,7 @@ AJS.toInit(function () {
                     var resource = config.resources[i];
                     var tempResourceName = resource['resourceName'].replace(/ /g, "-");
                     AJS.$("#" + tempResourceName).auiSelect2("data", {
-                            id: resource['resourceName'],
+                            id: resource['groupName'],
                             text: resource['groupName']
                         });
                 }
