@@ -170,7 +170,7 @@ function showNewHardwareDialogAjax(baseUrl, editableHardwareModel) {
             results: function (data, page) {
                 var select2data = [];
                 for (var i = 0; i < data.length; i++) {
-                    select2data.push({id: data[i], text: data[i]});
+                    select2data.push({id: unescapeHtml(data[i]), text: unescapeHtml(data[i])});
                 }
                 return {results: select2data};
             }
@@ -186,7 +186,7 @@ function showNewHardwareDialogAjax(baseUrl, editableHardwareModel) {
         initSelection: function (element, callback) {
             callback({id: element.val(), text: element.val()});
         }
-    }).auiSelect2("val", hardwareModel.typeOfDevice);
+    }).auiSelect2("val", unescapeHtml(hardwareModel.typeOfDevice));
 
     AJS.$("#producer").auiSelect2({
         placeholder: "Existing producers",
@@ -199,7 +199,7 @@ function showNewHardwareDialogAjax(baseUrl, editableHardwareModel) {
             results: function (data, page) {
                 var select2data = [];
                 for (var i = 0; i < data.length; i++) {
-                    select2data.push({id: data[i], text: data[i]});
+                    select2data.push({id: unescapeHtml(data[i]), text: unescapeHtml(data[i])});
                 }
                 return {results: select2data};
             }
@@ -215,7 +215,7 @@ function showNewHardwareDialogAjax(baseUrl, editableHardwareModel) {
         initSelection: function (element, callback) {
             callback({id: element.val(), text: element.val()});
         }
-    }).auiSelect2("val", hardwareModel.producer);
+    }).auiSelect2("val", unescapeHtml(hardwareModel.producer));
 
     AJS.$("#operating-system").auiSelect2({
         placeholder: "Existing operating systems",
@@ -228,7 +228,7 @@ function showNewHardwareDialogAjax(baseUrl, editableHardwareModel) {
             results: function (data, page) {
                 var select2data = [];
                 for (var i = 0; i < data.length; i++) {
-                    select2data.push({id: data[i], text: data[i]});
+                    select2data.push({id: unescapeHtml(data[i]), text: unescapeHtml(data[i])});
                 }
                 return {results: select2data};
             }
@@ -244,7 +244,7 @@ function showNewHardwareDialogAjax(baseUrl, editableHardwareModel) {
         initSelection: function (element, callback) {
             callback({id: element.val(), text: element.val()});
         }
-    }).auiSelect2("val", hardwareModel.operatingSystem);
+    }).auiSelect2("val", unescapeHtml(hardwareModel.operatingSystem));
 
     createHardwareDialog.gotoPage(0);
     createHardwareDialog.gotoPanel(0);

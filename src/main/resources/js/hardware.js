@@ -127,15 +127,7 @@ function initIndividualRelatedLendingTab(baseUrl) {
             results: function (data, page) {
                 var select2data = [];
                 for (var i = 0; i < data.length; i++) {
-                    var tempDisplayName = data[i].displayName;
-                    tempDisplayName = tempDisplayName.replace(/&Auml;/g, 'Ä');
-                    tempDisplayName = tempDisplayName.replace(/&Ouml;/g, 'Ö');
-                    tempDisplayName = tempDisplayName.replace(/&Uuml;/g, 'Ü');
-                    tempDisplayName = tempDisplayName.replace(/&auml;/g, 'ä');
-                    tempDisplayName = tempDisplayName.replace(/&ouml;/g, 'ö');
-                    tempDisplayName = tempDisplayName.replace(/&uuml;/g, 'ü');
-                    tempDisplayName = tempDisplayName.replace(/&szlig;/g, 'ß');
-                    select2data.push({id: data[i].userName, text: tempDisplayName});
+                    select2data.push({id: data[i].userName, text: unescapeHtml(data[i].displayName)});
                 }
                 return {results: select2data};
             }
@@ -259,5 +251,9 @@ function formatString(string) {
 }
 
 function unescapeHtml(safe) {
-    return AJS.$('<div />').html(safe).text();
+    if(safe) {
+        return AJS.$('<div />').html(safe).text();
+    } else {
+        return '';
+    }
 }

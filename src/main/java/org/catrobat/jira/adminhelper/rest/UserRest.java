@@ -39,6 +39,7 @@ import com.atlassian.mail.Email;
 import com.atlassian.mail.queue.SingleMailQueueItem;
 import com.atlassian.sal.api.user.UserManager;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
 import org.catrobat.jira.adminhelper.activeobject.Lending;
@@ -244,6 +245,8 @@ public class UserRest extends RestHelper {
         if (query == null || query.length() < 1) {
             return Response.ok(new ArrayList<JsonUser>()).build();
         }
+
+        query = StringEscapeUtils.escapeHtml4(query);
 
         com.atlassian.jira.user.util.UserManager jiraUserManager = ComponentAccessor.getUserManager();
         TreeMap<String, JsonUser> jsonUsers = new TreeMap<String, JsonUser>();

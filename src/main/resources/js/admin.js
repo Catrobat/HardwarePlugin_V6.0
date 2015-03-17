@@ -538,6 +538,10 @@ AJS.toInit(function () {
     });
 
     function unescapeHtml(safe) {
-        return AJS.$('<div />').html(safe).text();
+        if(safe) {
+            return AJS.$('<div />').html(safe).text();
+        } else {
+            return '';
+        }
     }
 });

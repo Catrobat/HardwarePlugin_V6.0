@@ -215,7 +215,7 @@ function showLendOutDialogAjax(baseUrl, hardwareId, deviceList, deviceId) {
             results: function (data, page) {
                 var select2data = [];
                 for (var i = 0; i < data.length; i++) {
-                    select2data.push({id: data[i].userName, text: data[i].displayName});
+                    select2data.push({id: data[i].userName, text: unescapeHtml(data[i].displayName)});
                 }
                 return {results: select2data};
             }

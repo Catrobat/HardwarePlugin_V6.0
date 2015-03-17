@@ -212,7 +212,7 @@ function showNewDeviceDialogAjax(baseUrl, hardwareList, editableDevice) {
                 var select2data = [];
                 select2data.push({id: null, text: "<none>"});
                 for (var i = 0; i < data.length; i++) {
-                    select2data.push({id: data[i].receivedFrom, text: data[i].receivedFrom});
+                    select2data.push({id: unescapeHtml(data[i].receivedFrom), text: unescapeHtml(data[i].receivedFrom)});
                 }
                 return {results: select2data};
             }
@@ -228,5 +228,5 @@ function showNewDeviceDialogAjax(baseUrl, hardwareList, editableDevice) {
         initSelection: function (element, callback) {
             callback({id: element.val(), text: element.val()});
         }
-    }).auiSelect2("val", device.receivedFrom);
+    }).auiSelect2("val", unescapeHtml(device.receivedFrom));
 }
