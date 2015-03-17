@@ -77,6 +77,9 @@ public class JsonDevice {
     private Date currentlyLentOutSince;
 
     @XmlElement
+    private String currentlyLentOutPurpose;
+
+    @XmlElement
     private List<JsonDeviceComment> comments;
 
     @XmlElement
@@ -109,6 +112,7 @@ public class JsonDevice {
         for (int i = lendingsArray.length - 1; i >= 0; i--) {
             if (lendingsArray[i].getEnd() == null) {
                 currentlyLentOutSince = lendingsArray[i].getBegin();
+                currentlyLentOutPurpose = lendingsArray[i].getPurpose();
                 ApplicationUser user = ComponentAccessor.getUserManager().getUserByKey(lendingsArray[i].getLendingByUserKey());
                 if (user != null)
                     currentlyLentOutBy = user.getUsername();

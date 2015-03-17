@@ -50,12 +50,12 @@ public class OverviewTabTest extends SeleniumTestBase {
         }
 
         verifyEquals("Lending Out - Nexus 4 (8 GB)", selenium.getText("css=h2.dialog-title"));
-        verifyEquals("111", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr/td)[17]"));
-        verifyEquals("111", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr/td[2])[3]"));
-        verifyEquals("111", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr/td[3])[3]"));
-        verifyEquals("789", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr[2]/td)[9]"));
-        verifyEquals("890", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr[2]/td[2])[2]"));
-        verifyEquals("901", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr[2]/td[3])[2]"));
+        verifyEquals("111", selenium.getText("css=#lend-out-dialog #table-lent-out > tr > td.serial"));
+        verifyEquals("111", selenium.getText("css=#lend-out-dialog #table-lent-out > tr > td.imei"));
+        verifyEquals("111", selenium.getText("css=#lend-out-dialog #table-lent-out > tr > td.inventory"));
+        verifyEquals("789", selenium.getText("css=#lend-out-dialog #table-lent-out > tr:nth-child(2) > td.serial"));
+        verifyEquals("890", selenium.getText("css=#lend-out-dialog #table-lent-out > tr:nth-child(2) > td.imei"));
+        verifyEquals("901", selenium.getText("css=#lend-out-dialog #table-lent-out > tr:nth-child(2) > td.inventory"));
         selenium.click("link=Cancel");
         selenium.click("id=2");
         for (int second = 0; ; second++) {
@@ -68,9 +68,9 @@ public class OverviewTabTest extends SeleniumTestBase {
         }
 
         verifyEquals("Lending Out - Nexus 7 (8 GB)", selenium.getText("css=h2.dialog-title"));
-        verifyEquals("444", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr/td)[17]"));
-        verifyEquals("", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr/td[2])[3]"));
-        verifyEquals("", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr/td[3])[3]"));
+        verifyEquals("444", selenium.getText("css=#lend-out-dialog #table-lent-out > tr > td.serial"));
+        verifyEquals("", selenium.getText("css=#lend-out-dialog #table-lent-out > tr > td.imei"));
+        verifyEquals("", selenium.getText("css=#lend-out-dialog #table-lent-out > tr > td.inventory"));
         selenium.click("link=Cancel");
     }
 

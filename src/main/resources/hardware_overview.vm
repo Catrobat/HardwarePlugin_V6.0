@@ -99,6 +99,7 @@
                 <th>Inventorynumber</th>
                 <th>Lent out by</th>
                 <th>Lent out since</th>
+                <th>Lent out Purpose</th>
                 <th class="aui-table-column-unsortable">Details</th>
                 <th class="aui-table-column-unsortable">Return Device</th>
             </tr>

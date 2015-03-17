@@ -56,6 +56,7 @@ function populateLentOutTable(hardwareList) {
             "<td class=\"inventory\">" + formatString(hardwareList[i].inventoryNumber) + "</td>\n" +
             "<td class=\"lent-out-by\">" + formatString(hardwareList[i].currentlyLentOutBy) + "</td>\n" +
             "<td class=\"lent-out-since\">" + currentlyLentOutSince.toISOString().split("T")[0] + "</td>\n" +
+            "<td class=\"lent-out-purpose\">" + formatString(hardwareList[i].currentlyLentOutPurpose) + "</td>\n" +
             "<td><a class=\"device_details\" id=\"" + hardwareList[i].id + "\" href=\"#\">Details</a></td>\n" +
             "<td><a class=\"device_return\" id=\"" + hardwareList[i].id + "\" href=\"#\">Return</a></td>\n" +
             "</tr>";
@@ -64,7 +65,7 @@ function populateLentOutTable(hardwareList) {
     AJS.$("#table-lent-out").html(tableBody);
     AJS.$("#table-lent-out").trigger("update");
 
-    var lentOutList = new List("tabs-lent-out", {page: Number.MAX_VALUE, valueNames: ["name", "serial", "imei", "inventory", "lent-out-by", "lent-out-since"]});
+    var lentOutList = new List("tabs-lent-out", {page: Number.MAX_VALUE, valueNames: ["name", "serial", "imei", "inventory", "lent-out-by", "lent-out-since", "lent-out-purpose"]});
     lentOutList.on('updated', function() {
         AJS.$("#table-lent-out").trigger("update");
     });

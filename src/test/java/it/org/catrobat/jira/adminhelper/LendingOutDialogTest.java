@@ -36,12 +36,12 @@ public class LendingOutDialogTest extends SeleniumTestBase {
             Thread.sleep(1000);
         }
 
-        verifyEquals("111", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr/td)[17]"));
-        verifyEquals("111", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr/td[2])[3]"));
-        verifyEquals("111", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr/td[3])[3]"));
-        verifyEquals("789", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr[2]/td)[9]"));
-        verifyEquals("890", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr[2]/td[2])[2]"));
-        verifyEquals("901", selenium.getText("xpath=(//tbody[@id='table-lent-out']/tr[2]/td[3])[2]"));
+        verifyEquals("111", selenium.getText("css=#lend-out-dialog #table-lent-out > tr > td.serial"));
+        verifyEquals("111", selenium.getText("css=#lend-out-dialog #table-lent-out > tr > td.imei"));
+        verifyEquals("111", selenium.getText("css=#lend-out-dialog #table-lent-out > tr > td.inventory"));
+        verifyEquals("789", selenium.getText("css=#lend-out-dialog #table-lent-out > tr:nth-child(2) > td.serial"));
+        verifyEquals("890", selenium.getText("css=#lend-out-dialog #table-lent-out > tr:nth-child(2) > td.imei"));
+        verifyEquals("901", selenium.getText("css=#lend-out-dialog #table-lent-out > tr:nth-child(2) > td.inventory"));
         selenium.click("xpath=(//a[contains(text(),'Choose...')])[2]");
         selenium.click("css=li.page-menu-item.selected > button.item-button");
         verifyEquals("789", selenium.getValue("css=input#serial"));
