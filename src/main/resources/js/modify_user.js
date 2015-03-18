@@ -189,7 +189,6 @@ AJS.toInit(function () {
 
         AJS.$("#github-name").auiSelect2({
             placeholder: "Search for user",
-            minimumInputLength: 1,
             ajax: {
                 url: "https://api.github.com/search/users",
                 dataType: "json",
@@ -198,11 +197,19 @@ AJS.toInit(function () {
                 },
                 results: function (data, page) {
                     var select2data = [];
+                    select2data.push({id: '', text: 'delete name', it: true});
                     for (var i = 0; i < data.items.length; i++) {
                         select2data.push({id: data.items[i].login, text: data.items[i].login});
                     }
                     return {results: select2data};
                 }
+            },
+            formatResult: function(result){
+                if(result.it) {
+                    return '<i><b>' + result.text + '</b></i>';
+                }
+
+                return result.text;
             }
         });
 

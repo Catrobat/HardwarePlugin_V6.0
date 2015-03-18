@@ -68,11 +68,14 @@ public class GithubHelperRest extends RestHelper {
             return unauthorized;
         }
 
-        if (jsonUser.getUserName() == null || jsonUser.getGithubName() == null || jsonUser.getDeveloperList() == null) {
+        if (jsonUser.getUserName() == null || jsonUser.getDeveloperList() == null) {
             return Response.serverError().entity("JSON User Object not complete").build();
         }
 
-        if (!githubHelper.doesUserExist(jsonUser.getGithubName())) {
+        boolean deleteGithubName = false;
+        if(jsonUser.getGithubName() == null || jsonUser.getGithubName().trim().equals("")) {
+            deleteGithubName = true;
+        } else if (!githubHelper.doesUserExist(jsonUser.getGithubName())) {
             return Response.serverError().entity("Github User does not exist").build();
         }
 
@@ -107,20 +110,28 @@ public class GithubHelperRest extends RestHelper {
         // set the new github user name in the user preferences
         extendedPreferences = userPreferencesManager.getExtendedPreferences(applicationUser);
         try {
-            extendedPreferences.setText(UserRest.GITHUB_PROPERTY, jsonUser.getGithubName());
+            if(deleteGithubName) {
+                extendedPreferences.remove(UserRest.GITHUB_PROPERTY);
+            } else {
+                extendedPreferences.setText(UserRest.GITHUB_PROPERTY, jsonUser.getGithubName());
+            }
         } catch (AtlassianCoreException e) {
             e.printStackTrace();
             return Response.serverError().entity(e.getMessage()).build();
         }
 
-        UserRest userRest = new UserRest(userManager, userPreferencesManager, configService, permissionManager, groupManager, directoryManager, null);
-        Response response = userRest.addUserToGithubTeams(jsonUser);
-        if (response.getStatus() != 200) {
-            return response;
+        if(!deleteGithubName) {
+            UserRest userRest = new UserRest(userManager, userPreferencesManager, configService, permissionManager, groupManager, directoryManager, null);
+            Response response = userRest.addUserToGithubTeams(jsonUser);
+            if (response.getStatus() != 200) {
+                return response;
+            }
         }
 
         if (!stillExists && oldGithubName != null) {
-            if (oldGithubName.toLowerCase().equals(jsonUser.getGithubName().toLowerCase())) {
+            if(deleteGithubName) {
+                githubHelper.removeUserFromOrganization(oldGithubName);
+            } else if (oldGithubName.toLowerCase().equals(jsonUser.getGithubName().toLowerCase())) {
                 githubHelper.removeUserFromAllOldGroups(jsonUser);
             } else {
                 githubHelper.removeUserFromOrganization(oldGithubName);
