@@ -20,20 +20,21 @@ function populateTeamTable(config, tableId, resourceId) {
     AJS.$(tableId).empty();
     for (var i = 0; i < config.teams.length; i++) {
         var obj = config.teams[i];
+        var teamName = obj['name'].replace(/\W/g, "-");
         AJS.$(tableId).append("<tr><td headers=\"basic-team\">" + obj['name'] +
-        "</td><td headers=\"basic-coordinator\"><input class=\"radio\" type=\"radio\" name=\"" + obj['name'] +
-        "\" id=\"" + obj['name'] + "-coordinator\" value=\"coordinator\"></td><td headers=\"basic-senior\"><input class=\"radio\" type=\"radio\" name=\"" +
-        obj['name'] + "\" id=\"" + obj['name'].replace(/ /g, "-") + "-senior\" value=\"senior\"></td><td headers=\"basic-developer\"><input class=\"radio\" type=\"radio\" name=\"" +
-        obj['name'] + "\" id=\"" + obj['name'].replace(/ /g, "-") + "-developer\" value=\"developer\"></td><td headers=\"basic-none\"><input class=\"radio\" type=\"radio\" checked=\"checked\" name=\"" +
-        obj['name'] + "\" id=\"" + obj['name'].replace(/ /g, "-") + "-none\" value=\"none\"></td></tr>");
+        "</td><td headers=\"basic-coordinator\"><input class=\"radio\" type=\"radio\" name=\"" + teamName +
+        "\" id=\"" + teamName + "-coordinator\" value=\"coordinator\"></td><td headers=\"basic-senior\"><input class=\"radio\" type=\"radio\" name=\"" +
+        teamName + "\" id=\"" + teamName + "-senior\" value=\"senior\"></td><td headers=\"basic-developer\"><input class=\"radio\" type=\"radio\" name=\"" +
+        teamName + "\" id=\"" + teamName + "-developer\" value=\"developer\"></td><td headers=\"basic-none\"><input class=\"radio\" type=\"radio\" checked=\"checked\" name=\"" +
+        teamName + "\" id=\"" + teamName + "-none\" value=\"none\"></td></tr>");
     }
 
     AJS.$(resourceId).empty();
     for (i = 0; i < config.resources.length; i++) {
         obj = config.resources[i];
         AJS.$(resourceId).append('<div class="checkbox">' +
-            '<input class="checkbox" type="checkbox" id="' + obj.resourceName.replace(/ /g, "-") + '">' +
-            '<label for="' + obj.resourceName.replace(/ /g, "-") + '">' + obj.resourceName + '</label>' +
+            '<input class="checkbox" type="checkbox" id="' + obj.resourceName.replace(/\W/g, "-") + '">' +
+            '<label for="' + obj.resourceName.replace(/\W/g, "-") + '">' + obj.resourceName + '</label>' +
             '</div>'
         );
     }

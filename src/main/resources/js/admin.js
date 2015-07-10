@@ -50,7 +50,7 @@ AJS.toInit(function () {
                 for (var i = 0; i < config.resources.length; i++) {
                     var resource = config.resources[i];
                     localTempResources.push(resource['resourceName']);
-                    var tempResourceName = resource['resourceName'].replace(/ /g, '-');
+                    var tempResourceName = resource['resourceName'].replace(/\W/g, '-');
                     AJS.$("#resources").append('<div class="field-group">' +
                         '<label for="' + tempResourceName + '">' + resource['resourceName'] + '</label>' +
                         '<input class="text single-jira-group" type="text" id="' + tempResourceName + '">' +
@@ -61,7 +61,7 @@ AJS.toInit(function () {
                 for (var i = 0; i < config.teams.length; i++) {
                     var team = config.teams[i];
                     teams.push(team['name']);
-                    var tempTeamName = team['name'].replace(/ /g, '-');
+                    var tempTeamName = team['name'].replace(/\W/g, '-');
                     AJS.$("#teams").append("<h3>" + team['name'] +
                     "<button class=\"aui-button aui-button-subtle\" value=\"" + team['name'] + "\">" +
                     "<span class=\"aui-icon aui-icon-small aui-iconfont-edit\">Editing</span> Edit</button></h3><fieldset>");
@@ -222,7 +222,7 @@ AJS.toInit(function () {
                 });
                 for(var i = 0; i < config.resources.length; i++) {
                     var resource = config.resources[i];
-                    var tempResourceName = resource['resourceName'].replace(/ /g, "-");
+                    var tempResourceName = resource['resourceName'].replace(/\W/g, "-");
                     AJS.$("#" + tempResourceName).auiSelect2("data", {
                             id: resource['groupName'],
                             text: resource['groupName']
@@ -262,7 +262,7 @@ AJS.toInit(function () {
         for(var i = 0; i < localTempResources.length; i++) {
             var resource = {};
             resource.resourceName = localTempResources[i];
-            var tempResourceName = localTempResources[i].replace(/ /g, "-");
+            var tempResourceName = localTempResources[i].replace(/\W/g, "-");
             resource.groupName = AJS.$("#" + tempResourceName).auiSelect2("val");
             config.resources.push(resource);
         }
@@ -282,7 +282,7 @@ AJS.toInit(function () {
         config.approvedGroups = approvedGroups;
         config.teams = [];
         for (var i = 0; i < teams.length; i++) {
-            var tempTeamName = teams[i].replace(/ /g, '-');
+            var tempTeamName = teams[i].replace(/\W/g, '-');
             var tempTeam = {};
             tempTeam.name = teams[i];
             tempTeam.githubTeams = AJS.$("#" + tempTeamName + "-github-teams").auiSelect2("val");

@@ -153,8 +153,8 @@ AJS.toInit(function () {
             "<legend><span>Team</span></legend>\n";
         for (var i = 0; i < teamList.length; i++) {
             checkboxSet += "<div class=\"checkbox\">\n" +
-            "<input class=\"checkbox\" type=\"checkbox\" name=\"" + teamList[i].name + "\" id=\"change-github-dialog-" + teamList[i].name.replace(/ /g, '-') + "\">\n" +
-            "<label for=\"change-github-dialog-" + teamList[i].name.replace(/ /g, '-') + "\">" + teamList[i].name + "</label>\n" +
+            "<input class=\"checkbox\" type=\"checkbox\" name=\"" + teamList[i].name + "\" id=\"change-github-dialog-" + teamList[i].name.replace(/\W/g, '-') + "\">\n" +
+            "<label for=\"change-github-dialog-" + teamList[i].name.replace(/\W/g, '-') + "\">" + teamList[i].name + "</label>\n" +
             "</div>\n";
         }
         checkboxSet += "</fieldset>";
@@ -174,7 +174,7 @@ AJS.toInit(function () {
         dialog.addSubmit("OK", function (dialog) {
             var selectedTeamList = [];
             for (var i = 0; i < teamList.length; i++) {
-                if (AJS.$("#change-github-dialog-" + teamList[i].name.replace(/ /g, '-')).prop("checked")) {
+                if (AJS.$("#change-github-dialog-" + teamList[i].name.replace(/\W/g, '-')).prop("checked")) {
                     selectedTeamList.push(teamList[i].name);
                 }
             }
@@ -257,7 +257,7 @@ AJS.toInit(function () {
         userToModify.seniorList = [];
         userToModify.developerList = [];
         for (var i = 0; i < teamList.length; i++) {
-            var value = AJS.$("input[name='" + teamList[i] + "']:checked").val();
+            var value = AJS.$("input[name='" + teamList[i].replace(/\W/g, "-") + "']:checked").val();
             if (value == "coordinator") {
                 userToModify.coordinatorList.push(teamList[i]);
             } else if (value == "senior") {
@@ -270,7 +270,7 @@ AJS.toInit(function () {
         userToModify.resourceList = [];
         for (i = 0; i < config.resources.length; i++) {
             var resource = config.resources[i];
-            if (AJS.$('#' + resource.resourceName.replace(/ /g, "-")).attr('checked')) {
+            if (AJS.$('#' + resource.resourceName.replace(/\W/g, "-")).attr('checked')) {
                 userToModify.resourceList.push(resource);
             }
         }

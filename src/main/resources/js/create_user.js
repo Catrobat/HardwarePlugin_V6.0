@@ -92,7 +92,7 @@ AJS.toInit(function () {
         userToCreate.developerList = [];
 
         for (var i = 0; i < teamList.length; i++) {
-            var value = AJS.$("input[name='" + teamList[i].replace(/ /g, "-") + "']:checked").val();
+            var value = AJS.$("input[name='" + teamList[i].replace(/\W/g, "-") + "']:checked").val();
             if (value == "coordinator") {
                 userToCreate.coordinatorList.push(teamList[i]);
             } else if (value == "senior") {
@@ -104,7 +104,7 @@ AJS.toInit(function () {
         userToCreate.resourceList = [];
         for (i = 0; i < config.resources.length; i++) {
             var resource = config.resources[i];
-            if (AJS.$('#' + resource.resourceName.replace(/ /g, "-")).attr('checked')) {
+            if (AJS.$('#' + resource.resourceName.replace(/\W/g, "-")).attr('checked')) {
                 userToCreate.resourceList.push(resource);
             }
         }

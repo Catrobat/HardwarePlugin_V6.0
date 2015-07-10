@@ -401,7 +401,8 @@ public class UserRest extends RestHelper {
             boolean groupExists = false;
             groupCollection = groupManager.getAllGroups();
             for (Group group : groupCollection) {
-                if (groupString.toLowerCase().equals(group.getName().toLowerCase())) {
+                if (group != null && group.getName() != null && groupString != null &&
+                        groupString.toLowerCase().equals(group.getName().toLowerCase())) {
                     groupManager.addUserToGroup(user, group);
                     groupExists = true;
                     break;
