@@ -47,6 +47,8 @@ public interface AdminHelperConfigService {
 
     AdminHelperConfig removeResource(String resourceName);
 
+    AdminHelperConfig editMail(String mailFromName, String mailFrom, String mailSubject, String mailBody);
+
     List<String> getGroupsForRole(String teamName, TeamToGroup.Role role);
 
     boolean isGroupApproved(String groupName);

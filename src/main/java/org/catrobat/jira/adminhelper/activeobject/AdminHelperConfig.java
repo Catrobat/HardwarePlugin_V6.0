@@ -42,6 +42,22 @@ public interface AdminHelperConfig extends Entity {
 
     void setDefaultGithubTeamId(int defaultGithubTeamId);
 
+    String getMailFromName();
+
+    void setMailFromName(String fromName);
+
+    String getMailFrom();
+
+    void setMailFrom(String from);
+
+    String getMailSubject();
+
+    void setMailSubject(String subject);
+
+    String getMailBody();
+
+    void setMailBody(String body);
+
     @OneToMany(reverse = "getConfiguration")
     Resource[] getResources();
 

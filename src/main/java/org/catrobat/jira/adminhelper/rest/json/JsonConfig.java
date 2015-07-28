@@ -60,6 +60,14 @@ public final class JsonConfig {
     private long userDirectoryId;
     @XmlElement
     private String userDirectoryName;
+    @XmlElement
+    private String mailFromName;
+    @XmlElement
+    private String mailFrom;
+    @XmlElement
+    private String mailSubject;
+    @XmlElement
+    private String mailBody;
 
     public JsonConfig() {
 
@@ -118,6 +126,10 @@ public final class JsonConfig {
             this.userDirectoryName = null;
         }
 
+        this.mailFromName = toCopy.getMailFromName();
+        this.mailFrom = toCopy.getMailFrom();
+        this.mailSubject = toCopy.getMailSubject();
+        this.mailBody = toCopy.getMailBody();
     }
 
     public String getGithubToken() {
@@ -206,5 +218,37 @@ public final class JsonConfig {
 
     public void setDefaultGithubTeam(String defaultGithubTeam) {
         this.defaultGithubTeam = defaultGithubTeam;
+    }
+
+    public String getMailFromName() {
+        return mailFromName;
+    }
+
+    public void setMailFromName(String mailFromName) {
+        this.mailFromName = mailFromName;
+    }
+
+    public String getMailFrom() {
+        return mailFrom;
+    }
+
+    public void setMailFrom(String mailFrom) {
+        this.mailFrom = mailFrom;
+    }
+
+    public String getMailSubject() {
+        return mailSubject;
+    }
+
+    public void setMailSubject(String mailSubject) {
+        this.mailSubject = mailSubject;
+    }
+
+    public String getMailBody() {
+        return mailBody;
+    }
+
+    public void setMailBody(String mailBody) {
+        this.mailBody = mailBody;
     }
 }

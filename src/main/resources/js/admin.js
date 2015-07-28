@@ -45,6 +45,14 @@ AJS.toInit(function () {
                     AJS.$("#github_token_public").val(unescapeHtml(config.githubTokenPublic));
                 if (config.githubOrganization)
                     AJS.$("#github_organization").val(unescapeHtml(config.githubOrganization));
+                if (config.mailFromName)
+                    AJS.$("#mail-from-name").val(config.mailFromName);
+                if (config.mailFrom)
+                    AJS.$("#mail-from").val(config.mailFrom);
+                if (config.mailSubject)
+                    AJS.$("#mail-subject").val(config.mailSubject);
+                if (config.mailBody)
+                    AJS.$("#mail-body").val(config.mailBody);
                 localTempResources = [];
                 AJS.$("#resources").empty();
                 for (var i = 0; i < config.resources.length; i++) {
@@ -256,6 +264,10 @@ AJS.toInit(function () {
         config.githubToken = AJS.$("#github_token").val();
         config.githubTokenPublic = AJS.$("#github_token_public").val();
         config.githubOrganization = AJS.$("#github_organization").val();
+        config.mailFromName = AJS.$("#mail-from-name").val();
+        config.mailFrom = AJS.$("#mail-from").val();
+        config.mailSubject = AJS.$("#mail-subject").val();
+        config.mailBody = AJS.$("#mail-body").val();
         config.userDirectoryId = AJS.$("#userdirectory").auiSelect2("val");
         config.defaultGithubTeam = AJS.$("#default-github-team").auiSelect2("val");
         config.resources = [];

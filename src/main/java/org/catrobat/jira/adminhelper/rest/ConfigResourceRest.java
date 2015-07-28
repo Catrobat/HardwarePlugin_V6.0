@@ -120,8 +120,10 @@ public class ConfigResourceRest extends RestHelper {
         configService.setPublicApiToken(jsonConfig.getGithubTokenPublic());
         configService.setOrganisation(jsonConfig.getGithubOrganization());
         configService.setUserDirectoryId(jsonConfig.getUserDirectoryId());
+        configService.editMail(jsonConfig.getMailFromName(), jsonConfig.getMailFrom(),
+                jsonConfig.getMailSubject(), jsonConfig.getMailBody());
 
-        for(JsonResource jsonResource : jsonConfig.getResources()) {
+        for (JsonResource jsonResource : jsonConfig.getResources()) {
             configService.editResource(jsonResource.getResourceName(), jsonResource.getGroupName());
         }
 
@@ -152,7 +154,7 @@ public class ConfigResourceRest extends RestHelper {
                 GHOrganization organization = gitHub.getOrganization(organizationName);
                 Collection<GHTeam> teamList = organization.getTeams().values();
 
-                if(jsonConfig.getDefaultGithubTeam() != null) {
+                if (jsonConfig.getDefaultGithubTeam() != null) {
                     for (GHTeam team : teamList) {
                         if (jsonConfig.getDefaultGithubTeam().toLowerCase().equals(team.getName().toLowerCase())) {
                             configService.setDefaultGithubTeamId(team.getId());
@@ -212,9 +214,9 @@ public class ConfigResourceRest extends RestHelper {
             return unauthorized;
         }
 
-        if(teams == null || teams.length != 2) {
+        if (teams == null || teams.length != 2) {
             return Response.serverError().build();
-        } else if(teams[1].trim().length() == 0) {
+        } else if (teams[1].trim().length() == 0) {
             return Response.serverError().entity("Team name must not be empty").build();
         }
 
@@ -252,7 +254,7 @@ public class ConfigResourceRest extends RestHelper {
             return unauthorized;
         }
 
-        if(resourceName == null || resourceName.trim().length() == 0) {
+        if (resourceName == null || resourceName.trim().length() == 0) {
             return Response.serverError().entity("Resource-Name must not be empty").build();
         }
 
@@ -273,7 +275,7 @@ public class ConfigResourceRest extends RestHelper {
             return unauthorized;
         }
 
-        if(resourceName == null || resourceName.trim().length() == 0) {
+        if (resourceName == null || resourceName.trim().length() == 0) {
             return Response.serverError().entity("Resource-Name must not be empty").build();
         }
 

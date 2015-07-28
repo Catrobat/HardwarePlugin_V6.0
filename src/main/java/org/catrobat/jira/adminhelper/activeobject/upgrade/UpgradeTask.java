@@ -25,11 +25,12 @@ public class UpgradeTask implements ActiveObjectsUpgradeTask {
 
     /* https://developer.atlassian.com/docs/atlassian-platform-common-components/active-objects/developing-your-plugin-with-active-objects/upgrading-your-plugin-and-handling-data-model-updates#Upgradingyourpluginandhandlingdatamodelupdates-Moduledefinition
     Model Version 1: added Table Resource and edited AdminHelperConfig - actually nothing to do
+    Model Version 2: edited AdminHelperConfig to allow E-Mail configuration - actually nothing to do
      */
 
     @Override
     public ModelVersion getModelVersion() {
-        return ModelVersion.valueOf("1");
+        return ModelVersion.valueOf("2");
     }
 
     @Override
@@ -43,7 +44,7 @@ public class UpgradeTask implements ActiveObjectsUpgradeTask {
 
 
         // adding Resource to Active Objects
-        if (modelVersion.isOlderThan(ModelVersion.valueOf("1"))) {
+        if (modelVersion.isOlderThan(ModelVersion.valueOf("2"))) {
             activeObjects.migrate(AdminHelperConfig.class, ApprovedGroup.class, ApprovedUser.class, Device.class,
                     DeviceComment.class, GithubTeam.class, Group.class, HardwareModel.class, Lending.class,
                     OperatingSystem.class, Producer.class, Resource.class, Team.class, TeamToGithubTeam.class,

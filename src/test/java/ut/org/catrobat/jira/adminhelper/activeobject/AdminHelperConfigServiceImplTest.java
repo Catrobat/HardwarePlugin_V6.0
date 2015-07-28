@@ -187,6 +187,23 @@ public class AdminHelperConfigServiceImplTest {
     }
 
     @Test
+    public void testEditMail() {
+        AdminHelperConfig config = configurationService.getConfiguration();
+        assertNull(config.getMailFromName());
+        assertNull(config.getMailFrom());
+        assertNull(config.getMailSubject());
+        assertNull(config.getMailBody());
+
+        assertNotNull(configurationService.editMail("mailFromName", "mailFrom", "mailSubject", "mailBody"));
+        ao.flushAll();
+        config = configurationService.getConfiguration();
+        assertEquals("mailFromName", config.getMailFromName());
+        assertEquals("mailFrom", config.getMailFrom());
+        assertEquals("mailSubject", config.getMailSubject());
+        assertEquals("mailBody", config.getMailBody());
+    }
+
+    @Test
     public void testAddTeam() {
         AdminHelperConfig config;
 

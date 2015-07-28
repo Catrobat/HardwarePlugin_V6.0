@@ -71,6 +71,51 @@
             <fieldset id="resources">
 
             </fieldset>
+            <h2>Welcome E-Mail</h2>
+            <fieldset>
+                <div class="field-group">
+                    <label for="mail-">From Name</label>
+                    <input class="text" type="text" id="mail-from-name" name="mail-from-name"
+                           title="mail-from-name">
+                    <div class="description">
+                        The name of the sender which is shown in the welcome mail.
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <div class="field-group">
+                    <label for="mail-from">From</label>
+                    <input class="text" type="text" id="mail-from" name="mail-from"
+                           title="mail-from">
+                    <div class="description">
+                        The e-mail address of the sender which is shown in the welcome mail.
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <div class="field-group">
+                    <label for="mail-subject">Subject</label>
+                    <input class="text" type="text" id="mail-subject" name="mail-subject"
+                           title="mail-subject">
+                    <div class="description">
+                        The subject of the mail.
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <div class="field-group">
+                    <label for="mail-body">Body</label>
+                    <textarea name="mail-body" id="mail-body"></textarea>
+                    <div class="description">
+                        The actual text of the mail. Following strings will be replaced by Jira:
+                        <ul>
+                            <li><span class="mono">{{name}}</span>: The name of the new user</li>
+                            <li><span class="mono">{{username}}</span>: The username of the new user</li>
+                            <li><span class="mono">{{password}}</span>: The password for the new user</li>
+                        </ul>
+                    </div>
+                </div>
+            </fieldset>
             <h2>GitHub</h2>
             <fieldset>
                 <div class="field-group">

@@ -33,6 +33,17 @@ public class AdminHelperConfigServiceImpl implements AdminHelperConfigService {
     }
 
     @Override
+    public AdminHelperConfig editMail(String mailFromName, String mailFrom, String mailSubject, String mailBody) {
+        AdminHelperConfig config = getConfiguration();
+        config.setMailFromName(mailFromName);
+        config.setMailFrom(mailFrom);
+        config.setMailSubject(mailSubject);
+        config.setMailBody(mailBody);
+        config.save();
+        return config;
+    }
+
+    @Override
     public AdminHelperConfig getConfiguration() {
         AdminHelperConfig[] config = ao.find(AdminHelperConfig.class);
         if (config.length == 0) {

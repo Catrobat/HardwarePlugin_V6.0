@@ -20,6 +20,10 @@
     height: 34px;
 }
 
+.mono {
+    font-family: "Courier New", Courier, monospace;
+}
+
 .search-field {
     width: 50%;
     float: right;

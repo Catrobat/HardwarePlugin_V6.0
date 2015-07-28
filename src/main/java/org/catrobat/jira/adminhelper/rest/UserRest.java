@@ -41,6 +41,7 @@ import com.atlassian.sal.api.user.UserManager;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfig;
 import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
 import org.catrobat.jira.adminhelper.activeobject.Lending;
 import org.catrobat.jira.adminhelper.activeobject.LendingService;
@@ -153,18 +154,30 @@ public class UserRest extends RestHelper {
     }
 
     private void sendEmail(String name, String username, String emailAddress, String password) {
+        AdminHelperConfig config = configService.getConfiguration();
+
         Email email = new Email(emailAddress);
-        email.setFromName("Jira Administrators");
-        email.setFrom("no-reply@catrob.at");
+        email.setFromName(config.getMailFromName() != null ? config.getMailFromName() : "Jira Administrators");
+        email.setFrom(config.getMailFrom() != null ? config.getMailFrom() : "no-reply@catrob.at");
         email.setEncoding("UTF-8");
         email.setMimeType("text/plain");
-        email.setSubject("Welcome to Catrobat");
-        email.setBody("Hi " + name + ",\n" +
-                "your account has been created and you may login to Jira and other resources with following credentials:\n\n" +
-                "Username: \t" + username + "\n" +
-                "Password: \t" + password + "\n\n" +
-                "Best regards,\n" +
-                "Catrobat-Admins");
+        email.setSubject(config.getMailSubject() != null ? config.getMailSubject() : "Welcome to Catrobat");
+
+        String body = config.getMailBody();
+        if(body == null) {
+            email.setBody("Hi " + name + ",\n" +
+                    "Your account has been created and you may login to Jira " +
+                    "(https://jira.catrob.at/) and other resources with following credentials:\n\n" +
+                    "Username: \t" + username + "\n" +
+                    "Password: \t" + password + "\n\n" +
+                    "Best regards,\n" +
+                    "Catrobat-Admins");
+        } else {
+            body.replaceAll("\\{\\{name\\}\\}", name);
+            body.replaceAll("\\{\\{username\\}\\}", username);
+            body.replaceAll("\\{\\{password\\}\\}", password);
+            email.setBody(body);
+        }
 
         SingleMailQueueItem item = new SingleMailQueueItem(email);
         ComponentAccessor.getMailQueue().addItem(item);
