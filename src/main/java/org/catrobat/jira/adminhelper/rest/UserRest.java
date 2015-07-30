@@ -157,14 +157,17 @@ public class UserRest extends RestHelper {
         AdminHelperConfig config = configService.getConfiguration();
 
         Email email = new Email(emailAddress);
-        email.setFromName(config.getMailFromName() != null ? config.getMailFromName() : "Jira Administrators");
-        email.setFrom(config.getMailFrom() != null ? config.getMailFrom() : "no-reply@catrob.at");
+        email.setFromName(config.getMailFromName() != null && config.getMailFromName().length() != 0 ?
+                config.getMailFromName() : "Jira Administrators");
+        email.setFrom(config.getMailFrom() != null && config.getMailFrom().length() != 0  ?
+                config.getMailFrom() : "no-reply@catrob.at");
         email.setEncoding("UTF-8");
         email.setMimeType("text/plain");
-        email.setSubject(config.getMailSubject() != null ? config.getMailSubject() : "Welcome to Catrobat");
+        email.setSubject(config.getMailSubject() != null && config.getMailSubject().length() != 0
+                ? config.getMailSubject() : "Welcome to Catrobat");
 
         String body = config.getMailBody();
-        if(body == null) {
+        if (body == null || body.length() == 0) {
             email.setBody("Hi " + name + ",\n" +
                     "Your account has been created and you may login to Jira " +
                     "(https://jira.catrob.at/) and other resources with following credentials:\n\n" +
@@ -173,9 +176,9 @@ public class UserRest extends RestHelper {
                     "Best regards,\n" +
                     "Catrobat-Admins");
         } else {
-            body.replaceAll("\\{\\{name\\}\\}", name);
-            body.replaceAll("\\{\\{username\\}\\}", username);
-            body.replaceAll("\\{\\{password\\}\\}", password);
+            body = body.replaceAll("\\{\\{name\\}\\}", name);
+            body = body.replaceAll("\\{\\{username\\}\\}", username);
+            body = body.replaceAll("\\{\\{password\\}\\}", password);
             email.setBody(body);
         }
 
