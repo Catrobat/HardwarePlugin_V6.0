@@ -119,7 +119,7 @@ function populateActiveDevicesTable(deviceList) {
             "<td class=\"inventory\">" + formatString(deviceList[i].inventoryNumber) + "</td>\n" +
             "<td class=\"received-from\">" + formatString(deviceList[i].receivedFrom) + "</td>\n" +
             "<td class=\"lent-out-since\">" + getShortDate(deviceList[i].currentlyLentOutSince) + "</td>\n" +
-            "<td class=\"lent-out-by\">" + formatString(getShortDate(deviceList[i].currentlyLentOutBy)) + "</td>\n" +
+            "<td class=\"lent-out-by\">" + formatString(deviceList[i].currentlyLentOutBy) + "</td>\n" +
             "<td class=\"action\">" + action + "</td>\n" +
             "<td><a class=\"device_details\" id=\"" + deviceList[i].id + "\" href=\"#\">Details</a></td>\n" +
             "</tr>";
@@ -153,7 +153,7 @@ function populateAllDevicesTable(deviceList) {
             "<td class=\"inventory\">" + formatString(deviceList[i].inventoryNumber) + "</td>\n" +
             "<td class=\"received-from\">" + formatString(deviceList[i].receivedFrom) + "</td>\n" +
             "<td class=\"lent-out-since\">" + getShortDate(deviceList[i].currentlyLentOutSince) + "</td>\n" +
-            "<td class=\"lent-out-by\">" + formatString(getShortDate(deviceList[i].currentlyLentOutBy)) + "</td>\n" +
+            "<td class=\"lent-out-by\">" + formatString(deviceList[i].currentlyLentOutBy) + "</td>\n" +
             "<td class=\"sorted-out\">" + getShortDate(deviceList[i].sortedOutDate) + "</td>\n" +
             "<td class=\"action\">" + action + "</td>\n" +
             "<td><a class=\"device_details\" id=\"" + deviceList[i].id + "\" href=\"#\">Details</a></td>\n" +
