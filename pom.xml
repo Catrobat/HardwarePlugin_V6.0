@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.catrobat.jira</groupId>
     <artifactId>AdminHelper</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
     <organization>
         <name>Catrobat</name>
         <url>https://github.com/felly/jiraadminhelper</url>

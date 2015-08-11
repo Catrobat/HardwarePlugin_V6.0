@@ -194,12 +194,36 @@ public class AdminHelperConfigServiceImplTest {
         assertNull(config.getMailSubject());
         assertNull(config.getMailBody());
 
-        assertNotNull(configurationService.editMail("mailFromName", "mailFrom", "mailSubject", "mailBody"));
+        assertNotNull(configurationService.editMail("mailFromName", "mailFrom", "Hi {{name}},\n" +
+                "Your account has been created and you may login to Jira\n" +
+                "(https://jira.catrob.at/) and other resources with the following\n" +
+                "credentials:\n" +
+                "\n" +
+                "Username: {{username}}\n" +
+                "Password: {{password}}\n" +
+                "\n" +
+                "Important: User name is case-sensitive, so please write PrenameSurname,\n" +
+                "especially on IRC!\n" +
+                "\n" +
+                "Best regards,\n" +
+                "Your Catrobat-Admins", "mailBody"));
         ao.flushAll();
         config = configurationService.getConfiguration();
         assertEquals("mailFromName", config.getMailFromName());
         assertEquals("mailFrom", config.getMailFrom());
-        assertEquals("mailSubject", config.getMailSubject());
+        assertEquals("Hi {{name}},\n" +
+                "Your account has been created and you may login to Jira\n" +
+                "(https://jira.catrob.at/) and other resources with the following\n" +
+                "credentials:\n" +
+                "\n" +
+                "Username: {{username}}\n" +
+                "Password: {{password}}\n" +
+                "\n" +
+                "Important: User name is case-sensitive, so please write PrenameSurname,\n" +
+                "especially on IRC!\n" +
+                "\n" +
+                "Best regards,\n" +
+                "Your Catrobat-Admins", config.getMailSubject());
         assertEquals("mailBody", config.getMailBody());
     }
 

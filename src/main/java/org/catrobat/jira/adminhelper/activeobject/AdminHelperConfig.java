@@ -19,6 +19,7 @@ package org.catrobat.jira.adminhelper.activeobject;
 import net.java.ao.Entity;
 import net.java.ao.OneToMany;
 import net.java.ao.Preload;
+import net.java.ao.schema.StringLength;
 
 @Preload
 public interface AdminHelperConfig extends Entity {
@@ -50,12 +51,16 @@ public interface AdminHelperConfig extends Entity {
 
     void setMailFrom(String from);
 
+    @StringLength(StringLength.UNLIMITED)
     String getMailSubject();
 
+    @StringLength(StringLength.UNLIMITED)
     void setMailSubject(String subject);
 
+    @StringLength(StringLength.UNLIMITED)
     String getMailBody();
 
+    @StringLength(StringLength.UNLIMITED)
     void setMailBody(String body);
 
     @OneToMany(reverse = "getConfiguration")
