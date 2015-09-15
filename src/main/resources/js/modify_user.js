@@ -91,7 +91,7 @@ AJS.toInit(function () {
     }, "#");
 
     function populateTable() {
-        AJS.$(".loadingDiv").show();
+        //AJS.$(".loadingDiv").show();
         AJS.$.ajax({
             url: baseUrl + "/rest/admin-helper/1.0/user/getUsers",
             dataType: "json",
@@ -122,14 +122,14 @@ AJS.toInit(function () {
                     AJS.$("#user-table").trigger("update");
                 });
 
-                AJS.$(".loadingDiv").hide();
+                //AJS.$(".loadingDiv").hide();
             },
             error: function () {
                 AJS.messages.error({
                     title: "Error!",
                     body: "Something went wrong!"
                 });
-                AJS.$(".loadingDiv").hide();
+                //AJS.$(".loadingDiv").hide();
             }
         }).done(function () {
             AJS.$(".disable").click(function (event) {
