@@ -19,7 +19,6 @@ package org.catrobat.jira.adminhelper.rest;
 import com.atlassian.core.AtlassianCoreException;
 import com.atlassian.crowd.embedded.api.Group;
 import com.atlassian.crowd.embedded.api.PasswordCredential;
-import com.atlassian.crowd.embedded.api.User;
 import com.atlassian.crowd.exception.*;
 import com.atlassian.crowd.exception.embedded.InvalidGroupException;
 import com.atlassian.crowd.manager.directory.DirectoryManager;
@@ -31,13 +30,12 @@ import com.atlassian.jira.exception.RemoveException;
 import com.atlassian.jira.security.PermissionManager;
 import com.atlassian.jira.security.groups.GroupManager;
 import com.atlassian.jira.user.ApplicationUser;
-import com.atlassian.jira.user.ApplicationUsers;
 import com.atlassian.jira.user.preferences.ExtendedPreferences;
 import com.atlassian.jira.user.preferences.UserPreferencesManager;
+import com.atlassian.jira.user.util.UserManager;
 import com.atlassian.jira.user.util.UserUtil;
 import com.atlassian.mail.Email;
 import com.atlassian.mail.queue.SingleMailQueueItem;
-import com.atlassian.sal.api.user.UserManager;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -69,7 +67,7 @@ public class UserRest extends RestHelper {
     private final DirectoryManager directoryManager;
     private final LendingService lendingService;
 
-    public UserRest(final UserManager userManager, final UserPreferencesManager userPreferencesManager,
+    public UserRest(final com.atlassian.sal.api.user.UserManager userManager, final UserPreferencesManager userPreferencesManager,
                     final AdminHelperConfigService configService, final PermissionManager permissionManager,
                     final GroupManager groupManager, final DirectoryManager directoryManager,
                     final LendingService lendingService) {
@@ -94,8 +92,8 @@ public class UserRest extends RestHelper {
             return Response.serverError().entity("Please check all input fields.").build();
         }
 
-        UserUtil userUtil = ComponentAccessor.getUserUtil();
-        if (userUtil.getUserByName(jsonUser.getUserName()) != null) {
+        UserManager userManager = ComponentAccessor.getUserManager();
+        if (userManager.getUserByName(jsonUser.getUserName()) != null) {
             return Response.serverError().entity("User already exists!").build();
         }
 
@@ -132,7 +130,7 @@ public class UserRest extends RestHelper {
             return Response.serverError().entity("Not enough permissions to create user in directory").build();
         }
 
-        ApplicationUser jiraUser = userUtil.getUserByName(jsonUser.getUserName());
+        ApplicationUser jiraUser = userManager.getUserByName(jsonUser.getUserName());
         if (jiraUser == null) {
             return Response.serverError().entity("User creation failed.").build();
         }
@@ -145,7 +143,7 @@ public class UserRest extends RestHelper {
         }
 
         // User just needs to be added to default github team if desired
-        Response response = addUserToGithubAndJiraGroups(jsonUser, ApplicationUsers.toDirectoryUser(jiraUser), config);
+        Response response = addUserToGithubAndJiraGroups(jsonUser, jiraUser, config);
         if (response != null && response.getStatus() == Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
             return response;
         }
@@ -159,7 +157,7 @@ public class UserRest extends RestHelper {
         Email email = new Email(emailAddress);
         email.setFromName(config.getMailFromName() != null && config.getMailFromName().length() != 0 ?
                 config.getMailFromName() : "Jira Administrators");
-        email.setFrom(config.getMailFrom() != null && config.getMailFrom().length() != 0  ?
+        email.setFrom(config.getMailFrom() != null && config.getMailFrom().length() != 0 ?
                 config.getMailFrom() : "no-reply@catrob.at");
         email.setEncoding("UTF-8");
         email.setMimeType("text/plain");
@@ -197,9 +195,9 @@ public class UserRest extends RestHelper {
 
         UserUtil userUtil = ComponentAccessor.getUserUtil();
         List<JsonUser> jsonUserList = new ArrayList<JsonUser>();
-        Collection<User> allUsers = ComponentAccessor.getUserManager().getAllUsers();
-        Collection<User> systemAdmins = userUtil.getJiraSystemAdministrators();
-        for (User user : allUsers) {
+        Collection<ApplicationUser> allUsers = ComponentAccessor.getUserManager().getAllUsers();
+        Collection<ApplicationUser> systemAdmins = userUtil.getJiraSystemAdministrators();
+        for (ApplicationUser user : allUsers) {
             if (systemAdmins.contains(user)) {
                 continue;
             }
@@ -226,7 +224,7 @@ public class UserRest extends RestHelper {
             }
             jsonUser.setActive(isActive);
 
-            ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(ApplicationUsers.from(user));
+            ExtendedPreferences extendedPreferences = userPreferencesManager.getExtendedPreferences(user);
             jsonUser.setGithubName(extendedPreferences.getText(GITHUB_PROPERTY));
 
             jsonUserList.add(jsonUser);
@@ -266,13 +264,12 @@ public class UserRest extends RestHelper {
 
         com.atlassian.jira.user.util.UserManager jiraUserManager = ComponentAccessor.getUserManager();
         TreeMap<String, JsonUser> jsonUsers = new TreeMap<String, JsonUser>();
-        for (User user : jiraUserManager.getUsers()) {
+        for (ApplicationUser user : jiraUserManager.getAllUsers()) {
             if (user.getName().toLowerCase().contains(query.toLowerCase()) ||
                     user.getDisplayName().toLowerCase().contains(query.toLowerCase())) {
-                ApplicationUser applicationUser = ApplicationUsers.from(user);
                 JsonUser jsonUser = new JsonUser();
-                jsonUser.setUserName(applicationUser.getKey());
-                jsonUser.setDisplayName(applicationUser.getDisplayName());
+                jsonUser.setUserName(user.getKey());
+                jsonUser.setDisplayName(user.getDisplayName());
                 jsonUsers.put(user.getName().toLowerCase(), jsonUser);
             }
         }
@@ -324,7 +321,7 @@ public class UserRest extends RestHelper {
 
         // remove user from all groups (especially from DISABLED_GROUP) since he will be added to chosen groups afterwards
         try {
-            removeFromAllGroups(ApplicationUsers.toDirectoryUser(applicationUser));
+            removeFromAllGroups(applicationUser);
         } catch (RemoveException e) {
             e.printStackTrace();
             return Response.serverError().entity(e.getMessage()).build();
@@ -335,9 +332,9 @@ public class UserRest extends RestHelper {
 
         // add user to all desired GitHub teams and groups
         ExtendedPreferences extendedPreferences = userPreferencesManager
-                .getExtendedPreferences(ApplicationUsers.from(applicationUser.getDirectoryUser()));
+                .getExtendedPreferences(applicationUser);
         jsonUser.setGithubName(extendedPreferences.getText(GITHUB_PROPERTY));
-        addUserToGithubAndJiraGroups(jsonUser, applicationUser.getDirectoryUser(), config);
+        addUserToGithubAndJiraGroups(jsonUser, applicationUser, config);
 
 
         return Response.ok().build();
@@ -374,8 +371,8 @@ public class UserRest extends RestHelper {
 
         // remove user from all groups and add user to DISABLED_GROUP
         try {
-            removeFromAllGroups(ApplicationUsers.toDirectoryUser(applicationUser));
-            Response error = addToGroups(applicationUser.getDirectoryUser(), Arrays.asList(DISABLED_GROUP));
+            removeFromAllGroups(applicationUser);
+            Response error = addToGroups(applicationUser, Collections.singletonList(DISABLED_GROUP));
             if (error != null) {
                 return error;
             }
@@ -405,7 +402,7 @@ public class UserRest extends RestHelper {
         return Response.ok().build();
     }
 
-    private Response addToGroups(User user, List<String> groupList) throws UserNotFoundException, OperationFailedException,
+    private Response addToGroups(ApplicationUser user, List<String> groupList) throws UserNotFoundException, OperationFailedException,
             GroupNotFoundException, OperationNotPermittedException, InvalidGroupException {
         if (user == null || groupList == null)
             return Response.serverError().entity("user/group may not be null").build();
@@ -477,7 +474,7 @@ public class UserRest extends RestHelper {
         return Response.ok().build();
     }
 
-    public Response addUserToGithubAndJiraGroups(JsonUser jsonUser, User jiraUser, JsonConfig config) {
+    public Response addUserToGithubAndJiraGroups(JsonUser jsonUser, ApplicationUser jiraUser, JsonConfig config) {
         try {
             if (jsonUser.getCoordinatorList() != null) {
                 for (String coordinatorOf : jsonUser.getCoordinatorList()) {
@@ -565,7 +562,7 @@ public class UserRest extends RestHelper {
         return Response.ok().build();
     }
 
-    private void removeFromAllGroups(User user) throws RemoveException, PermissionException {
+    private void removeFromAllGroups(ApplicationUser user) throws RemoveException, PermissionException {
         if (user == null)
             return;
 

@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.catrobat.jira</groupId>
     <artifactId>AdminHelper</artifactId>
-    <version>1.0.10</version>
+    <version>1.1.0</version>
     <organization>
         <name>Catrobat</name>
         <url>https://github.com/felly/jiraadminhelper</url>
@@ -223,9 +223,9 @@
         </plugins>
     </build>
     <properties>
-        <jira.version>6.3.14</jira.version>
+        <jira.version>7.0.0</jira.version>
         <amps.version>5.0.13</amps.version>
-        <ao.version>0.23.2</ao.version>
+        <ao.version>1.1.0</ao.version>
         <rest.version>2.7.1</rest.version>
         <plugin.testrunner.version>1.2.0</plugin.testrunner.version>
         <!-- TestKit version 5.x for JIRA 5.x, 6.x for JIRA 6.x -->

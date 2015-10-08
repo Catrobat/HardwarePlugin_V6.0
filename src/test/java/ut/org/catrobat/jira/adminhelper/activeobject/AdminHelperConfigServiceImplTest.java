@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -238,11 +239,11 @@ public class AdminHelperConfigServiceImplTest {
         assertNotNull(configurationService.addTeam("team1", githubIdList,
                 Arrays.asList("coordinator", "got", "usually", "more groups"),
                 Arrays.asList("seniors", "got", "some less"),
-                Arrays.asList("developers")));
+                Collections.singletonList("developers")));
         assertNotNull(configurationService.addTeam("team 2", githubIdList,
                 Arrays.asList("coordinator", "got", "usually", "more groups"),
                 Arrays.asList("seniors", "got", "some less"),
-                Arrays.asList("developers")));
+                Collections.singletonList("developers")));
         ao.flushAll();
         config = configurationService.getConfiguration();
         assertEquals(2, config.getTeams().length);
