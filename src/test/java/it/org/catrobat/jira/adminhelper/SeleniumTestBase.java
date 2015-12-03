@@ -16,30 +16,65 @@
 
 package it.org.catrobat.jira.adminhelper;
 
-import com.atlassian.jira.functest.framework.backdoor.Backdoor;
+import com.atlassian.jira.functest.framework.FuncTestCase;
 import com.atlassian.jira.testkit.client.util.TimeBombLicence;
-import com.atlassian.jira.tests.TestBase;
+import com.atlassian.selenium.SeleniumClient;
 import com.thoughtworks.selenium.SeleneseTestBase;
 import com.thoughtworks.selenium.Selenium;
-import org.junit.Before;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverBackedSelenium;
+import junit.framework.TestCase;
 
 import java.util.Calendar;
 
-public abstract class SeleniumTestBase extends TestBase {
+import static com.atlassian.selenium.browsers.AutoInstallClient.seleniumClient;
+
+public abstract class SeleniumTestBase extends TestCase {
     protected Selenium selenium;
     protected String today;
 
-    @Before
+    @Override
     public void setUp() {
-        Backdoor testKit = jira().backdoor();
-        testKit.restoreDataFromResource("selenium.zip", TimeBombLicence.LICENCE_FOR_TESTING);
-        testKit.websudo().disable();
-        jira().gotoLoginPage().loginAsSysAdmin(HardwareServletPage.class);
-        WebDriver driver = jira().getTester().getDriver();
-        String baseUrl = "http://localhost:2990/";
-        selenium = new WebDriverBackedSelenium(driver, baseUrl);
+        // Backdoor testKit = jira().backdoor();
+//        backdoor.applicationProperties().setString("jira.baseurl", "http://localhost:2990/jira");
+//        backdoor.restoreDataFromResource("selenium.zip", TimeBombLicence.LICENCE_FOR_TESTING);
+//        backdoor.websudo().disable();
+//        backdoor.usersAndGroups().addUser("selenium-admin", "1234", "Selenium Admin", "selenium@test.me")
+//                .addUserToGroup("selenium-admin", "jira-administrators");
+
+//        SeleniumClient selenium = new SingleBrowserSeleniumClient(new AdminHelperSeleniumConfiguration());
+//        selenium = seleniumClient();
+//        selenium.waitForPageToLoad("30000");
+//
+//        navigation.loginUsingForm("admin", "admin", true, true);
+//        navigation.gotoDashboard();
+//        selenium.waitForPageToLoad("30000");
+//        navigation.gotoPage("plugins/servlet/admin_helper/hardware");
+        // jira().gotoLoginPage().loginAsSysAdmin(HardwareServletPage.class);
+        // WebDriver driver = jira().getTester().getDriver();
+        // String baseUrl = "http://localhost:2990/";
+
+        // selenium = new WebDriverBackedSelenium(driver, baseUrl);
+        SeleniumClient client = seleniumClient();
+        selenium = client;
+
+        selenium.setSpeed("3000");
+
+//        client.open("/");
+//         client.get
+//        client.waitForPageToLoad("3000");
+        client.open("/jira/plugins/servlet/admin_helper/hardware");
+        client.waitForPageToLoad("3000");
+
+        // logging in - if necessary
+        if(selenium.isElementPresent("css=#login-form-username")) {
+            // #login-form-username
+            selenium.typeKeys("css=#login-form-username", "admin");
+            // #login-form-password
+            selenium.typeKeys("css=#login-form-password", "admin");
+            // #login-form-submit
+            selenium.click("css=#login-form-submit");
+
+            client.waitForPageToLoad("3000");
+        }
 
         Calendar calendar = Calendar.getInstance();
         String month = "" + (calendar.get(Calendar.MONTH) + 1);
