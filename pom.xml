@@ -223,7 +223,7 @@
         </plugins>
     </build>
     <properties>
-        <jira.version>6.3.14</jira.version>
+        <jira.version>6.4.12</jira.version>
         <amps.version>5.0.13</amps.version>
         <ao.version>0.23.2</ao.version>
         <rest.version>2.7.1</rest.version>

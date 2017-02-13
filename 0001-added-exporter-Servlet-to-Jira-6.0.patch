@@ -1,0 +1,377 @@
+From 8b6bb0f22c5f35f28f02d67e98afc6843145c45d Mon Sep 17 00:00:00 2001
+From: Dominik Lindenbauer <dominik.lindenbauer@student.tugraz.at>
+Date: Wed, 8 Feb 2017 12:01:13 +0100
+Subject: [PATCH] added exporter Servlet to Jira 6.0
+
+---
+ .gitignore~                                        |   6 +
+ .../jira/adminhelper/DownloadBackupServlet.java    | 151 +++++++++++++++++++++
+ .../jira/adminhelper/helper/JSONExporter.java      |  47 +++++++
+ .../jira/adminhelper/rest/json/JsonDeviceList.java |  30 ++++
+ src/main/main.iml                                  |  26 ++++
+ src/main/resources/atlassian-plugin.xml            |   4 +
+ src/main/resources/hardware_overview.vm            |   1 +
+ src/test/test.iml                                  |  27 ++++
+ 8 files changed, 292 insertions(+)
+ create mode 100644 .gitignore~
+ create mode 100644 src/main/java/org/catrobat/jira/adminhelper/DownloadBackupServlet.java
+ create mode 100644 src/main/java/org/catrobat/jira/adminhelper/helper/JSONExporter.java
+ create mode 100644 src/main/java/org/catrobat/jira/adminhelper/rest/json/JsonDeviceList.java
+ create mode 100644 src/main/main.iml
+ create mode 100644 src/test/test.iml
+
+diff --git a/.gitignore~ b/.gitignore~
+new file mode 100644
+index 0000000..3096d40
+--- /dev/null
++++ b/.gitignore~
+@@ -0,0 +1,6 @@
++.idea/
++AdminHelper.iml
++amps-standalone/
++target/
++.DS_Store
++src/test/resources/generated-resources/
+diff --git a/src/main/java/org/catrobat/jira/adminhelper/DownloadBackupServlet.java b/src/main/java/org/catrobat/jira/adminhelper/DownloadBackupServlet.java
+new file mode 100644
+index 0000000..d70c6a6
+--- /dev/null
++++ b/src/main/java/org/catrobat/jira/adminhelper/DownloadBackupServlet.java
+@@ -0,0 +1,151 @@
++package org.catrobat.jira.adminhelper;
++
++import com.atlassian.jira.config.util.JiraHome;
++import com.atlassian.jira.security.groups.GroupManager;
++import com.atlassian.sal.api.auth.LoginUriProvider;
++import com.atlassian.sal.api.user.UserManager;
++import com.atlassian.sal.api.websudo.WebSudoManager;
++import com.google.gson.Gson;
++import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
++import org.catrobat.jira.adminhelper.activeobject.DeviceService;
++import org.catrobat.jira.adminhelper.helper.JSONExporter;
++import org.catrobat.jira.adminhelper.rest.json.JsonConfig;
++import org.catrobat.jira.adminhelper.rest.json.JsonDevice;
++import org.catrobat.jira.adminhelper.rest.json.JsonDeviceList;
++
++import javax.servlet.ServletException;
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.HttpServletResponse;
++import java.io.IOException;
++import java.util.Date;
++import java.util.List;
++import java.util.zip.ZipEntry;
++import java.util.zip.ZipOutputStream;
++
++/**
++ * Created by dominik on 18.01.17.
++ */
++public class DownloadBackupServlet extends HelperServlet {
++    private final UserManager userManager;
++    private final DeviceService deviceService;
++    private final JiraHome jiraHome;
++    private final AdminHelperConfigService configService;
++    private final com.atlassian.jira.user.util.UserManager util_user_manager;
++
++    public DownloadBackupServlet(UserManager userManager, LoginUriProvider loginUriProvider, WebSudoManager webSudoManager,
++                                 GroupManager groupManager, AdminHelperConfigService configurationService, DeviceService deviceService,
++                                 JiraHome jiraHome, AdminHelperConfigService configService, com.atlassian.jira.user.util.UserManager util_user_manager) {
++        super(userManager, loginUriProvider, webSudoManager, groupManager, configurationService);
++        this.userManager = userManager;
++        this.deviceService = deviceService;
++        this.jiraHome = jiraHome;
++        this.configService = configService;
++        this.util_user_manager = util_user_manager;
++
++    }
++
++    @Override
++    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
++        super.doGet(req, resp);
++
++        System.out.println("parameters are");
++        System.out.println(req.getParameterMap());
++        if(req.getParameterMap().size() == 0) {
++           packConfigAndHardware(resp);
++        }
++        if(req.getParameterMap().size() == 2) {
++            String download_hardware = req.getParameter("hardware");
++            if(download_hardware.equals("false")){
++                packConfig(resp);
++            }
++            else{
++                packConfigAndHardware(resp);
++            }
++        }
++        else {
++            resp.sendError(500);
++        }
++    }
++
++    private void packHardware(HttpServletResponse resp) throws IOException
++    {
++        resp.setContentType("application/zip; charset=utf-8");
++        String file_name = "hardwareBackup_" + new Date() + ".zip";
++        resp.setHeader("Content-Disposition", "attachment; filename=\"" + file_name + "\"");
++
++        JSONExporter exporter = new JSONExporter(deviceService, util_user_manager, configService);
++
++        List<JsonDevice> devices = exporter.getDevicesAsJSON();
++
++        JsonDeviceList device_list = new JsonDeviceList(devices);
++
++        Gson gson = new Gson();
++        String json_string = gson.toJson(device_list);
++
++        ZipOutputStream out = new ZipOutputStream(resp.getOutputStream());
++        ZipEntry e = new ZipEntry("device.JSON");
++
++        out.putNextEntry(e);
++        out.write(json_string.getBytes());
++        out.closeEntry();
++        out.close();
++    }
++
++    private void packConfig(HttpServletResponse resp) throws IOException
++    {
++        resp.setContentType("application/zip; charset=utf-8");
++        String file_name = "configBackup_" + new Date() + ".zip";
++        resp.setHeader("Content-Disposition", "attachment; filename=\"" + file_name + "\"");
++
++        JSONExporter exporter = new JSONExporter(deviceService, util_user_manager, configService);
++
++        JsonConfig config = exporter.getConfig();
++        config.setGithubToken(configService.getConfiguration().getGithubApiToken());
++
++        Gson gson = new Gson();
++        String json_string = gson.toJson(config);
++
++        ZipOutputStream out = new ZipOutputStream(resp.getOutputStream());
++        ZipEntry e = new ZipEntry("config.JSON");
++
++        out.putNextEntry(e);
++        out.write(json_string.getBytes());
++        out.closeEntry();
++        out.close();
++    }
++
++    private void packConfigAndHardware(HttpServletResponse resp) throws IOException
++    {
++        resp.setContentType("application/zip; charset=utf-8");
++        String file_name = "hdw_config_Backup_" + new Date() + ".zip";
++        resp.setHeader("Content-Disposition", "attachment; filename=\"" + file_name + "\"");
++
++        JSONExporter exporter = new JSONExporter(deviceService, util_user_manager, configService);
++
++        JsonConfig config = exporter.getConfig();
++        List<JsonDevice> devices = exporter.getDevicesAsJSON();
++
++        config.setGithubToken(configService.getConfiguration().getGithubApiToken());
++
++        Gson gson = new Gson();
++        String json_config = gson.toJson(config);
++
++        JsonDeviceList device_list = new JsonDeviceList(devices);
++
++        String json_device = gson.toJson(device_list);
++
++        ZipOutputStream out = new ZipOutputStream(resp.getOutputStream());
++        ZipEntry config_entry = new ZipEntry("config.JSON");
++        ZipEntry device_entry = new ZipEntry("device.JSON");
++
++        out.putNextEntry(config_entry);
++        out.write(json_config.getBytes());
++        out.closeEntry();
++
++        out.putNextEntry(device_entry);
++        out.write(json_device.getBytes());
++        out.closeEntry();
++
++        out.close();
++    }
++}
+diff --git a/src/main/java/org/catrobat/jira/adminhelper/helper/JSONExporter.java b/src/main/java/org/catrobat/jira/adminhelper/helper/JSONExporter.java
+new file mode 100644
+index 0000000..795a810
+--- /dev/null
++++ b/src/main/java/org/catrobat/jira/adminhelper/helper/JSONExporter.java
+@@ -0,0 +1,47 @@
++package org.catrobat.jira.adminhelper.helper;
++
++import com.atlassian.jira.user.util.UserManager;
++import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
++import org.catrobat.jira.adminhelper.activeobject.Device;
++import org.catrobat.jira.adminhelper.activeobject.DeviceService;
++import org.catrobat.jira.adminhelper.rest.json.JsonConfig;
++import org.catrobat.jira.adminhelper.rest.json.JsonDevice;
++
++import java.util.ArrayList;
++import java.util.List;
++
++/**
++ * Created by dominik on 18.01.17.
++ */
++public class JSONExporter {
++
++    private final DeviceService deviceService;
++    private final UserManager userManager;
++    private final AdminHelperConfigService configService;
++
++    public JSONExporter(DeviceService deviceService, UserManager userManager, AdminHelperConfigService configService) {
++        System.out.println("constructing JSON exporter");
++        this.deviceService = deviceService;
++        this.userManager = userManager;
++        this.configService = configService;
++    }
++
++    public List<JsonDevice> getDevicesAsJSON()
++    {
++        List<Device> device_list = deviceService.all();
++        List<JsonDevice> json_list = new ArrayList<JsonDevice>();
++
++        for(Device d : device_list)
++        {
++            JsonDevice current = new JsonDevice(d, userManager);
++            json_list.add(current);
++        }
++
++        return json_list;
++    }
++
++    public JsonConfig getConfig()
++    {
++        return new JsonConfig(configService);
++    }
++}
+diff --git a/src/main/java/org/catrobat/jira/adminhelper/rest/json/JsonDeviceList.java b/src/main/java/org/catrobat/jira/adminhelper/rest/json/JsonDeviceList.java
+new file mode 100644
+index 0000000..20ed9aa
+--- /dev/null
++++ b/src/main/java/org/catrobat/jira/adminhelper/rest/json/JsonDeviceList.java
+@@ -0,0 +1,30 @@
++package org.catrobat.jira.adminhelper.rest.json;
++
++import javax.xml.bind.annotation.XmlAccessType;
++import javax.xml.bind.annotation.XmlAccessorType;
++import javax.xml.bind.annotation.XmlElement;
++import javax.xml.bind.annotation.XmlRootElement;
++import java.util.List;
++
++/**
++ * Created by dominik on 18.01.17.
++ */
++
++@XmlRootElement
++@XmlAccessorType(XmlAccessType.FIELD)
++
++public class JsonDeviceList {
++
++    @XmlElement
++    private List<JsonDevice> device_list;
++
++    public JsonDeviceList(List<JsonDevice> device_list)
++    {
++        this.device_list = device_list;
++    }
++
++    public List<JsonDevice> getDeviceList()
++    {
++        return this.device_list;
++    }
++}
+diff --git a/src/main/main.iml b/src/main/main.iml
+new file mode 100644
+index 0000000..b76508b
+--- /dev/null
++++ b/src/main/main.iml
+@@ -0,0 +1,26 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<module type="JAVA_MODULE" version="4">
++  <component name="NewModuleRootManager" inherit-compiler-output="true">
++    <exclude-output />
++    <content url="file://$MODULE_DIR$">
++      <sourceFolder url="file://$MODULE_DIR$/java" isTestSource="false" />
++    </content>
++    <orderEntry type="inheritedJdk" />
++    <orderEntry type="sourceFolder" forTests="false" />
++    <orderEntry type="library" name="lib13" level="project" />
++    <orderEntry type="library" name="provided" level="project" />
++    <orderEntry type="library" name="lib31" level="project" />
++    <orderEntry type="library" name="test" level="project" />
++    <orderEntry type="library" name="lib15" level="project" />
++    <orderEntry type="library" name="atlassian-bundled-plugins1" level="project" />
++    <orderEntry type="library" name="lib23" level="project" />
++    <orderEntry type="library" name="lib20" level="project" />
++    <orderEntry type="library" name="installed-plugins" level="project" />
++    <orderEntry type="library" name="target" level="project" />
++    <orderEntry type="library" name="compile" level="project" />
++    <orderEntry type="library" name="atlassian-bundled-plugins" level="project" />
++    <orderEntry type="library" name="lib10" level="project" />
++    <orderEntry type="library" name="lib2" level="project" />
++    <orderEntry type="library" name="transformed-plugins" level="project" />
++  </component>
++</module>
+\ No newline at end of file
+diff --git a/src/main/resources/atlassian-plugin.xml b/src/main/resources/atlassian-plugin.xml
+index f61fad5..e3d2177 100644
+--- a/src/main/resources/atlassian-plugin.xml
++++ b/src/main/resources/atlassian-plugin.xml
+@@ -93,6 +93,10 @@
+         <url-pattern>/admin_helper/upload</url-pattern>
+     </servlet>
+ 
++    <servlet key="download_backup_servlet" class="org.catrobat.jira.adminhelper.DownloadBackupServlet">
++        <url-pattern>/admin_helper/download_backup</url-pattern>
++    </servlet>
++
+     <component key="adminHelperConfiguration"
+                class="org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigServiceImpl"/>
+     <component key="device" class="org.catrobat.jira.adminhelper.activeobject.DeviceServiceImpl"/>
+diff --git a/src/main/resources/hardware_overview.vm b/src/main/resources/hardware_overview.vm
+index 21426b3..7f70a12 100644
+--- a/src/main/resources/hardware_overview.vm
++++ b/src/main/resources/hardware_overview.vm
+@@ -235,6 +235,7 @@
+             <input class="aui-button" id="new_device" type="button" value="New Device"/>
+         </p>
+         <p>Download hardware sheet as <a href="$applicationProperties.getBaseUrl()/plugins/servlet/admin_helper/download">CSV</a>.</p>
++        <p>Download full backup as <a href="$applicationProperties.getBaseUrl()/plugins/servlet/admin_helper/download_backup">zip</a>.</p>
+     </div>
+     <div class="tabs-pane" id="tabs-individual-lending">
+         <div class="left-from-search-field">
+diff --git a/src/test/test.iml b/src/test/test.iml
+new file mode 100644
+index 0000000..c707502
+--- /dev/null
++++ b/src/test/test.iml
+@@ -0,0 +1,27 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<module type="JAVA_MODULE" version="4">
++  <component name="NewModuleRootManager" inherit-compiler-output="true">
++    <exclude-output />
++    <content url="file://$MODULE_DIR$">
++      <sourceFolder url="file://$MODULE_DIR$/java" isTestSource="true" />
++    </content>
++    <orderEntry type="inheritedJdk" />
++    <orderEntry type="sourceFolder" forTests="false" />
++    <orderEntry type="library" name="provided" level="project" />
++    <orderEntry type="library" name="lib31" level="project" />
++    <orderEntry type="library" name="test" level="project" />
++    <orderEntry type="library" name="lib15" level="project" />
++    <orderEntry type="library" name="jira-rest-plugin-7.0.0.jar-embedded" level="project" />
++    <orderEntry type="library" name="atlassian-bundled-plugins1" level="project" />
++    <orderEntry type="library" name="lib23" level="project" />
++    <orderEntry type="library" name="lib39" level="project" />
++    <orderEntry type="library" name="installed-plugins" level="project" />
++    <orderEntry type="library" name="target" level="project" />
++    <orderEntry type="library" name="compile" level="project" />
++    <orderEntry type="library" name="atlassian-bundled-plugins" level="project" />
++    <orderEntry type="library" name="lib10" level="project" />
++    <orderEntry type="library" name="lib2" level="project" />
++    <orderEntry type="library" name="transformed-plugins" level="project" />
++    <orderEntry type="module" module-name="main" />
++  </component>
++</module>
+\ No newline at end of file
+-- 
+2.5.0
+

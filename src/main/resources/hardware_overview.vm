@@ -235,6 +235,7 @@
             <input class="aui-button" id="new_device" type="button" value="New Device"/>
         </p>
         <p>Download hardware sheet as <a href="$applicationProperties.getBaseUrl()/plugins/servlet/admin_helper/download">CSV</a>.</p>
+        <p>Download full backup as <a href="$applicationProperties.getBaseUrl()/plugins/servlet/admin_helper/download_backup">zip</a>.</p>
     </div>
     <div class="tabs-pane" id="tabs-individual-lending">
         <div class="left-from-search-field">
