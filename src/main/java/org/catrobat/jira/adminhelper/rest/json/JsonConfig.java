@@ -39,6 +39,12 @@ import java.util.TreeMap;
 public final class JsonConfig {
 
     @XmlElement
+    private boolean isConfigImport;
+    @XmlElement
+    private boolean teamAndResources;
+    @XmlElement
+    private boolean onlyPermission;
+    @XmlElement
     private String githubToken;
     @XmlElement
     private String githubTokenPublic;
@@ -68,6 +74,10 @@ public final class JsonConfig {
     private String mailSubject;
     @XmlElement
     private String mailBody;
+    @XmlElement
+    private List<String> readOnlyUsers;
+    @XmlElement
+    private List<String> readOnlyGroups;
 
     public JsonConfig() {
 
@@ -115,7 +125,7 @@ public final class JsonConfig {
 
         GithubHelper githubHelper = new GithubHelper(configService);
         this.availableGithubTeams = githubHelper.getAvailableTeams();
-        this.defaultGithubTeam = githubHelper.getTeamName(toCopy.getDefaultGithubTeamId());
+        //this.defaultGithubTeam = configService.getConfiguration().getDefaultGithubTeam();
 
         this.userDirectoryId = toCopy.getUserDirectoryId();
         DirectoryManager directoryManager = ComponentAccessor.getComponent(DirectoryManager.class);
@@ -188,9 +198,7 @@ public final class JsonConfig {
         this.approvedUsers = approvedUsers;
     }
 
-    public long getUserDirectoryId() {
-        return userDirectoryId;
-    }
+    public long getUserDirectoryId() {return userDirectoryId;}
 
     public void setUserDirectoryId(long userDirectoryId) {
         this.userDirectoryId = userDirectoryId;
@@ -251,4 +259,20 @@ public final class JsonConfig {
     public void setMailBody(String mailBody) {
         this.mailBody = mailBody;
     }
+
+    public List<String> getReadOnlyUsers() { return this.readOnlyUsers; }
+
+    public  List<String> getReadOnlyGroups() { return this.readOnlyGroups; }
+
+    public boolean isOnlyPermission() {return onlyPermission;}
+
+    public void setOnlyPermission(boolean onlyPermission) {this.onlyPermission = onlyPermission;}
+
+    public boolean isTeamAndResources() {return teamAndResources;}
+
+    public void setTeamAndResources(boolean teamAndResources) {this.teamAndResources = teamAndResources;}
+
+    public boolean isConfigImport() {return isConfigImport;}
+
+    public void setConfigImport(boolean configImport) {isConfigImport = configImport;}
 }

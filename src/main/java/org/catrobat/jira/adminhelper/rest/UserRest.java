@@ -19,6 +19,7 @@ package org.catrobat.jira.adminhelper.rest;
 import com.atlassian.core.AtlassianCoreException;
 import com.atlassian.crowd.embedded.api.Group;
 import com.atlassian.crowd.embedded.api.PasswordCredential;
+import com.atlassian.crowd.embedded.api.User;
 import com.atlassian.crowd.exception.*;
 import com.atlassian.crowd.exception.embedded.InvalidGroupException;
 import com.atlassian.crowd.manager.directory.DirectoryManager;
@@ -195,8 +196,8 @@ public class UserRest extends RestHelper {
 
         UserUtil userUtil = ComponentAccessor.getUserUtil();
         List<JsonUser> jsonUserList = new ArrayList<JsonUser>();
-        Collection<ApplicationUser> allUsers = ComponentAccessor.getUserManager().getAllUsers();
-        Collection<ApplicationUser> systemAdmins = userUtil.getJiraSystemAdministrators();
+        Collection<ApplicationUser> allUsers = ComponentAccessor.getUserManager().getAllApplicationUsers();
+        Collection<User> systemAdmins = userUtil.getJiraSystemAdministrators();
         for (ApplicationUser user : allUsers) {
             if (systemAdmins.contains(user)) {
                 continue;
@@ -264,7 +265,7 @@ public class UserRest extends RestHelper {
 
         com.atlassian.jira.user.util.UserManager jiraUserManager = ComponentAccessor.getUserManager();
         TreeMap<String, JsonUser> jsonUsers = new TreeMap<String, JsonUser>();
-        for (ApplicationUser user : jiraUserManager.getAllUsers()) {
+        for (ApplicationUser user : jiraUserManager.getAllApplicationUsers()) {
             if (user.getName().toLowerCase().contains(query.toLowerCase()) ||
                     user.getDisplayName().toLowerCase().contains(query.toLowerCase())) {
                 JsonUser jsonUser = new JsonUser();
