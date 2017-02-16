@@ -39,6 +39,8 @@ import java.util.TreeMap;
 public final class JsonConfig {
 
     @XmlElement
+    private boolean isConfigImport;
+    @XmlElement
     private String githubToken;
     @XmlElement
     private String githubTokenPublic;
@@ -251,4 +253,6 @@ public final class JsonConfig {
     public void setMailBody(String mailBody) {
         this.mailBody = mailBody;
     }
+
+    public void setConfigImport(boolean configImport) {isConfigImport = configImport;}
 }

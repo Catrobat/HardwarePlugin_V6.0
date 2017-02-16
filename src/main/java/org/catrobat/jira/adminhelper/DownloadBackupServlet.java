@@ -8,6 +8,8 @@ import com.atlassian.sal.api.websudo.WebSudoManager;
 import com.google.gson.Gson;
 import org.catrobat.jira.adminhelper.activeobject.AdminHelperConfigService;
 import org.catrobat.jira.adminhelper.activeobject.DeviceService;
+import org.catrobat.jira.adminhelper.activeobject.HardwareModel;
+import org.catrobat.jira.adminhelper.activeobject.HardwareModelService;
 import org.catrobat.jira.adminhelper.helper.JSONExporter;
 import org.catrobat.jira.adminhelper.rest.json.JsonConfig;
 import org.catrobat.jira.adminhelper.rest.json.JsonDevice;
@@ -31,17 +33,19 @@ public class DownloadBackupServlet extends HelperServlet {
     private final JiraHome jiraHome;
     private final AdminHelperConfigService configService;
     private final com.atlassian.jira.user.util.UserManager util_user_manager;
+    private final HardwareModelService hardwareModelService;
 
     public DownloadBackupServlet(UserManager userManager, LoginUriProvider loginUriProvider, WebSudoManager webSudoManager,
                                  GroupManager groupManager, AdminHelperConfigService configurationService, DeviceService deviceService,
-                                 JiraHome jiraHome, AdminHelperConfigService configService, com.atlassian.jira.user.util.UserManager util_user_manager) {
+                                 JiraHome jiraHome, AdminHelperConfigService configService, com.atlassian.jira.user.util.UserManager util_user_manager,
+                                 HardwareModelService hardwareModelService) {
         super(userManager, loginUriProvider, webSudoManager, groupManager, configurationService);
         this.userManager = userManager;
         this.deviceService = deviceService;
         this.jiraHome = jiraHome;
         this.configService = configService;
         this.util_user_manager = util_user_manager;
-
+        this.hardwareModelService = hardwareModelService;
     }
 
     @Override
@@ -73,7 +77,7 @@ public class DownloadBackupServlet extends HelperServlet {
         String file_name = "hardwareBackup_" + new Date() + ".zip";
         resp.setHeader("Content-Disposition", "attachment; filename=\"" + file_name + "\"");
 
-        JSONExporter exporter = new JSONExporter(deviceService, util_user_manager, configService);
+        JSONExporter exporter = new JSONExporter(deviceService, util_user_manager, configService, hardwareModelService);
 
         List<JsonDevice> devices = exporter.getDevicesAsJSON();
 
@@ -97,7 +101,7 @@ public class DownloadBackupServlet extends HelperServlet {
         String file_name = "configBackup_" + new Date() + ".zip";
         resp.setHeader("Content-Disposition", "attachment; filename=\"" + file_name + "\"");
 
-        JSONExporter exporter = new JSONExporter(deviceService, util_user_manager, configService);
+        JSONExporter exporter = new JSONExporter(deviceService, util_user_manager, configService, hardwareModelService);
 
         JsonConfig config = exporter.getConfig();
         config.setGithubToken(configService.getConfiguration().getGithubApiToken());
@@ -120,7 +124,7 @@ public class DownloadBackupServlet extends HelperServlet {
         String file_name = "hdw_config_Backup_" + new Date() + ".zip";
         resp.setHeader("Content-Disposition", "attachment; filename=\"" + file_name + "\"");
 
-        JSONExporter exporter = new JSONExporter(deviceService, util_user_manager, configService);
+        JSONExporter exporter = new JSONExporter(deviceService, util_user_manager, configService, hardwareModelService);
 
         JsonConfig config = exporter.getConfig();
         List<JsonDevice> devices = exporter.getDevicesAsJSON();
